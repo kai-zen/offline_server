@@ -1,4 +1,3 @@
-import { AccessService } from "./../../../user/access/access.service";
 import ProductActionsService from "src/features/product/product/service/product-actions.service";
 import { ComplexPutService } from "src/features/complex/complex/service/complex-put.service";
 import { EventsGateway } from "src/websocket/events.gateway";
@@ -17,9 +16,9 @@ import {
   forwardRef,
 } from "@nestjs/common";
 import { ComplexUsersActionsService } from "src/features/complex/users/service/complex-user-actions.service";
-import { ActivityService } from "src/features/complex/activities/activities.service";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { AccessService } from "src/features/user/access/access.service";
 
 @Injectable()
 export class OrderActionService {
@@ -31,7 +30,6 @@ export class OrderActionService {
     private readonly productService: ProductActionsService,
     private readonly orderThirdMethods: OrderThirdMethodsService,
     private readonly complexPutService: ComplexPutService,
-    private readonly logService: ActivityService,
     private readonly complexUsersActionsService: ComplexUsersActionsService,
     private readonly accessService: AccessService,
     @Inject(forwardRef(() => CashBankService))
@@ -154,14 +152,6 @@ export class OrderActionService {
           theRecord.user._id,
           theRecord.total_price
         );
-
-      // update stats
-      await this.orderThirdMethods.statsHandler({
-        complex_id,
-        created_order: theRecord,
-        products: theRecord.products,
-        user_id: theRecord.user?._id || undefined,
-      });
     }
 
     return;
@@ -251,9 +241,8 @@ export class OrderActionService {
       extra_price: number;
       user_discount: number;
     };
-    author_id: string;
   }) {
-    const { author_id, new_values, order_id } = data;
+    const { new_values, order_id } = data;
     const {
       extra_price,
       packing_price,
@@ -276,13 +265,6 @@ export class OrderActionService {
         "امکان تغییر فاکتور پرداخت شده وجود ندارد."
       );
 
-    const before = JSON.stringify({
-      extra_price: theRecord.extra_price.toLocaleString(),
-      packing_price: theRecord.packing_price.toLocaleString(),
-      shipping_price: theRecord.shipping_price.toLocaleString(),
-      user_discount: theRecord.user_discount.toLocaleString(),
-    });
-
     const items_before =
       theRecord.extra_price +
       theRecord.packing_price +
@@ -291,14 +273,6 @@ export class OrderActionService {
     const items_after =
       extra_price + packing_price + shipping_price + user_discount;
     const diffrence = items_before - items_after;
-
-    const after = JSON.stringify({
-      extra_price: extra_price.toLocaleString(),
-      packing_price: packing_price.toLocaleString(),
-      shipping_price: shipping_price.toLocaleString(),
-      user_discount: user_discount.toLocaleString(),
-      total_price: theRecord.total_price - diffrence,
-    });
 
     if (!theRecord) throw new NotFoundException(messages[400]);
     theRecord.extra_price = extra_price;
@@ -310,17 +284,6 @@ export class OrderActionService {
 
     // websocket
     await this.eventsGateway.changeOrder({ order: theOrder, complex_id });
-
-    await this.logService.create({
-      type: 2,
-      description: "قیمت های فاکتور ویرایش شد.",
-      complex_id,
-      user_id: author_id,
-      before,
-      after,
-      dist: theRecord,
-      dist_type: "order",
-    });
     return theRecord;
   }
 

@@ -25,7 +25,6 @@ import { AddItemToOrderDto } from "./dto/add.dto";
 import { EditAddressDto } from "./dto/edit-address.dto";
 import { EditPriceDto } from "./dto/edit-price.dto";
 import { EditDeliveryDto } from "./dto/edit-delivery.dto";
-import { LoadOfflineOrdersDto } from "./dto/offline.dto";
 import { RemoveItemFromOrderDto } from "./dto/remove-item.dto";
 import { OrderStatsService } from "./service/order-stats.service";
 
@@ -150,30 +149,12 @@ export class OrderController {
     return await this.fetchService.findById(recordId);
   }
 
-  @Post()
-  @UseGuards(IsLoggedInGuard)
-  async createOrder(@Body() body: CreateOrderDto, @Req() req: Request) {
-    const { is_platform, ...restOfBody } = body;
-    return await this.createService.create(
-      req.currentUser,
-      restOfBody,
-      is_platform
-    );
-  }
-
   // this route is for create order by complex employee
   @Post("/employee")
   @AccessLevel([1, 2, 4, 5, 7, 8])
   @UseGuards(HasAccessGuard)
   async createOrderByEmployee(@Body() body: CreateOrderDto) {
     return await this.createService.createByEmployee(body);
-  }
-
-  @Post("/offline")
-  @AccessLevel([1, 2, 4])
-  @UseGuards(HasAccessGuard)
-  async loadOfllineOrders(@Body() body: LoadOfflineOrdersDto) {
-    return await this.createService.loadOfflineOrders(body);
   }
 
   @Put("/employee/add/:id")
@@ -217,15 +198,9 @@ export class OrderController {
   @Put("/edit-prices/:id")
   @AccessLevel([1, 2, 4])
   @UseGuards(HasAccessGuard)
-  async editPrices(
-    @Param("id") recordId: string,
-    @Body() body: EditPriceDto,
-    @Req() req: Request
-  ) {
-    const theEmployee = req.currentUser;
+  async editPrices(@Param("id") recordId: string, @Body() body: EditPriceDto) {
     return await this.actionService.editPrices({
       new_values: body,
-      author_id: theEmployee._id.toString(),
       order_id: recordId,
     });
   }

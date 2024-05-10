@@ -5,12 +5,10 @@ import { discountCalculator } from "src/features/product/product/helpers/functio
 import { DiscountService } from "src/features/product/discount/discount.service";
 import { messages } from "src/helpers/constants";
 import { OrderDocument } from "../order.schema";
-import { PersonalDiscountService } from "src/features/user/personal-discount/personal-discount.service";
 import { ProductDocument } from "src/features/product/product/product.schema";
 import { ShippingRangeDocument } from "src/features/complex/shipping-range/shipping-range.schema";
 import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
-import { Model, Types } from "mongoose";
-import { WorkTimeService } from "src/features/complex/work-time/work-time.service";
+import { Model } from "mongoose";
 import {
   BadRequestException,
   ForbiddenException,
@@ -29,26 +27,13 @@ export class OrderThirdMethodsService {
     private readonly productService: ProductFetchService,
     private readonly complexService: ComplexFetchService,
     private readonly shippingRangeService: ShippingRangeService,
-    private readonly personalDiscountService: PersonalDiscountService,
     private readonly complexUsersActionsService: ComplexUsersActionsService,
-    private readonly worktimeService: WorkTimeService,
     private readonly discountService: DiscountService
   ) {}
 
   async isValidCreateRequest(complex_id: string) {
     const theComplex: Complex = await this.complexService.findById(complex_id);
     if (!theComplex) throw new NotFoundException(messages[404]);
-
-    const isOpen = await this.worktimeService.isOpen(complex_id);
-    if (!theComplex.is_active)
-      throw new BadRequestException(
-        "متاسفانه مجموعه مورد نظر شما هنوز به تایید سفره نرسیده است."
-      );
-    if (!isOpen)
-      throw new BadRequestException(
-        `متاسفانه در حال حاضر مجموعه سفارشی نمیپذیرد. ${new Date().getHours()}:${new Date().getMinutes()}`
-      );
-
     return theComplex;
   }
 
@@ -194,63 +179,6 @@ export class OrderThirdMethodsService {
     return { total_packing, order_price, complex_discount };
   }
 
-  async priceAndDiscountValidator(data: {
-    products_price: number;
-    discount_id: string;
-    user_id: string | Types.ObjectId;
-    min_order_price: number;
-  }) {
-    const { products_price, discount_id, user_id, min_order_price } = data;
-
-    const theUserDiscount = await this.personalDiscountService.findUserCode({
-      _id: discount_id,
-      user_id,
-    });
-
-    if (
-      theUserDiscount?.min_order &&
-      products_price < theUserDiscount.min_order
-    )
-      throw new BadRequestException(
-        `حداقل مبلغ سفارش برای اعمال تخفیف شما ${theUserDiscount.min_order.toLocaleString()} تومان است`
-      );
-
-    if (products_price <= min_order_price)
-      throw new BadRequestException(
-        `حداقل مبلغ برای ثبت سفارش آنلاین ${min_order_price} است`
-      );
-
-    return theUserDiscount;
-  }
-
-  async statsHandler(data: {
-    created_order: OrderDocument;
-    complex_id: string;
-    products: {
-      product: ProductDocument;
-      quantity: number;
-      price: {
-        amount: number;
-        title: string;
-        price_id: string;
-      };
-    }[];
-    user_id?: string | Types.ObjectId;
-  }) {
-    const { created_order, complex_id, products, user_id } = data;
-
-    if (user_id)
-      await this.complexUsersActionsService.addNewOrder({
-        complex_id,
-        order: created_order,
-        products: products.map((item) => ({
-          _id: item.product._id.toString(),
-          quantity: item?.quantity || 0,
-        })),
-        user_id,
-      });
-  }
-
   async factorNumber(complex_id: string) {
     const todayOrdersCount = await this.model
       .find({
@@ -266,9 +194,5 @@ export class OrderThirdMethodsService {
       })
       .countDocuments();
     return todayOrdersCount + 1;
-  }
-
-  async deleteDiscount(discount_id: string) {
-    return await this.personalDiscountService.deleteOne(discount_id);
   }
 }

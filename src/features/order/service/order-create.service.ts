@@ -5,25 +5,19 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { OrderDocument } from "../order.schema";
 import { OrderThirdMethodsService } from "./third-methods.actions";
-import { PaymentService } from "./../../../management/payment/payment.service";
 import { UserDocument } from "src/features/user/users/user.schema";
 import { UserService } from "src/features/user/users/user.service";
 import {
   BadRequestException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
   forwardRef,
 } from "@nestjs/common";
-import { BlacklistService } from "src/features/complex/blacklist/blacklist.service";
 import { ComplexUsersActionsService } from "src/features/complex/users/service/complex-user-actions.service";
 import { toObjectId } from "src/helpers/functions";
 import { messages } from "src/helpers/constants";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
-import { InjectQueue } from "@nestjs/bull";
-import { Queue } from "bull";
-import { ComplexUserAddressService } from "src/features/complex/user-address/user-address.service";
 
 @Injectable()
 export class OrderCreateService {
@@ -34,166 +28,11 @@ export class OrderCreateService {
     private readonly authService: AuthService,
     private readonly eventsGateway: EventsGateway,
     private readonly orderThirdMethods: OrderThirdMethodsService,
-    private readonly blackListService: BlacklistService,
     private readonly complexUsersActionsService: ComplexUsersActionsService,
-    private readonly complexUserAddressService: ComplexUserAddressService,
     private readonly productFetchService: ProductFetchService,
-    @Inject(forwardRef(() => PaymentService))
-    private readonly paymentService: PaymentService,
     @Inject(forwardRef(() => CashBankService))
-    private readonly cashBankService: CashBankService,
-    @InjectQueue("offline_orders") private readonly queue: Queue
+    private readonly cashBankService: CashBankService
   ) {}
-
-  async create(
-    user: UserDocument,
-    data: {
-      description: string;
-      products: { product_id: string; quantity: number; price_index: number }[];
-      complex_id: string;
-      needs_pack?: boolean;
-      user_address?: {
-        name: string;
-        description: string;
-        latitude: number;
-        longitude: number;
-      };
-      table_number?: string;
-      discount_id?: string;
-    },
-    is_platform: boolean
-  ) {
-    const {
-      user_address,
-      products,
-      description,
-      discount_id,
-      complex_id,
-      table_number,
-      needs_pack,
-    } = data || {};
-
-    const isBanned = await this.blackListService.isBanned(
-      user._id.toString(),
-      complex_id
-    );
-    if (isBanned)
-      throw new ForbiddenException(
-        "متاسفانه امکان سفارش از این مجموعه برای شما وجود ندارد."
-      );
-
-    // validate complex activation and workhours
-    const theComplex =
-      await this.orderThirdMethods.isValidCreateRequest(complex_id);
-    const productsFullData =
-      await this.orderThirdMethods.productDataHandler(products);
-
-    const needsPack = user_address?.description ? true : Boolean(needs_pack);
-    const servicePrice = !needsPack ? theComplex.service || 0 : 0;
-
-    if (needsPack) {
-      const justIndoorIndex = productsFullData.findIndex((item) =>
-        user_address?.description
-          ? !item.product.has_shipping
-          : !item.product.is_packable
-      );
-      if (justIndoorIndex !== -1)
-        throw new BadRequestException(
-          "سفارش شما حاوی محصولاتی است که امکان بسته‌بندی بیرون‌بر ندارد."
-        );
-    }
-
-    const theRange = await this.orderThirdMethods.shippingRangeHandler({
-      complex_id,
-      user_address,
-    });
-
-    // calculate different prices
-    const shipping_price = !Boolean(user_address?.description)
-      ? 0
-      : theRange.price;
-    const { products_price, packing_price, complex_discount } =
-      await this.orderThirdMethods.priceHandler({
-        products: productsFullData,
-        complex_packing_price: theComplex.packing,
-        complex_id,
-      });
-
-    // validate and apply user discount code
-    const theUserDiscount =
-      await this.orderThirdMethods.priceAndDiscountValidator({
-        discount_id,
-        user_id: user._id,
-        min_order_price: user_address?.description
-          ? theComplex.min_online_ordering_price
-          : 0,
-        products_price,
-      });
-
-    const tax = ((theComplex.tax || 0) * products_price) / 100 || 0;
-
-    const factor_number = await this.orderThirdMethods.factorNumber(complex_id);
-
-    const newRecord = new this.model({
-      order_type: 3,
-      payment_type: 1,
-      needs_pack: needsPack,
-      description,
-      user,
-      user_address: user_address || null,
-      user_phone: user.mobile,
-      products: productsFullData,
-      shipping_price,
-      packing_price: !needsPack ? 0 : packing_price,
-      total_price:
-        products_price +
-        (!needsPack ? 0 : packing_price) +
-        shipping_price +
-        tax +
-        servicePrice,
-      complex: theComplex,
-      user_discount: theUserDiscount?.value || 0,
-      complex_discount,
-      table_number: table_number || null,
-      factor_number,
-      tax,
-      service: servicePrice,
-      created_at: new Date(),
-    });
-    const created_order = await newRecord.save();
-
-    // websocket
-    if (table_number)
-      await this.eventsGateway.addOrder(complex_id, created_order);
-
-    // update stats
-    await this.orderThirdMethods.deleteDiscount(theUserDiscount?.id);
-
-    if (user._id && user_address?.description) {
-      // save the address
-      if (theComplex.auto_copy_addresses)
-        await this.complexUserAddressService.addByOrdering({
-          address: user_address,
-          complex_id,
-          user_id: user._id.toString(),
-        });
-
-      // make payment
-      const params = theComplex.is_website
-        ? {
-            user,
-            order: created_order,
-            domain: theComplex.domain,
-            merchant_id: is_platform
-              ? undefined
-              : theComplex.gateway?.gate_id || undefined,
-            is_platform,
-          }
-        : { user, order: created_order, is_platform };
-      return await this.paymentService.create(params);
-    }
-    return created_order;
-  }
 
   async createByEmployee(data: {
     order_type: 1 | 2 | 3;
@@ -435,39 +274,5 @@ export class OrderCreateService {
     // websocket
     await this.eventsGateway.changeOrder({ complex_id, order: edited_order });
     return edited_order;
-  }
-
-  async loadOfflineOrders(data: {
-    complex_id: string;
-    orders: {
-      order_type: 1 | 2 | 3;
-      payment_type: 1 | 2 | 3 | 4 | 5 | 6;
-      status: 1 | 2 | 3 | 4 | 5 | 6 | 7;
-      description: string;
-      products: { product_id: string; quantity: number; price_index: number }[];
-      needs_pack: boolean;
-      user_address: {
-        name: string;
-        description: string;
-        latitude: number;
-        longitude: number;
-      } | null;
-      created_at: string;
-
-      // prices
-      shipping_price: number;
-      packing_price: number;
-      user_discount: number;
-      extra_price: number;
-      complex_discount: number;
-      service: number;
-
-      cashbank_id?: string;
-      user_phone?: string;
-      table_number?: string;
-    }[];
-  }) {
-    const { complex_id, orders } = data || {};
-    this.queue.add({ orders, complex_id });
   }
 }

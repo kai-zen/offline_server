@@ -1,12 +1,9 @@
 import AuthModule from "src/features/user/auth/auth.module";
 import ComplexUserModule from "src/features/complex/users/complex-user.module";
 import DiscountModule from "src/features/product/discount/discount.module";
-import PaymentModule from "src/features/management/payment/payment.module";
-import PersonalDiscountModule from "src/features/user/personal-discount/personal-discount.module";
 import ProductModule from "src/features/product/product/product.module";
 import ShippingRangeModule from "src/features/complex/shipping-range/shipping-range.module";
 import UserModule from "src/features/user/users/user.module";
-import WorkTimeModule from "src/features/complex/work-time/work-time.module";
 import { EventsModule } from "src/websocket/events.module";
 import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
@@ -15,7 +12,6 @@ import { OrderController } from "./order.controller";
 import { OrderFetchService } from "./service/order-fetch.service";
 import { OrderSchema } from "./order.schema";
 import { OrderThirdMethodsService } from "./service/third-methods.actions";
-import BlacklistModule from "src/features/complex/blacklist/blacklist.module";
 import { OrderCreateService } from "./service/order-create.service";
 import AccessModule from "src/features/user/access/access.module";
 import CashBankModule from "src/features/complex/cash-bank/cash-bank.module";
@@ -34,17 +30,13 @@ const Order = MongooseModule.forFeature([
     ProductModule,
     ShippingRangeModule,
     UserModule,
-    PersonalDiscountModule,
     ComplexUserModule,
     AuthModule,
     EventsModule,
-    WorkTimeModule,
     DiscountModule,
-    BlacklistModule,
     AccessModule,
     ComplexUserAddressModule,
     forwardRef(() => CashBankModule),
-    forwardRef(() => PaymentModule),
     BullModule.registerQueue({ name: "offline_orders" }),
   ],
   controllers: [OrderController],
