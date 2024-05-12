@@ -26,14 +26,14 @@ export class CashBankService {
         `${sofreBaseUrl}/cash-bank/localdb/${process.env.COMPLEX_ID}`
       )
     );
-    for await (const cashbank of res.data) {
+    for await (const record of res.data) {
       const modifiedResponse = res.data.map((item) => ({
         ...item,
         _id: toObjectId(item._id),
         complex: toObjectId(item.complex),
       }));
       await this.model.updateMany(
-        { _id: cashbank._id },
+        { _id: record._id },
         { $set: modifiedResponse },
         { upsert: true }
       );
