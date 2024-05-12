@@ -5,6 +5,7 @@ import { Injectable } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class ComplexService {
@@ -33,5 +34,13 @@ export class ComplexService {
 
   async isOwner(user_id: string | Types.ObjectId, complex_id: string) {
     return await this.model.exists({ _id: complex_id, owner: user_id });
+  }
+
+  @Cron(CronExpression.EVERY_6_HOURS, {
+    name: "complex-update-cron",
+    timeZone: "Asia/Tehran",
+  })
+  async handleCron() {
+    await this.updateData();
   }
 }

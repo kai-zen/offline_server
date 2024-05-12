@@ -7,13 +7,13 @@ export class ComplexController {
   constructor(private readonly service: ComplexService) {}
 
   @Get()
-  async findAll() {
+  async find() {
     return await this.service.findTheComplex();
   }
 
   @Put()
   @UseGuards(IsOwnerGuard)
-  async findByTags() {
+  async updateData() {
     return await this.service.updateData();
   }
 }
