@@ -1,5 +1,5 @@
 import ProductFetchService from "src/features/product/product/service/product-fetch.service";
-import { ComplexFetchService } from "../../complex/service/comlex-fetch.service";
+import { ComplexFetchService } from "../../complex/comlex.service";
 import { ComplexUserDocument } from "../complex-users.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";

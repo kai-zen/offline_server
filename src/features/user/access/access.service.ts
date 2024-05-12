@@ -7,7 +7,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ComplexFetchService } from "src/features/complex/complex/service/comlex-fetch.service";
+import { ComplexFetchService } from "src/features/complex/complex/comlex.service";
 import { messages } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
 

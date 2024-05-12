@@ -1,4 +1,3 @@
-import { ComplexFetchService } from "src/features/complex/complex/service/comlex-fetch.service";
 import { messages } from "src/helpers/constants";
 import { Request } from "express";
 import {
@@ -7,10 +6,11 @@ import {
   Injectable,
   ForbiddenException,
 } from "@nestjs/common";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class IsOwnerGuard implements CanActivate {
-  constructor(private complexService: ComplexFetchService) {}
+  constructor(private complexService: ComplexService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();

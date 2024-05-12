@@ -7,7 +7,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { ComplexUsersFetchService } from "src/features/complex/users/service/complex-user-fetch.service";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
-import { ComplexFetchService } from "../complex/service/comlex-fetch.service";
+import { ComplexFetchService } from "../complex/comlex.service";
 import { ActivityService } from "../activities/activities.service";
 
 @Injectable()

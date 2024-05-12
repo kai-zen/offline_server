@@ -1,5 +1,5 @@
 import { AccessService } from "../access/access.service";
-import { ComplexFetchService } from "src/features/complex/complex/service/comlex-fetch.service";
+import { ComplexFetchService } from "src/features/complex/complex/comlex.service";
 import { ComplexUsersActionsService } from "./../../complex/users/service/complex-user-actions.service";
 import { JwtService } from "@nestjs/jwt";
 import { messages } from "src/helpers/constants";

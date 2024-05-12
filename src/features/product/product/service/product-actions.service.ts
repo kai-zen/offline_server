@@ -1,4 +1,4 @@
-import { ComplexFetchService } from "src/features/complex/complex/service/comlex-fetch.service";
+import { ComplexFetchService } from "src/features/complex/complex/comlex.service";
 import { deleteFile, toObjectId } from "src/helpers/functions";
 import { InjectModel } from "@nestjs/mongoose";
 import { messages } from "src/helpers/constants";

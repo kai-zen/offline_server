@@ -1,4 +1,4 @@
-import { ComplexFetchService } from "../complex/service/comlex-fetch.service";
+import { ComplexFetchService } from "../complex/comlex.service";
 import { ComplexPutService } from "../complex/service/complex-put.service";
 import { distanceCalculator, toObjectId } from "src/helpers/functions";
 import { Injectable, NotFoundException } from "@nestjs/common";

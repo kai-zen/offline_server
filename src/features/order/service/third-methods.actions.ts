@@ -1,5 +1,5 @@
 import ProductFetchService from "src/features/product/product/service/product-fetch.service";
-import { ComplexFetchService } from "src/features/complex/complex/service/comlex-fetch.service";
+import { ComplexFetchService } from "src/features/complex/complex/comlex.service";
 import { ComplexUsersActionsService } from "src/features/complex/users/service/complex-user-actions.service";
 import { discountCalculator } from "src/features/product/product/helpers/functions";
 import { DiscountService } from "src/features/product/discount/discount.service";

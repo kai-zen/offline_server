@@ -25,30 +25,6 @@ export const messages = {
   500: "مشکلی رخ داده است، بعدا مجدد تلاش کنید.",
 };
 
-export const zarinpalConfig = {
-  normal: {
-    PurchaseUrl: "https://api.zarinpal.com/pg/v4/payment/request.json",
-    PaymentUrl: "https://www.zarinpal.com/pg/StartPay/",
-    VerificationUrl: "https://api.zarinpal.com/pg/v4/payment/verify.json",
-  },
-
-  sandbox: {
-    PurchaseUrl: "https://sandbox.zarinpal.com/pg/services/WebGate/wsdl",
-    PaymentUrl: "https://sandbox.zarinpal.com/pg/StartPay/",
-    VerificationUrl: "https://sandbox.zarinpal.com/pg/services/WebGate/wsdl",
-  },
-
-  // routes: {
-  //   PaymentRequest: "PaymentRequest.json",
-  //   PaymentVerification: "PaymentVerification.json",
-  //   UnverifiedTransactions: "UnverifiedTransactions.json",
-  // },
-  // https: "https://www.zarinpal.com/pg/rest/WebGate/",
-  // sandbox: "https://sandbox.zarinpal.com/pg/rest/WebGate/",
-  // PG_sandbox: "https://sandbox.zarinpal.com/pg/StartPay",
-  // PG_https: "https://www.zarinpal.com/pg/StartPay",
-};
-
 export type paymentRequestResponseType = {
   data: {
     data: {
@@ -126,3 +102,5 @@ export const schemaConfig = {
     createdAt: "created_at",
   },
 };
+
+export const sofreBaseUrl = "https://api.sofre.app";
