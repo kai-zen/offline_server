@@ -16,10 +16,6 @@ export class AccessService {
     private readonly httpService: HttpService
   ) {}
 
-  async findAll() {
-    return await this.model.find().populate("user").exec();
-  }
-
   async updateData() {
     const res = await lastValueFrom(
       this.httpService.get(

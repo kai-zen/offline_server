@@ -1,14 +1,15 @@
+import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
-import { messages } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { toObjectId } from "src/helpers/functions";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ComplexUsersFetchService } from "src/features/complex/users/service/complex-user-fetch.service";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
-import { ComplexFetchService } from "../complex/comlex.service";
-import { ActivityService } from "../activities/activities.service";
+import { lastValueFrom } from "rxjs";
+import { sofreBaseUrl } from "src/helpers/constants";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -18,15 +19,11 @@ export class ComplexUserAddressService {
     private readonly userService: UserService,
     private readonly shippingRangeService: ShippingRangeService,
     private readonly complexUserService: ComplexUsersFetchService,
-    private readonly complexService: ComplexFetchService,
-    private readonly logService: ActivityService
+    private readonly httpService: HttpService
   ) {}
 
-  async findByUser(complexId: string, user_id: string) {
-    return await this.model
-      .find({ user: toObjectId(user_id), complex: toObjectId(complexId) })
-      .select("-user")
-      .exec();
+  async findByUser(user_id: string) {
+    return await this.model.find({ user: toObjectId(user_id) }).exec();
   }
 
   async findByUserWithShppingPrices(complexId: string, user_id: string) {
@@ -79,128 +76,39 @@ export class ComplexUserAddressService {
     };
   }
 
-  async findById(id: string) {
-    return await this.model.findById(id).exec();
+  async updateData() {
+    let hasMore = true;
+    let page = 1;
+    while (hasMore) {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`
+        )
+      );
+      if (res.data && res.data.length > 0) {
+        for await (const record of res.data) {
+          const modifiedResponse = res.data.map((item) => ({
+            ...item,
+            _id: toObjectId(item._id),
+            user: toObjectId(item.user),
+            complex: toObjectId(item.complex),
+          }));
+          await this.model.updateMany(
+            { _id: record._id },
+            { $set: modifiedResponse },
+            { upsert: true }
+          );
+        }
+        ++page;
+      } else hasMore = false;
+    }
   }
 
-  async create(data: {
-    name: string;
-    description: string;
-    details: string;
-    latitude: number;
-    longitude: number;
-    complex_id: string;
-    user_id: string;
-  }) {
-    const {
-      name,
-      description,
-      latitude,
-      longitude,
-      user_id,
-      complex_id,
-      details,
-    } = data || {};
-
-    const theComplex = await this.complexService.findById(complex_id);
-    if (!theComplex) throw new NotFoundException(messages[404]);
-
-    const newRecord = new this.model({
-      name,
-      description,
-      user: toObjectId(user_id),
-      complex: theComplex,
-      latitude,
-      longitude,
-      details,
-    });
-    return await newRecord.save();
-  }
-
-  async addByOrdering(data: {
-    address: {
-      name: string;
-      description: string;
-      latitude: number;
-      longitude: number;
-    };
-    complex_id: string;
-    user_id: string;
-  }) {
-    const { address, user_id, complex_id } = data;
-    const { name, description, latitude, longitude } = address || {};
-
-    const doesItExist = await this.model.exists({
-      description,
-      user: toObjectId(user_id),
-      complex: toObjectId(complex_id),
-    });
-    if (doesItExist) return;
-
-    const newRecord = new this.model({
-      name,
-      description,
-      user: toObjectId(user_id),
-      complex: toObjectId(complex_id),
-      latitude,
-      longitude,
-      details: "",
-    });
-    return await newRecord.save();
-  }
-
-  async findAndEdit(
-    id: string,
-    newData: {
-      name: string;
-      description: string;
-      details: string;
-      latitude: number;
-      longitude: number;
-      complex_id: string;
-    },
-    author_id: string
-  ) {
-    const { name, description, latitude, longitude, details, complex_id } =
-      newData || {};
-
-    const theRecord = await this.model.findOne({
-      _id: id,
-      complex: toObjectId(complex_id),
-    });
-    if (!theRecord) throw new NotFoundException(messages[404]);
-
-    const oldDescription = theRecord.description;
-    theRecord.name = name;
-    theRecord.description = description;
-    theRecord.details = details;
-    theRecord.latitude = latitude;
-    theRecord.longitude = longitude;
-
-    await this.logService.create({
-      complex_id,
-      type: 2,
-      description: `آدرس(${oldDescription}) اشتراک ویرایش شد.`,
-      user_id: author_id,
-    });
-
-    return await theRecord.save();
-  }
-
-  async deleteOne(id: string, complex_id: string, author_id: string) {
-    const theRecord = await this.model.findOne({
-      _id: id,
-      complex: toObjectId(complex_id),
-    });
-    if (!theRecord) throw new NotFoundException(messages[404]);
-
-    await this.logService.create({
-      complex_id,
-      type: 3,
-      description: `آدرس(${theRecord.description}) اشتراک حذف شد.`,
-      user_id: author_id,
-    });
-    await this.model.deleteOne({ _id: id, complex: toObjectId(complex_id) });
-    return "success";
+  @Cron(CronExpression.EVERY_6_HOURS, {
+    name: "ranges-update-cron",
+    timeZone: "Asia/Tehran",
+  })
+  async handleCron() {
+    await this.updateData();
   }
 }
