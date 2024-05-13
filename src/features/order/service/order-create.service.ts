@@ -1,4 +1,4 @@
-import { ProductFetchService } from "src/features/product/product/service/product-fetch.service";
+import { ProductFetchService } from "src/features/product/product/product.service";
 import { AuthService } from "src/features/user/auth/auth.service";
 import { EventsGateway } from "src/websocket/events.gateway";
 import { InjectModel } from "@nestjs/mongoose";

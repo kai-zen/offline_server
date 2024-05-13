@@ -49,7 +49,7 @@ export class DiscountService {
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_11AM, {
-    name: "complex-update-cron",
+    name: "discounts-update-cron",
     timeZone: "Asia/Tehran",
   })
   async handleCron() {

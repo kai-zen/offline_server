@@ -2,7 +2,7 @@ import mongoose, { HydratedDocument } from "mongoose";
 import { ComplexDocument } from "src/features/complex/complex/complex.schema";
 import { ProductDocument } from "../product/product.schema";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { ProductFolderDocument } from "src/features/category/folders/folder.schema";
+import { ProductFolderDocument } from "../folders/folder.schema";
 
 @Schema({ versionKey: false })
 export class Discount {

@@ -41,7 +41,7 @@ export class ShippingRangeService {
   }
 
   @Cron(CronExpression.EVERY_3_HOURS, {
-    name: "complex-update-cron",
+    name: "ranges-update-cron",
     timeZone: "Asia/Tehran",
   })
   async handleCron() {

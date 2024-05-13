@@ -41,7 +41,7 @@ export class CashBankService {
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_10AM, {
-    name: "complex-update-cron",
+    name: "cashbanks-update-cron",
     timeZone: "Asia/Tehran",
   })
   async handleCron() {
