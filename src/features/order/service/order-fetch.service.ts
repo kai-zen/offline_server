@@ -128,10 +128,7 @@ export class OrderFetchService {
   ) {
     const { limit = "12", page = "1" } = queryParams || {};
 
-    const theCashbank = await this.cashbankService.findById(
-      cash_bank,
-      complex_id
-    );
+    const theCashbank = await this.cashbankService.findById(cash_bank);
     if (!theCashbank) throw new NotFoundException(messages[404]);
 
     const filters: any[] = [

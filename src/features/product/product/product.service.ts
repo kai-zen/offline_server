@@ -39,6 +39,14 @@ export class ProductService {
     return productsWithDiscount;
   }
 
+  async findById(id: string) {
+    return await this.model
+      .findById(id)
+      .populate("folder")
+      .populate("complex")
+      .exec();
+  }
+
   async findPrice(productId: string, priceId: string) {
     const theProduct = await this.model.findById(productId).lean().exec();
     if (!theProduct) throw new NotFoundException("محصول پیدا نشد.");

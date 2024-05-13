@@ -68,20 +68,14 @@ export class UserService {
     while (hasMore) {
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`
+          `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}/${page}`
         )
       );
       if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
-          const modifiedResponse = {
-            ...record,
-            _id: toObjectId(record._id),
-            user: toObjectId(record.user),
-            complex: toObjectId(record.complex),
-          };
           await this.model.updateMany(
-            { _id: modifiedResponse._id },
-            { $set: modifiedResponse },
+            { _id: toObjectId(record._id) },
+            { $set: record },
             { upsert: true }
           );
         }

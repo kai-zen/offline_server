@@ -1,5 +1,4 @@
-import { ProductFetchService } from "src/features/product/product/product.service";
-import { AuthService } from "src/features/user/auth/auth.service";
+import { ProductService } from "src/features/product/product/product.service";
 import { EventsGateway } from "src/websocket/events.gateway";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
@@ -25,11 +24,10 @@ export class OrderCreateService {
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
     private readonly userService: UserService,
-    private readonly authService: AuthService,
     private readonly eventsGateway: EventsGateway,
     private readonly orderThirdMethods: OrderThirdMethodsService,
     private readonly complexUsersActionsService: ComplexUsersActionsService,
-    private readonly productFetchService: ProductFetchService,
+    private readonly productService: ProductService,
     @Inject(forwardRef(() => CashBankService))
     private readonly cashBankService: CashBankService
   ) {}

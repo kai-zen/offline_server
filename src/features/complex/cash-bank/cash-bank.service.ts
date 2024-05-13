@@ -20,6 +20,10 @@ export class CashBankService {
     return await this.model.find().exec();
   }
 
+  async findById(id: string) {
+    return await this.model.findById(id);
+  }
+
   async updateData() {
     const res = await lastValueFrom(
       this.httpService.get(

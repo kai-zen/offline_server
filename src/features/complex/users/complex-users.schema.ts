@@ -1,9 +1,9 @@
 import mongoose, { HydratedDocument } from "mongoose";
 import { ComplexDocument } from "../complex/complex.schema";
-import { OrderDocument } from "src/features/order/order/order.schema";
 import { ProductDocument } from "src/features/product/product/product.schema";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "src/features/user/users/user.schema";
+import { OrderDocument } from "src/features/order/order.schema";
 
 @Schema({ versionKey: false })
 class ComplexUserProduct {
@@ -34,9 +34,6 @@ class ComplexUserOrder {
 
 @Schema({
   versionKey: false,
-  timestamps: {
-    createdAt: "created_at",
-  },
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 })
@@ -72,6 +69,9 @@ export class ComplexUser {
 
   @Prop({ default: null })
   last_given_discount: Date;
+
+  @Prop()
+  created_at: string | Date;
 
   @Prop()
   last_visit: Date;

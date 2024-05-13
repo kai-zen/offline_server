@@ -4,7 +4,7 @@ import { Model } from "mongoose";
 import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { toObjectId } from "src/helpers/functions";
 import { Injectable } from "@nestjs/common";
-import { ComplexUsersFetchService } from "src/features/complex/users/service/complex-user-fetch.service";
+import { ComplexUsersFetchService } from "src/features/complex/users/complex-user.service";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
