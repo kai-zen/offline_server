@@ -1,6 +1,5 @@
 import { AccessService } from "src/features/user/access/access.service";
 import { JwtService } from "@nestjs/jwt";
-import { OrderDocument } from "src/features/order/order/order.schema";
 import {
   MessageBody,
   SubscribeMessage,
@@ -8,6 +7,7 @@ import {
   WebSocketServer,
 } from "@nestjs/websockets";
 import { Server } from "socket.io";
+import { OrderDocument } from "src/features/order/order.schema";
 
 @WebSocketGateway({ cors: { origin: "*" } })
 export class EventsGateway {
