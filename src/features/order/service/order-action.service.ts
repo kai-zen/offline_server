@@ -1,13 +1,9 @@
-import ProductActionsService from "src/features/product/product/service/product-actions.service";
-import { ComplexPutService } from "src/features/complex/complex/service/complex-put.service";
 import { EventsGateway } from "src/websocket/events.gateway";
 import { InjectModel } from "@nestjs/mongoose";
 import { messages } from "src/helpers/constants";
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { OrderDocument } from "../order.schema";
-import { OrderThirdMethodsService } from "./third-methods.actions";
 import { toObjectId } from "src/helpers/functions";
-import { UserService } from "src/features/user/users/user.service";
 import {
   BadRequestException,
   Inject,
@@ -15,7 +11,6 @@ import {
   NotFoundException,
   forwardRef,
 } from "@nestjs/common";
-import { ComplexUsersActionsService } from "src/features/complex/users/service/complex-user-actions.service";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { AccessService } from "src/features/user/access/access.service";
@@ -25,44 +20,11 @@ export class OrderActionService {
   constructor(
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
-    private readonly userService: UserService,
     private readonly eventsGateway: EventsGateway,
-    private readonly productService: ProductActionsService,
-    private readonly orderThirdMethods: OrderThirdMethodsService,
-    private readonly complexPutService: ComplexPutService,
-    private readonly complexUsersActionsService: ComplexUsersActionsService,
     private readonly accessService: AccessService,
     @Inject(forwardRef(() => CashBankService))
     private readonly cashBankService: CashBankService
   ) {}
-
-  async modifyIsPayed(order_id: string | Types.ObjectId) {
-    const theRecord = await this.model
-      .findById(order_id)
-      .populate("products.product")
-      .populate("complex")
-      .populate("user")
-      .exec();
-    if (!theRecord) throw new NotFoundException(messages[404]);
-    if (theRecord.payment_type > 1)
-      throw new BadRequestException("این سفارش قبلا پرداخت شده است.");
-
-    const toPayPrice = theRecord.total_price - theRecord.user_discount;
-    await this.complexPutService.updateBalance(
-      theRecord.complex._id,
-      toPayPrice
-    );
-
-    theRecord.payment_type = 2;
-    const theOrder = await theRecord.save();
-
-    // websocket
-    await this.eventsGateway.changeOrder({
-      order: theOrder,
-      complex_id: theRecord.complex._id.toString(),
-    });
-    return theOrder;
-  }
 
   async findAndEdit(data: {
     id: string;
@@ -106,28 +68,15 @@ export class OrderActionService {
         throw new BadRequestException(
           "امکان تغییر شیوه پرداخت سفارشی که پرداخت شده، به پرداخت نشده وجود ندارد."
         );
-      if (!cash_bank)
-        throw new BadRequestException(
-          "انتخاب صندوق برای ویرایش شیوه پرداخت الزامی است."
-        );
-      const theCashBank = await this.cashBankService.findById(
-        cash_bank,
-        theRecord.complex._id.toString()
-      );
+      const theCashBank = await this.cashBankService.findById(cash_bank);
       if (!theCashBank)
         throw new NotFoundException("صندوق مورد نظر شما وجود ندارد.");
 
-      if (payment_type === 6)
-        if (theRecord.user?._id)
-          await this.complexUsersActionsService.addDebt({
-            user_id: theRecord.user._id.toString(),
-            complex_id: theRecord.complex._id.toString(),
-            theOrder: theRecord,
-          });
-        else
-          throw new BadRequestException(
-            "کاربر سفارشی که قصد تغییر وضعیت پرداخت آن به نسیه را دارید، نامشخص است."
-          );
+      if (payment_type === 6 && !theRecord.user?._id)
+        throw new BadRequestException(
+          "کاربر سفارشی که قصد تغییر وضعیت پرداخت آن به نسیه را دارید، نامشخص است."
+        );
+
       theRecord.payment_type = payment_type;
       theRecord.cash_bank = theCashBank;
     }
@@ -140,19 +89,6 @@ export class OrderActionService {
 
     // websocket
     await this.eventsGateway.changeOrder({ order: theOrder, complex_id });
-
-    if (status === 5) {
-      for await (const product of theRecord.products.map(
-        (item) => item.product
-      )) {
-        await this.productService.addOrdersCount(product._id);
-      }
-      if (theRecord.user?._id)
-        await this.userService.updateStats(
-          theRecord.user._id,
-          theRecord.total_price
-        );
-    }
 
     return;
   }
@@ -285,35 +221,6 @@ export class OrderActionService {
     // websocket
     await this.eventsGateway.changeOrder({ order: theOrder, complex_id });
     return theRecord;
-  }
-
-  async cancelOrder(id: string, user_id: Types.ObjectId) {
-    const theRecord = await this.model
-      .findOne({
-        _id: toObjectId(id),
-        user: user_id,
-      })
-      .populate("products.product")
-      .populate("complex")
-      .populate("user")
-      .exec();
-    if (!theRecord) throw new NotFoundException();
-    if (theRecord.status === 7 || theRecord.status === 6)
-      throw new BadRequestException("سفارش شما لغو شده است.");
-    if (theRecord.status !== 1)
-      throw new BadRequestException(
-        "امکان لغو سفارش به دلیل شروع فرایند آماده سازی وجود ندارد."
-      );
-
-    theRecord.status = 7;
-    const theOrder = await theRecord.save();
-    // websocket
-    await this.eventsGateway.changeOrder({
-      order: theOrder,
-      complex_id: theRecord.complex?._id?.toString(),
-    });
-
-    return theOrder;
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_5AM, {

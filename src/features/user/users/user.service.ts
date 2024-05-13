@@ -62,6 +62,11 @@ export class UserService {
     return await this.model.findOne({ mobile });
   }
 
+  async createUser(mobile: string) {
+    const newRecord = new this.model({ mobile });
+    return await newRecord.save();
+  }
+
   async updateData() {
     let hasMore = true;
     let page = 1;

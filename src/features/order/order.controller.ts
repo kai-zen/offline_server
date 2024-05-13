@@ -2,7 +2,6 @@ import { AccessLevel } from "src/helpers/decorators";
 import { CreateOrderDto } from "./dto/create.dto";
 import { EditOrderDto } from "./dto/edit.dto";
 import { HasAccessGuard } from "src/guards/access.guard";
-import { IsAdminGuard } from "src/guards/admin.guard";
 import { IsLoggedInGuard } from "src/guards/auth.guard";
 import { OrderActionService } from "./service/order-action.service";
 import { OrderFetchService } from "./service/order-fetch.service";
@@ -37,12 +36,6 @@ export class OrderController {
     private createService: OrderCreateService,
     private readonly statsService: OrderStatsService
   ) {}
-
-  @Get()
-  @UseGuards(IsAdminGuard)
-  async findAll(@Query() queryParams: { [props: string]: string }) {
-    return await this.fetchService.findAll(queryParams);
-  }
 
   @Get("/user")
   @UseGuards(IsLoggedInGuard)
@@ -215,12 +208,6 @@ export class OrderController {
       ...body,
       order_id: recordId,
     });
-  }
-
-  @Put("/cancel/:id")
-  @UseGuards(IsLoggedInGuard)
-  async cancelOrder(@Param("id") recordId: string, @Req() req: Request) {
-    return await this.actionService.cancelOrder(recordId, req.currentUser._id);
   }
 
   @Put("/:complexId/:id")

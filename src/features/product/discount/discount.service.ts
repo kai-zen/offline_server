@@ -17,7 +17,11 @@ export class DiscountService {
   ) {}
 
   async findAll() {
-    return await this.model.find().exec();
+    return await this.model
+      .find()
+      .populate("products")
+      .populate("folders")
+      .exec();
   }
 
   async updateData() {

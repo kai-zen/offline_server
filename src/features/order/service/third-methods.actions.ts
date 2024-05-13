@@ -1,6 +1,4 @@
 import ProductFetchService from "src/features/product/product/product.service";
-import { ComplexFetchService } from "src/features/complex/complex/comlex.service";
-import { ComplexUsersActionsService } from "src/features/complex/users/service/complex-user-actions.service";
 import { discountCalculator } from "src/features/product/product/helpers/functions";
 import { DiscountService } from "src/features/product/discount/discount.service";
 import { messages } from "src/helpers/constants";
@@ -18,6 +16,7 @@ import {
 import { Complex } from "src/features/complex/complex/complex.schema";
 import { toObjectId } from "src/helpers/functions";
 import { InjectModel } from "@nestjs/mongoose";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class OrderThirdMethodsService {
@@ -25,14 +24,13 @@ export class OrderThirdMethodsService {
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
     private readonly productService: ProductFetchService,
-    private readonly complexService: ComplexFetchService,
+    private readonly complexService: ComplexService,
     private readonly shippingRangeService: ShippingRangeService,
-    private readonly complexUsersActionsService: ComplexUsersActionsService,
     private readonly discountService: DiscountService
   ) {}
 
-  async isValidCreateRequest(complex_id: string) {
-    const theComplex: Complex = await this.complexService.findById(complex_id);
+  async isValidCreateRequest() {
+    const theComplex: Complex = await this.complexService.findTheComplex();
     if (!theComplex) throw new NotFoundException(messages[404]);
     return theComplex;
   }
@@ -100,7 +98,6 @@ export class OrderThirdMethodsService {
   }
 
   async priceHandler(data: {
-    complex_id: string;
     complex_packing_price: number;
     products: {
       product: ProductDocument;
@@ -112,10 +109,9 @@ export class OrderThirdMethodsService {
       };
     }[];
   }) {
-    const { complex_packing_price, products, complex_id } = data;
+    const { complex_packing_price, products } = data;
 
-    const complexDiscounts =
-      await this.discountService.findAllActiveComplexDiscounts(complex_id);
+    const complexDiscounts = await this.discountService.findAll();
 
     let products_price = 0;
     let packing_price = complex_packing_price || 0;
@@ -141,8 +137,7 @@ export class OrderThirdMethodsService {
     return { products_price, packing_price, complex_discount };
   }
 
-  async productsPriceHandler(data: {
-    complex_id: string;
+  async productsPriceHandler(
     products: {
       product: ProductDocument;
       quantity: number;
@@ -151,12 +146,9 @@ export class OrderThirdMethodsService {
         title: string;
         price_id: string;
       };
-    }[];
-  }) {
-    const { products, complex_id } = data;
-
-    const complexDiscounts =
-      await this.discountService.findAllActiveComplexDiscounts(complex_id);
+    }[]
+  ) {
+    const complexDiscounts = await this.discountService.findAll();
 
     let order_price = 0;
     let complex_discount = 0;

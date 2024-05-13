@@ -13,7 +13,6 @@ import {
   NotFoundException,
   forwardRef,
 } from "@nestjs/common";
-import { ComplexUsersActionsService } from "src/features/complex/users/service/complex-user-actions.service";
 import { toObjectId } from "src/helpers/functions";
 import { messages } from "src/helpers/constants";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
@@ -26,7 +25,6 @@ export class OrderCreateService {
     private readonly userService: UserService,
     private readonly eventsGateway: EventsGateway,
     private readonly orderThirdMethods: OrderThirdMethodsService,
-    private readonly complexUsersActionsService: ComplexUsersActionsService,
     private readonly productService: ProductService,
     @Inject(forwardRef(() => CashBankService))
     private readonly cashBankService: CashBankService
@@ -67,12 +65,11 @@ export class OrderCreateService {
     let theUser: UserDocument | null;
     if (user_phone) {
       theUser = await this.userService.findByMobile(user_phone);
-      if (!theUser) theUser = await this.authService.registerUser(user_phone);
+      if (!theUser) theUser = await this.userService.createUser(user_phone);
     }
 
     // validate complex activation and workhours
-    const theComplex =
-      await this.orderThirdMethods.isValidCreateRequest(complex_id);
+    const theComplex = await this.orderThirdMethods.isValidCreateRequest();
 
     const productsFullData =
       await this.orderThirdMethods.productDataHandler(products);
@@ -82,10 +79,7 @@ export class OrderCreateService {
       user_address,
     });
 
-    const theCashBank = await this.cashBankService.findById(
-      cashbank_id,
-      complex_id
-    );
+    const theCashBank = await this.cashBankService.findById(cashbank_id);
     if ((payment_type !== 1 && !theCashBank) || payment_type === 2)
       throw new BadRequestException(messages[400]);
     if (cashbank_id && !theCashBank)
@@ -99,7 +93,6 @@ export class OrderCreateService {
       await this.orderThirdMethods.priceHandler({
         products: productsFullData,
         complex_packing_price: theComplex.packing,
-        complex_id,
       });
 
     const tax = (theComplex.tax * products_price) / 100;
@@ -155,13 +148,6 @@ export class OrderCreateService {
     // websocket
     await this.eventsGateway.addOrder(complex_id, created_order);
 
-    if (payment_type === 6 && created_order.total_price !== 0)
-      await this.complexUsersActionsService.addDebt({
-        complex_id,
-        user_id: theUser._id.toString(),
-        theOrder: created_order,
-      });
-
     return created_order;
   }
 
@@ -187,8 +173,7 @@ export class OrderCreateService {
       );
 
     // validate complex activation and workhours
-    const theComplex =
-      await this.orderThirdMethods.isValidCreateRequest(complex_id);
+    const theComplex = await this.orderThirdMethods.isValidCreateRequest();
 
     const productsFullData = await this.orderThirdMethods.productDataHandler(
       products,
@@ -197,10 +182,7 @@ export class OrderCreateService {
 
     // calculate different prices
     const { order_price, complex_discount, total_packing } =
-      await this.orderThirdMethods.productsPriceHandler({
-        products: productsFullData,
-        complex_id,
-      });
+      await this.orderThirdMethods.productsPriceHandler(productsFullData);
 
     const tax = Math.floor(
       (theComplex.tax * (order_price - total_packing)) / 100
@@ -256,7 +238,7 @@ export class OrderCreateService {
     else if (copy.length === 1) throw new BadRequestException(messages[400]);
     else copy.splice(theOrderProductIndex, 1);
 
-    const originalPrice = await this.productFetchService.findPrice(
+    const originalPrice = await this.productService.findPrice(
       product_id,
       price_id
     );

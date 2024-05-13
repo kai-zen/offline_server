@@ -1,5 +1,3 @@
-import AuthModule from "src/features/user/auth/auth.module";
-import ComplexUserModule from "src/features/complex/users/complex-user.module";
 import DiscountModule from "src/features/product/discount/discount.module";
 import ProductModule from "src/features/product/product/product.module";
 import ShippingRangeModule from "src/features/complex/shipping-range/shipping-range.module";
@@ -15,8 +13,6 @@ import { OrderThirdMethodsService } from "./service/third-methods.actions";
 import { OrderCreateService } from "./service/order-create.service";
 import AccessModule from "src/features/user/access/access.module";
 import CashBankModule from "src/features/complex/cash-bank/cash-bank.module";
-import { BullModule } from "@nestjs/bull";
-import { OfflineOrdersProcessor } from "./order.consumer";
 import ComplexUserAddressModule from "src/features/complex/user-address/user-address.module";
 import { OrderStatsService } from "./service/order-stats.service";
 
@@ -30,14 +26,11 @@ const Order = MongooseModule.forFeature([
     ProductModule,
     ShippingRangeModule,
     UserModule,
-    ComplexUserModule,
-    AuthModule,
     EventsModule,
     DiscountModule,
     AccessModule,
     ComplexUserAddressModule,
     forwardRef(() => CashBankModule),
-    BullModule.registerQueue({ name: "offline_orders" }),
   ],
   controllers: [OrderController],
   providers: [
@@ -45,7 +38,6 @@ const Order = MongooseModule.forFeature([
     OrderFetchService,
     OrderThirdMethodsService,
     OrderCreateService,
-    OfflineOrdersProcessor,
     OrderStatsService,
   ],
   exports: [
