@@ -40,7 +40,7 @@ export class ShippingRangeService {
     }
   }
 
-  @Cron(CronExpression.EVERY_3_HOURS, {
+  @Cron(CronExpression.EVERY_DAY_AT_4AM, {
     name: "ranges-update-cron",
     timeZone: "Asia/Tehran",
   })

@@ -1,4 +1,3 @@
-import UserModule from "../users/user.module";
 import { AccessController } from "./access.controller";
 import { AccessSchema } from "./access.schema";
 import { AccessService } from "./access.service";
@@ -11,7 +10,7 @@ const Access = MongooseModule.forFeature([
 
 @Global()
 @Module({
-  imports: [Access, UserModule],
+  imports: [Access],
   controllers: [AccessController],
   providers: [AccessService],
   exports: [AccessService],
