@@ -53,25 +53,34 @@ export class ComplexUserAddressService {
   }
 
   async findByMobile(mobile: string, complexId: string) {
-    let user = await this.userService.findByMobile(mobile);
-    if (!user) user = await this.userService.createUser(mobile);
-    const complexuser = await this.complexUserService.findByUserAndComplexBrief(
-      user._id.toString(),
-      complexId
-    );
-    const results = await this.model
-      .find({ user: user._id, complex: toObjectId(complexId) })
-      .exec();
+    const user = await this.userService.findByMobile(mobile);
+
+    const complexuser = user
+      ? await this.complexUserService.findByUserAndComplexBrief(
+          user._id.toString(),
+          complexId
+        )
+      : null;
+
+    const results = user
+      ? await this.model
+          .find({ user: user._id, complex: toObjectId(complexId) })
+          .exec()
+      : [];
 
     return {
       addresses: results,
       user: {
-        image: user.image,
-        name: user.name,
-        mobile: user.mobile,
-        username: user.username,
-        _id: user._id,
-        ...complexuser,
+        image: user?.image || "",
+        name: user?.name || "",
+        mobile,
+        username: user?.username || "",
+        _id: user?._id,
+        ...(complexuser || {
+          orders_quantity: 0,
+          total_rates: 0,
+          avg_rate: 0,
+        }),
       },
     };
   }
@@ -87,14 +96,12 @@ export class ComplexUserAddressService {
       );
       if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
-          const modifiedResponse = res.data.map((item) => ({
-            ...item,
-            _id: toObjectId(item._id),
-            user: toObjectId(item.user),
-            complex: toObjectId(item.complex),
-          }));
-          await this.model.updateMany(
-            { _id: record._id },
+          const modifiedResponse = {
+            ...record,
+            _id: toObjectId(record._id),
+          };
+          await this.model.updateOne(
+            { _id: modifiedResponse._id },
             { $set: modifiedResponse },
             { upsert: true }
           );
@@ -104,7 +111,7 @@ export class ComplexUserAddressService {
     }
   }
 
-  @Cron(CronExpression.EVERY_6_HOURS, {
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
     name: "ranges-update-cron",
     timeZone: "Asia/Tehran",
   })

@@ -1,26 +1,18 @@
-import {
-  deleteFile,
-  generate5digitCode,
-  toObjectId,
-} from "src/helpers/functions";
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { kavenegarApi, messages } from "src/helpers/constants";
 import { Model, Types } from "mongoose";
 import { UserDocument } from "./user.schema";
-import {
-  userOrderGroup,
-  userOrderProject,
-} from "src/features/order/order/helpers/aggregate-constants";
+import { lastValueFrom } from "rxjs";
+import { sofreBaseUrl } from "src/helpers/constants";
+import { HttpService } from "@nestjs/axios";
+import { toObjectId } from "src/helpers/functions";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel("user") private readonly model: Model<UserDocument>
+    @InjectModel("user") private readonly model: Model<UserDocument>,
+    private readonly httpService: HttpService
   ) {}
 
   async findAll(queryParams: { [props: string]: string }) {
@@ -70,40 +62,39 @@ export class UserService {
     return await this.model.findOne({ mobile });
   }
 
-  async findByUsername(username: string) {
-    return await this.model.exists({ username });
+  async updateData() {
+    let hasMore = true;
+    let page = 1;
+    while (hasMore) {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`
+        )
+      );
+      if (res.data && res.data.length > 0) {
+        for await (const record of res.data) {
+          const modifiedResponse = {
+            ...record,
+            _id: toObjectId(record._id),
+            user: toObjectId(record.user),
+            complex: toObjectId(record.complex),
+          };
+          await this.model.updateMany(
+            { _id: modifiedResponse._id },
+            { $set: modifiedResponse },
+            { upsert: true }
+          );
+        }
+        ++page;
+      } else hasMore = false;
+    }
   }
 
-  async createUser(mobile: string) {
-    const newRecord = new this.model({ mobile });
-    return await newRecord.save();
-  }
-
-  async updateProfile(
-    user_id: string,
-    data: {
-      name: string;
-      username: string;
-      file: string;
-      bio: string;
-      birthday: Date;
-      email: string;
-    }
-  ) {
-    const { name, username, birthday, bio, file, email } = data;
-    const theRecord = await this.model.findById(user_id);
-    if (!theRecord) throw new NotFoundException();
-
-    if (file) {
-      if (theRecord.image) deleteFile(theRecord.image);
-      theRecord.image = file;
-    }
-    if (name) theRecord.name = name;
-    if (bio) theRecord.bio = bio;
-    if (username && username !== theRecord.username)
-      theRecord.username = username;
-    if (birthday) theRecord.birthday = birthday;
-    if (email) theRecord.email = email;
-    return await theRecord.save();
+  @Cron(CronExpression.EVERY_DAY_AT_1AM, {
+    name: "ranges-update-cron",
+    timeZone: "Asia/Tehran",
+  })
+  async handleCron() {
+    await this.updateData();
   }
 }
