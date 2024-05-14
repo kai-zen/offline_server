@@ -19,7 +19,12 @@ export class AccessService {
   async updateData() {
     const res = await lastValueFrom(
       this.httpService.get(
-        `${sofreBaseUrl}/access/localdb/${process.env.COMPLEX_ID}`
+        `${sofreBaseUrl}/access/localdb/${process.env.COMPLEX_ID}`,
+        {
+          headers: {
+            apiKey: process.env.COMPLEX_TOKEN,
+          },
+        }
       )
     );
     console.log(res);

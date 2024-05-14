@@ -23,7 +23,12 @@ export class ProductFolderService {
   async updateData() {
     const res = await lastValueFrom(
       this.httpService.get(
-        `${sofreBaseUrl}/product-folder/localdb/${process.env.COMPLEX_ID}`
+        `${sofreBaseUrl}/product-folder/localdb/${process.env.COMPLEX_ID}`,
+        {
+          headers: {
+            apiKey: process.env.COMPLEX_TOKEN,
+          },
+        }
       )
     );
     for await (const record of res.data) {

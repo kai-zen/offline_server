@@ -18,7 +18,12 @@ export class ComplexService {
   async updateData() {
     const res = await lastValueFrom(
       this.httpService.get(
-        `${sofreBaseUrl}/complex/localdb/${process.env.COMPLEX_ID}`
+        `${sofreBaseUrl}/complex/localdb/${process.env.COMPLEX_ID}`,
+        {
+          headers: {
+            apiKey: process.env.COMPLEX_TOKEN,
+          },
+        }
       )
     );
     await this.model.updateOne(

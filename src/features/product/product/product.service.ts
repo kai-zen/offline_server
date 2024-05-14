@@ -57,7 +57,12 @@ export class ProductService {
   async updateData() {
     const res = await lastValueFrom(
       this.httpService.get(
-        `${sofreBaseUrl}/product/localdb/${process.env.COMPLEX_ID}`
+        `${sofreBaseUrl}/product/localdb/${process.env.COMPLEX_ID}`,
+        {
+          headers: {
+            apiKey: process.env.COMPLEX_TOKEN,
+          },
+        }
       )
     );
     for await (const record of res.data) {

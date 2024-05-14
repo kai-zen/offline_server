@@ -27,7 +27,12 @@ export class DiscountService {
   async updateData() {
     const res = await lastValueFrom(
       this.httpService.get(
-        `${sofreBaseUrl}/discount/localdb/${process.env.COMPLEX_ID}`
+        `${sofreBaseUrl}/discount/localdb/${process.env.COMPLEX_ID}`,
+        {
+          headers: {
+            apiKey: process.env.COMPLEX_TOKEN,
+          },
+        }
       )
     );
     for await (const record of res.data) {

@@ -77,7 +77,12 @@ export class ComplexUserAddressService {
     while (hasMore) {
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`
+          `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`,
+          {
+            headers: {
+              apiKey: process.env.COMPLEX_TOKEN,
+            },
+          }
         )
       );
       if (res.data && res.data.length > 0) {

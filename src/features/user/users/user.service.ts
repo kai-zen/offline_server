@@ -73,7 +73,12 @@ export class UserService {
     while (hasMore) {
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}/${page}`
+          `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}/${page}`,
+          {
+            headers: {
+              apiKey: process.env.COMPLEX_TOKEN,
+            },
+          }
         )
       );
       if (res.data && res.data.length > 0) {
