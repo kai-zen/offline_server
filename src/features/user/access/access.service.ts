@@ -22,6 +22,8 @@ export class AccessService {
         `${sofreBaseUrl}/access/localdb/${process.env.COMPLEX_ID}`
       )
     );
+    console.log(res);
+    return res;
     for await (const record of res.data) {
       const modifiedResponse = res.data.map((item) => ({
         ...item,
