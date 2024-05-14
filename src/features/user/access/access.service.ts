@@ -5,7 +5,6 @@ import { Injectable } from "@nestjs/common";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
 import { HttpService } from "@nestjs/axios";
-import { Cron, CronExpression } from "@nestjs/schedule";
 import { lastValueFrom } from "rxjs";
 
 @Injectable()
@@ -69,13 +68,5 @@ export class AccessService {
       ],
     });
     return theAccess;
-  }
-
-  @Cron(CronExpression.EVERY_3_HOURS, {
-    name: "ranges-update-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
-    await this.updateData();
   }
 }

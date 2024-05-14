@@ -6,7 +6,6 @@ import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
-import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class CashBankService {
@@ -47,13 +46,5 @@ export class CashBankService {
         { upsert: true }
       );
     }
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_10AM, {
-    name: "cashbanks-update-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
-    await this.updateData();
   }
 }
