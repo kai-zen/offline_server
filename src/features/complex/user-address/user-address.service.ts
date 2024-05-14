@@ -80,7 +80,7 @@ export class ComplexUserAddressService {
           `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`,
           {
             headers: {
-              apiKey: process.env.COMPLEX_TOKEN,
+              "api-key": process.env.COMPLEX_TOKEN,
             },
           }
         )

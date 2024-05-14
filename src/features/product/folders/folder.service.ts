@@ -26,7 +26,7 @@ export class ProductFolderService {
         `${sofreBaseUrl}/product-folder/localdb/${process.env.COMPLEX_ID}`,
         {
           headers: {
-            apiKey: process.env.COMPLEX_TOKEN,
+            "api-key": process.env.COMPLEX_TOKEN,
           },
         }
       )

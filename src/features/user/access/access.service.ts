@@ -22,22 +22,20 @@ export class AccessService {
         `${sofreBaseUrl}/access/localdb/${process.env.COMPLEX_ID}`,
         {
           headers: {
-            apiKey: process.env.COMPLEX_TOKEN,
+            "api-key": process.env.COMPLEX_TOKEN,
           },
         }
       )
     );
-    console.log(res);
-    return res;
     for await (const record of res.data) {
-      const modifiedResponse = res.data.map((item) => ({
-        ...item,
-        _id: toObjectId(item._id),
-        user: toObjectId(item.user),
-        complex: toObjectId(item.complex),
-      }));
-      await this.model.updateMany(
-        { _id: record._id },
+      const modifiedResponse = {
+        ...record,
+        _id: toObjectId(record._id),
+        user: toObjectId(record.user),
+        complex: toObjectId(record.complex),
+      };
+      await this.model.updateOne(
+        { _id: modifiedResponse._id },
         { $set: modifiedResponse },
         { upsert: true }
       );

@@ -76,7 +76,7 @@ export class UserService {
           `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}/${page}`,
           {
             headers: {
-              apiKey: process.env.COMPLEX_TOKEN,
+              "api-key": process.env.COMPLEX_TOKEN,
             },
           }
         )
