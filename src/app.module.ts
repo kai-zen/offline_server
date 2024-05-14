@@ -22,7 +22,6 @@ import { JwtModule } from "@nestjs/jwt";
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",
-      ignoreEnvFile: true,
     }),
     MongooseModule.forRoot(process.env.DB_CONNECTION_STRING),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
