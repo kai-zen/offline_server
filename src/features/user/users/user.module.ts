@@ -5,11 +5,12 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { UserController } from "./user.controller";
 import { UserSchema } from "./user.schema";
 import { UserService } from "./user.service";
+import { HttpModule } from "@nestjs/axios";
 
 const User = MongooseModule.forFeature([{ name: "user", schema: UserSchema }]);
 
 @Module({
-  imports: [User],
+  imports: [User, HttpModule],
   controllers: [UserController],
   providers: [UserService, JwtService],
   exports: [UserService],

@@ -15,6 +15,7 @@ import AccessModule from "src/features/user/access/access.module";
 import CashBankModule from "src/features/complex/cash-bank/cash-bank.module";
 import ComplexUserAddressModule from "src/features/complex/user-address/user-address.module";
 import { OrderStatsService } from "./service/order-stats.service";
+import { HttpModule } from "@nestjs/axios";
 
 const Order = MongooseModule.forFeature([
   { name: "order", schema: OrderSchema },
@@ -31,6 +32,7 @@ const Order = MongooseModule.forFeature([
     AccessModule,
     ComplexUserAddressModule,
     forwardRef(() => CashBankModule),
+    HttpModule,
   ],
   controllers: [OrderController],
   providers: [

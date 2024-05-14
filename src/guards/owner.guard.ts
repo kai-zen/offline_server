@@ -15,7 +15,6 @@ export class IsOwnerGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const user = request.currentUser;
-    if (user && user.access_level > 1) return true;
     const complexId =
       request.body?.complex_id ||
       request.query?.complex_id ||

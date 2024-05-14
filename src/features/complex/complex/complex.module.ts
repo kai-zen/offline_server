@@ -3,6 +3,7 @@ import { ComplexService } from "./comlex.service";
 import { ComplexSchema } from "./complex.schema";
 import { Global, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+import { HttpModule } from "@nestjs/axios";
 
 const Complex = MongooseModule.forFeature([
   { name: "complex", schema: ComplexSchema },
@@ -10,7 +11,7 @@ const Complex = MongooseModule.forFeature([
 
 @Global()
 @Module({
-  imports: [Complex],
+  imports: [Complex, HttpModule],
   controllers: [ComplexController],
   providers: [ComplexService],
   exports: [ComplexService],

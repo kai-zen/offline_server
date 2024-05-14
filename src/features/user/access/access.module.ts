@@ -1,3 +1,4 @@
+import { HttpModule } from "@nestjs/axios";
 import { AccessController } from "./access.controller";
 import { AccessSchema } from "./access.schema";
 import { AccessService } from "./access.service";
@@ -10,7 +11,7 @@ const Access = MongooseModule.forFeature([
 
 @Global()
 @Module({
-  imports: [Access],
+  imports: [Access, HttpModule],
   controllers: [AccessController],
   providers: [AccessService],
   exports: [AccessService],

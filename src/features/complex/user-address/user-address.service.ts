@@ -4,7 +4,6 @@ import { Model } from "mongoose";
 import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { toObjectId } from "src/helpers/functions";
 import { Injectable } from "@nestjs/common";
-import { ComplexUsersFetchService } from "src/features/complex/users/complex-user.service";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
@@ -18,7 +17,6 @@ export class ComplexUserAddressService {
     private readonly model: Model<ComplexUserAddress>,
     private readonly userService: UserService,
     private readonly shippingRangeService: ShippingRangeService,
-    private readonly complexUserService: ComplexUsersFetchService,
     private readonly httpService: HttpService
   ) {}
 
@@ -55,13 +53,6 @@ export class ComplexUserAddressService {
   async findByMobile(mobile: string, complexId: string) {
     const user = await this.userService.findByMobile(mobile);
 
-    const complexuser = user
-      ? await this.complexUserService.findByUserAndComplexBrief(
-          user._id.toString(),
-          complexId
-        )
-      : null;
-
     const results = user
       ? await this.model
           .find({ user: user._id, complex: toObjectId(complexId) })
@@ -76,11 +67,6 @@ export class ComplexUserAddressService {
         mobile,
         username: user?.username || "",
         _id: user?._id,
-        ...(complexuser || {
-          orders_quantity: 0,
-          total_rates: 0,
-          avg_rate: 0,
-        }),
       },
     };
   }

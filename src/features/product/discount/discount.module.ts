@@ -1,3 +1,4 @@
+import { HttpModule } from "@nestjs/axios";
 import { DiscountController } from "./discount.controller";
 import { DiscountSchema } from "./discount.schema";
 import { DiscountService } from "./discount.service";
@@ -9,7 +10,7 @@ const Discount = MongooseModule.forFeature([
 ]);
 
 @Module({
-  imports: [Discount],
+  imports: [Discount, HttpModule],
   controllers: [DiscountController],
   providers: [DiscountService],
   exports: [DiscountService],

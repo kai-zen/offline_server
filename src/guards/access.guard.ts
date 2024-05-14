@@ -20,7 +20,6 @@ export class HasAccessGuard implements CanActivate {
     const types = this.reflector.get<number[]>("types", context.getHandler());
     const request: Request = context.switchToHttp().getRequest();
     const user = request.currentUser;
-    if (user && user.access_level > 1) return true;
     const complexId =
       request.query.complexId ||
       request.body.complex_id ||
