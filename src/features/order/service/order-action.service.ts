@@ -1,6 +1,6 @@
 import { EventsGateway } from "src/websocket/events.gateway";
 import { InjectModel } from "@nestjs/mongoose";
-import { messages } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { OrderDocument } from "../order.schema";
 import { toObjectId } from "src/helpers/functions";
@@ -14,6 +14,8 @@ import {
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { AccessService } from "src/features/user/access/access.service";
+import { HttpService } from "@nestjs/axios";
+import { lastValueFrom } from "rxjs";
 
 @Injectable()
 export class OrderActionService {
@@ -23,7 +25,8 @@ export class OrderActionService {
     private readonly eventsGateway: EventsGateway,
     private readonly accessService: AccessService,
     @Inject(forwardRef(() => CashBankService))
-    private readonly cashBankService: CashBankService
+    private readonly cashBankService: CashBankService,
+    private readonly httpService: HttpService
   ) {}
 
   async findAndEdit(data: {
@@ -223,18 +226,36 @@ export class OrderActionService {
     return theRecord;
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_5AM, {
+  @Cron(CronExpression.EVERY_3_HOURS, {
     name: "complex-activation-cron",
     timeZone: "Asia/Tehran",
   })
   async handleCron() {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    await this.model
-      .deleteMany({
-        created_at: { $lte: sevenDaysAgo },
-        status: { $in: [1, 6, 7] },
+    const res = await lastValueFrom(
+      this.httpService.get(
+        `${sofreBaseUrl}/order/last-added/${process.env.COMPLEX_ID}`
+      )
+    );
+    const lastCreatedAt = new Date(res.data);
+    const newOrders = await this.model
+      .find({
+        created_at: { $gt: lastCreatedAt },
       })
+      .lean()
       .exec();
+
+    await this.httpService.post(
+      `${sofreBaseUrl}/order/last-added/${process.env.COMPLEX_ID}`,
+      {
+        complex_id: process.env.COMPLEX_ID,
+        orders: newOrders,
+      },
+      {
+        headers: {
+          apiKey: process.env.COMPLEX_TOKEN,
+        },
+      }
+    );
+    return "success";
   }
 }
