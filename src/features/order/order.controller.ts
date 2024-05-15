@@ -1,6 +1,5 @@
 import { CreateOrderDto } from "./dto/create.dto";
 import { EditOrderDto } from "./dto/edit.dto";
-import { IsLoggedInGuard } from "src/guards/auth.guard";
 import { OrderActionService } from "./service/order-action.service";
 import { OrderFetchService } from "./service/order-fetch.service";
 import { Request } from "express";
@@ -14,7 +13,6 @@ import {
   Put,
   Query,
   Req,
-  UseGuards,
 } from "@nestjs/common";
 import { OrderCreateService } from "./service/order-create.service";
 import { messages } from "src/helpers/constants";
@@ -26,7 +24,6 @@ import { RemoveItemFromOrderDto } from "./dto/remove-item.dto";
 import { OrderStatsService } from "./service/order-stats.service";
 
 @Controller("orders")
-@UseGuards(IsLoggedInGuard)
 export class OrderController {
   constructor(
     private actionService: OrderActionService,
