@@ -1,6 +1,5 @@
 import { ComplexService } from "./comlex.service";
-import { IsOwnerGuard } from "src/guards/owner.guard";
-import { Controller, Get, Put, UseGuards } from "@nestjs/common";
+import { Controller, Get, Put } from "@nestjs/common";
 
 @Controller("complex")
 export class ComplexController {
@@ -12,7 +11,6 @@ export class ComplexController {
   }
 
   @Put()
-  @UseGuards(IsOwnerGuard)
   async updateData() {
     return await this.service.updateData();
   }

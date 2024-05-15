@@ -1,8 +1,6 @@
 import { IsLoggedInGuard } from "src/guards/auth.guard";
 import { ComplexUserAddressService } from "./user-address.service";
 import { Controller, Get, Param, UseGuards } from "@nestjs/common";
-import { AccessLevel } from "src/helpers/decorators";
-import { HasAccessGuard } from "src/guards/access.guard";
 
 @Controller("complex-user-address")
 export class ComplexUserAddressController {
@@ -18,8 +16,6 @@ export class ComplexUserAddressController {
   }
 
   @Get("/mobile/:complexId/:mobileNumber")
-  @AccessLevel([1, 2, 4, 5, 7])
-  @UseGuards(HasAccessGuard)
   async findUserRecordsWithMobile(
     @Param("mobileNumber") mobileNumber: string,
     @Param("complexId") complexId: string

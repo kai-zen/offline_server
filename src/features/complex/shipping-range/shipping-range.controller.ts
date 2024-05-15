@@ -1,7 +1,5 @@
-import { AccessLevel } from "src/helpers/decorators";
 import { ShippingRangeService } from "./shipping-range.service";
-import { Controller, Get, Put, UseGuards } from "@nestjs/common";
-import { HasAccessGuard } from "src/guards/access.guard";
+import { Controller, Get, Put } from "@nestjs/common";
 
 @Controller("shipping-range")
 export class ShippingRangeController {
@@ -13,8 +11,6 @@ export class ShippingRangeController {
   }
 
   @Put()
-  @AccessLevel([1, 2])
-  @UseGuards(HasAccessGuard)
   async updateData() {
     return await this.service.updateData();
   }

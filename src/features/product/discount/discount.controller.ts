@@ -1,7 +1,5 @@
 import { DiscountService } from "./discount.service";
-import { Controller, Get, Put, UseGuards } from "@nestjs/common";
-import { AccessLevel } from "src/helpers/decorators";
-import { HasAccessGuard } from "src/guards/access.guard";
+import { Controller, Get, Put } from "@nestjs/common";
 
 @Controller("discount")
 export class DiscountController {
@@ -13,8 +11,6 @@ export class DiscountController {
   }
 
   @Put()
-  @AccessLevel([1, 2])
-  @UseGuards(HasAccessGuard)
   async updateData() {
     return await this.service.updateData();
   }
