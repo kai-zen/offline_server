@@ -21,12 +21,15 @@ export class EventsGateway {
 
   async handleConnection() {
     this.server.on("connection", async (socket) => {
-      const { token, complex_id, order_id } = socket.handshake.query;
-      if (token) {
+      const { localToken, complex_id } = socket.handshake.query;
+      if (localToken) {
         if (complex_id) {
-          const tokenData = await this.jwtService.verifyAsync(token as string, {
-            secret: process.env.JWT_SECRET,
-          });
+          const tokenData = await this.jwtService.verifyAsync(
+            localToken as string,
+            {
+              secret: "BQR0yzn6vMN1auL7gTimEf",
+            }
+          );
           const theAccess = await this.accessService.hasAccess(
             tokenData._id,
             complex_id as string,
@@ -37,7 +40,7 @@ export class EventsGateway {
             if ([1, 2, 5, 6].includes(theAccess.type))
               socket.join(`waiter-${complex_id}`);
           }
-        } else if (order_id) socket.join(`order-${order_id}`);
+        }
       }
     });
   }

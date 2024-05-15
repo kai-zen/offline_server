@@ -15,7 +15,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import CashBankModule from "./features/complex/cash-bank/cash-bank.module";
 import ComplexUserAddressModule from "./features/complex/user-address/user-address.module";
 import ProductFolderModule from "./features/product/folders/folder.module";
-import { JwtModule } from "@nestjs/jwt";
+import { JwtModule, JwtService } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -47,6 +47,6 @@ import { JwtModule } from "@nestjs/jwt";
     // websocket
     EventsModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }, JwtService],
 })
 export class AppModule {}

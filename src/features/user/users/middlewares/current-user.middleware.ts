@@ -24,7 +24,8 @@ export class CurrentUserMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, _res: Response, next: NextFunction) {
-    const [type, token] = req.headers.authorization?.split(" ") || [];
+    const [type, token] =
+      (req.headers.localauthorization as string)?.split(" ") || [];
     if (type === "Bearer") {
       try {
         const tokenData = await this.jwtService.verifyAsync(token, {
