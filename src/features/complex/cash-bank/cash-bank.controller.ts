@@ -10,6 +10,11 @@ export class CashBankController {
     return await this.service.findAll();
   }
 
+  @Get("/:complexId")
+  async findBranchRanges() {
+    return await this.service.findByComplex();
+  }
+
   @Put()
   async updateData() {
     return await this.service.updateData();

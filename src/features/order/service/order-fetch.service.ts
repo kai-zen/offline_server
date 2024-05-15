@@ -11,13 +11,6 @@ import { OrderDocument } from "../order.schema";
 import { productDataFormatter } from "../helpers/functions";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
-import { toObjectId } from "src/helpers/functions";
-import {
-  userOrderGroup,
-  userOrderCommentsLookup,
-  userOrderProject,
-  userOrderComplexLookup,
-} from "../helpers/aggregate-constants";
 import { messages } from "src/helpers/constants";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 
@@ -31,28 +24,6 @@ export class OrderFetchService {
     @Inject(forwardRef(() => CashBankService))
     private readonly cashbankService: CashBankService
   ) {}
-
-  async findAll(queryParams: { [props: string]: string }) {
-    const { limit = "12", page = "1" } = queryParams || {};
-    const results = await this.model
-      .find()
-      .sort({ created_at: -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit))
-      .populate("products.product")
-      .populate("complex")
-      .populate("user")
-      .lean()
-      .exec();
-
-    const totalDocuments = await this.model.find().countDocuments().exec();
-    const numberOfPages = Math.ceil(totalDocuments / parseInt(limit));
-
-    return {
-      items: productDataFormatter(results),
-      numberOfPages,
-    };
-  }
 
   async findComplexOrders(
     complex_id: string,
@@ -186,63 +157,5 @@ export class OrderFetchService {
       .lean()
       .exec();
     return productDataFormatter(results);
-  }
-
-  async findUserOrders(
-    queryParams: { [props: string]: string },
-    complex_id?: string
-  ) {
-    const { limit, page = "1" } = queryParams || {};
-    const applyingLimit = parseInt(limit) || 12;
-    const userId = this.req.currentUser._id;
-
-    const filters = complex_id
-      ? { $and: [{ user: userId }, { complex: toObjectId(complex_id) }] }
-      : { user: userId };
-
-    const [queryResult] =
-      (await this.model.aggregate([
-        { $match: filters },
-        { $unwind: "$products" },
-        {
-          $lookup: {
-            from: "products",
-            localField: "products.product",
-            foreignField: "_id",
-            as: "product_details",
-          },
-        },
-        { $unwind: "$product_details" },
-        { $project: userOrderProject },
-        { $group: userOrderGroup },
-        { $lookup: userOrderComplexLookup },
-        { $unwind: "$complex" },
-        { $lookup: userOrderCommentsLookup },
-        { $unwind: { path: "$comment", preserveNullAndEmptyArrays: true } },
-        { $sort: { created_at: -1 } },
-        {
-          $facet: {
-            results: [
-              { $skip: (parseInt(page) - 1) * applyingLimit },
-              { $limit: applyingLimit },
-            ],
-            totalDocuments: [{ $count: "count" }],
-          },
-        },
-      ])) || [];
-    if (!queryResult) throw new NotFoundException();
-    const { results, totalDocuments } = queryResult;
-    const numberOfPages = Math.ceil(totalDocuments?.[0]?.count / applyingLimit);
-
-    return { items: results, numberOfPages };
-  }
-
-  async findById(id: string) {
-    return await this.model
-      .findById(id)
-      .populate("products.product")
-      .populate("complex")
-      .populate("user")
-      .exec();
   }
 }

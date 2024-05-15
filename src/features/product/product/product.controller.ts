@@ -10,6 +10,11 @@ export class ProductController {
     return await this.service.findAll();
   }
 
+  @Get("/complex/:complexId")
+  async findComplexProducts() {
+    return await this.service.findComplexProducts();
+  }
+
   @Put()
   async updateData() {
     return await this.service.updateData();

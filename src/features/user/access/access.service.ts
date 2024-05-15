@@ -1,8 +1,8 @@
-import { Model, Types } from "mongoose";
+import { Model, PipelineStage, Types } from "mongoose";
 import { AccessDocument } from "./access.schema";
 import { InjectModel } from "@nestjs/mongoose";
-import { Injectable } from "@nestjs/common";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
@@ -14,6 +14,66 @@ export class AccessService {
     private readonly model: Model<AccessDocument>,
     private readonly httpService: HttpService
   ) {}
+
+  async findAll(queryParams: { [props: string]: string }) {
+    const {
+      limit = "8",
+      page = "1",
+      sort,
+      direction = "asc",
+      search = "",
+      type,
+    } = queryParams || {};
+
+    const searchRegex = new RegExp(`^${search}`, "i");
+    const applyingLimit = parseInt(limit) || 12;
+
+    const filters = {
+      $and: [
+        { type: type ? parseInt(type) : { $lte: 10 } },
+        {
+          $or: [{ "user.mobile": searchRegex }, { "user.name": searchRegex }],
+        },
+      ],
+    };
+    const aggregateQuery: PipelineStage[] = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      { $match: filters },
+      {
+        $facet: {
+          results: [
+            { $skip: (parseInt(page) - 1) * applyingLimit },
+            { $limit: applyingLimit },
+          ],
+          totalDocuments: [{ $count: "count" }],
+        },
+      },
+    ];
+
+    const sortObj: { [properties: string]: 1 | -1 } = {};
+    if (sort) {
+      sortObj[sort] = direction === "asc" ? -1 : 1;
+      aggregateQuery.push({ $sort: sortObj });
+    }
+
+    const [queryResult] =
+      (await this.model.aggregate(aggregateQuery).exec()) || [];
+    if (!queryResult) throw new NotFoundException(messages[404]);
+    const { results, totalDocuments } = queryResult;
+    const numberOfPages = Math.ceil(
+      (totalDocuments?.[0]?.count || 1) / applyingLimit
+    );
+
+    return { items: results, numberOfPages };
+  }
 
   async updateData() {
     const res = await lastValueFrom(

@@ -1,7 +1,5 @@
-import { AccessLevel } from "src/helpers/decorators";
 import { CreateOrderDto } from "./dto/create.dto";
 import { EditOrderDto } from "./dto/edit.dto";
-import { HasAccessGuard } from "src/guards/access.guard";
 import { IsLoggedInGuard } from "src/guards/auth.guard";
 import { OrderActionService } from "./service/order-action.service";
 import { OrderFetchService } from "./service/order-fetch.service";
@@ -37,31 +35,12 @@ export class OrderController {
     private readonly statsService: OrderStatsService
   ) {}
 
-  @Get("/user")
-  @UseGuards(IsLoggedInGuard)
-  async findUserOrders(@Query() queryParams: { [props: string]: string }) {
-    return await this.fetchService.findUserOrders(queryParams);
-  }
-
-  @Get("/user/complex/:complexId")
-  @UseGuards(IsLoggedInGuard)
-  async findUserComplexOrders(
-    @Query() queryParams: { [props: string]: string },
-    @Param("complexId") complexId: string
-  ) {
-    return await this.fetchService.findUserOrders(queryParams, complexId);
-  }
-
   @Get("/complex/live/:complexId")
-  @AccessLevel([1, 2, 3, 4, 5, 6, 7, 8, 9])
-  @UseGuards(HasAccessGuard)
   async findComplexLiveOrders(@Param("complexId") complexId: string) {
     return await this.fetchService.findComplexLiveOrders(complexId);
   }
 
   @Get("/complex/cash-bank/:complexId/:cashbankId")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async findCashbankOrders(
     @Query() queryParams: { [props: string]: string },
     @Param("complexId") complexId: string,
@@ -75,8 +54,6 @@ export class OrderController {
   }
 
   @Get("/complex/:complexId")
-  @AccessLevel([1, 2])
-  @UseGuards(HasAccessGuard)
   async findComplexOrders(
     @Query() queryParams: { [props: string]: string },
     @Param("complexId") complexId: string
@@ -88,39 +65,7 @@ export class OrderController {
     return theRecord;
   }
 
-  @Get("/complex/:complexId/stats/today")
-  @AccessLevel([1, 2])
-  @UseGuards(HasAccessGuard)
-  async getTodayStats(@Param("complexId") complexId: string) {
-    return await this.statsService.todayStats(complexId);
-  }
-
-  @Get("/complex/:complexId/quantity/past-days/:day")
-  @AccessLevel([1, 2])
-  @UseGuards(HasAccessGuard)
-  async getPastDaysQuantities(
-    @Param("complexId") complexId: string,
-    @Param("day") day: string
-  ) {
-    return await this.statsService.pastDaysQuantity(
-      complexId,
-      Number(day) || 7
-    );
-  }
-
-  @Get("/complex/:complexId/stats/past-days/:day")
-  @AccessLevel([1, 2])
-  @UseGuards(HasAccessGuard)
-  async getPastDaysStats(
-    @Param("complexId") complexId: string,
-    @Param("day") day: string
-  ) {
-    return await this.statsService.pastDaysStats(complexId, Number(day) || 7);
-  }
-
   @Get("/complex/:complexId/stats/finance")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async financeStats(
     @Param("complexId") complexId: string,
     @Query() queryParams: { [props: string]: string }
@@ -135,24 +80,13 @@ export class OrderController {
     });
   }
 
-  @Get("/:complexId/:id")
-  @AccessLevel([1, 2])
-  @UseGuards(HasAccessGuard)
-  async findById(@Param("id") recordId: string) {
-    return await this.fetchService.findById(recordId);
-  }
-
   // this route is for create order by complex employee
   @Post("/employee")
-  @AccessLevel([1, 2, 4, 5, 7, 8])
-  @UseGuards(HasAccessGuard)
   async createOrderByEmployee(@Body() body: CreateOrderDto) {
     return await this.createService.createByEmployee(body);
   }
 
   @Put("/employee/add/:id")
-  @AccessLevel([1, 2, 4, 5, 7, 8])
-  @UseGuards(HasAccessGuard)
   async addItemsToOrderByEmployee(
     @Param("id") recordId: string,
     @Body() body: AddItemToOrderDto
@@ -164,8 +98,6 @@ export class OrderController {
   }
 
   @Put("/edit-address/:id")
-  @AccessLevel([1, 2, 4])
-  @UseGuards(HasAccessGuard)
   async editAddress(
     @Param("id") recordId: string,
     @Body() body: EditAddressDto
@@ -177,7 +109,6 @@ export class OrderController {
   }
 
   @Put("/edit-delivery/:id")
-  @AccessLevel([1, 2, 4, 7])
   async editDelivery(
     @Param("id") recordId: string,
     @Body() body: EditDeliveryDto
@@ -189,8 +120,6 @@ export class OrderController {
   }
 
   @Put("/edit-prices/:id")
-  @AccessLevel([1, 2, 4])
-  @UseGuards(HasAccessGuard)
   async editPrices(@Param("id") recordId: string, @Body() body: EditPriceDto) {
     return await this.actionService.editPrices({
       new_values: body,
@@ -199,7 +128,6 @@ export class OrderController {
   }
 
   @Put("/remove-item/:id")
-  @AccessLevel([1, 2, 4])
   async removeItem(
     @Param("id") recordId: string,
     @Body() body: RemoveItemFromOrderDto
@@ -211,8 +139,6 @@ export class OrderController {
   }
 
   @Put("/:complexId/:id")
-  @AccessLevel([1, 2, 3, 4, 5, 6, 7, 8, 9])
-  @UseGuards(HasAccessGuard)
   async editOrder(
     @Req() req: Request,
     @Param("id") recordId: string,

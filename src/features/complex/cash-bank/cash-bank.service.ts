@@ -19,6 +19,10 @@ export class CashBankService {
     return await this.model.find().exec();
   }
 
+  async findByComplex() {
+    return await this.model.find().select("-complex").exec();
+  }
+
   async findById(id: string) {
     return await this.model.findById(id);
   }

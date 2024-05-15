@@ -5,7 +5,7 @@ import { Controller, Get, Put } from "@nestjs/common";
 export class ComplexController {
   constructor(private readonly service: ComplexService) {}
 
-  @Get()
+  @Get("/:complexId")
   async find() {
     return await this.service.findTheComplex();
   }

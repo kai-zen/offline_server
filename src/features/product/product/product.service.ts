@@ -38,6 +38,26 @@ export class ProductService {
     return productsWithDiscount;
   }
 
+  async findComplexProducts() {
+    const results = await this.model
+      .find()
+      .populate(
+        "complex",
+        "image name min_online_ordering_price packing tax service"
+      )
+      .populate("folder")
+      .lean()
+      .exec();
+
+    // add discount to products
+    const currentDiscounts = await this.discountService.findAll();
+    const productsWithDiscount = addDiscountToProducts(
+      results,
+      currentDiscounts
+    );
+    return productsWithDiscount;
+  }
+
   async findById(id: string) {
     return await this.model
       .findById(id)
