@@ -104,3 +104,5 @@ export const schemaConfig = {
 };
 
 export const sofreBaseUrl = "https://api.sofre.app";
+
+export const timeoutInMiliseconds = 400_000; // 400 seconds
