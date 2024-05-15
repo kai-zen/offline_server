@@ -4,7 +4,6 @@ import { InjectModel } from "@nestjs/mongoose";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { ShippingRange } from "./shipping-range.schema";
-import { Cron, CronExpression } from "@nestjs/schedule";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { ComplexService } from "../complex/comlex.service";
@@ -71,13 +70,5 @@ export class ShippingRangeService {
         { upsert: true }
       );
     }
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_4AM, {
-    name: "ranges-update-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
-    await this.updateData();
   }
 }

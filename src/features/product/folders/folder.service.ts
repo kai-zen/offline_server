@@ -6,7 +6,6 @@ import { toObjectId } from "src/helpers/functions";
 import { Injectable } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
-import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class ProductFolderService {
@@ -43,13 +42,5 @@ export class ProductFolderService {
         { upsert: true }
       );
     }
-  }
-
-  @Cron(CronExpression.EVERY_8_HOURS, {
-    name: "folders-update-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
-    await this.updateData();
   }
 }

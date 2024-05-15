@@ -1,4 +1,3 @@
-import { Cron, CronExpression } from "@nestjs/schedule";
 import { DiscountDocument } from "./discount.schema";
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
@@ -53,13 +52,5 @@ export class DiscountService {
         { upsert: true }
       );
     }
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_11AM, {
-    name: "discounts-update-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
-    await this.updateData();
   }
 }

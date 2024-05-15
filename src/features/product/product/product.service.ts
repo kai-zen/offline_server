@@ -8,7 +8,6 @@ import { lastValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
-import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class ProductService {
@@ -83,14 +82,6 @@ export class ProductService {
         { upsert: true }
       );
     }
-  }
-
-  @Cron(CronExpression.EVERY_8_HOURS, {
-    name: "products-update-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
-    await this.updateData();
   }
 }
 
