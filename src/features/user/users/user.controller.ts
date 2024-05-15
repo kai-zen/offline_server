@@ -1,5 +1,5 @@
 import { UserService } from "./user.service";
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import { Controller, Get, Param, Put, Query } from "@nestjs/common";
 
 @Controller("user")
 export class UserController {
@@ -13,5 +13,10 @@ export class UserController {
   @Get("/:id")
   async findById(@Param("id") complexId: string) {
     return await this.service.findById(complexId);
+  }
+
+  @Put()
+  async updateData() {
+    return await this.service.updateData();
   }
 }

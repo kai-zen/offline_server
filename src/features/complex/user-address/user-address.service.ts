@@ -8,7 +8,6 @@ import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
-import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -100,13 +99,5 @@ export class ComplexUserAddressService {
         ++page;
       } else hasMore = false;
     }
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
-    name: "ranges-update-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
-    await this.updateData();
   }
 }

@@ -6,7 +6,6 @@ import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { toObjectId } from "src/helpers/functions";
-import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class UserService {
@@ -81,7 +80,7 @@ export class UserService {
           }
         )
       );
-      if (res.data && res.data.length > 0) {
+      if (res?.data?.length > 0) {
         for await (const record of res.data) {
           await this.model.updateMany(
             { _id: toObjectId(record._id) },
@@ -92,13 +91,5 @@ export class UserService {
         ++page;
       } else hasMore = false;
     }
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_1AM, {
-    name: "ranges-update-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
-    await this.updateData();
   }
 }

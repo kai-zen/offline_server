@@ -1,6 +1,6 @@
 import { IsLoggedInGuard } from "src/guards/auth.guard";
 import { ComplexUserAddressService } from "./user-address.service";
-import { Controller, Get, Param, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Put, UseGuards } from "@nestjs/common";
 
 @Controller("complex-user-address")
 export class ComplexUserAddressController {
@@ -21,5 +21,10 @@ export class ComplexUserAddressController {
     @Param("complexId") complexId: string
   ) {
     return await this.service.findByMobile(mobileNumber, complexId);
+  }
+
+  @Put()
+  async updateData() {
+    return await this.service.updateData();
   }
 }
