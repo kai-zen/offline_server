@@ -66,21 +66,19 @@ export class ProductService {
       )
     );
     for await (const record of res.data) {
-      const modifiedResponse = res.data.map((item) => {
-        const pricesObjectIds = item.prices.map((p) => ({
-          ...p,
-          _id: toObjectId(p._id),
-        }));
-        return {
-          ...item,
-          prices: pricesObjectIds,
-          folder: toObjectId(item.folder),
-          _id: toObjectId(item._id),
-          complex: toObjectId(item.complex),
-        };
-      });
+      const pricesObjectIds = record.prices.map((p) => ({
+        ...p,
+        _id: toObjectId(p._id),
+      }));
+      const modifiedResponse = {
+        ...record,
+        prices: pricesObjectIds,
+        folder: toObjectId(record.folder),
+        _id: toObjectId(record._id),
+        complex: toObjectId(record.complex),
+      };
       await this.model.updateMany(
-        { _id: record._id },
+        { _id: modifiedResponse._id },
         { $set: modifiedResponse },
         { upsert: true }
       );

@@ -32,13 +32,11 @@ export class ProductFolderService {
       )
     );
     for await (const record of res.data) {
-      const modifiedResponse = res.data.map((item) => {
-        return {
-          ...item,
-          _id: toObjectId(item._id),
-          complex: toObjectId(item.complex),
-        };
-      });
+      const modifiedResponse = {
+        ...record,
+        _id: toObjectId(record._id),
+        complex: toObjectId(record.complex),
+      };
       await this.model.updateMany(
         { _id: record._id },
         { $set: modifiedResponse },
