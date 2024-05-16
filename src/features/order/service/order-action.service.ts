@@ -226,7 +226,7 @@ export class OrderActionService {
     return theRecord;
   }
 
-  @Cron(CronExpression.EVERY_3_HOURS, {
+  @Cron(CronExpression.EVERY_2_HOURS, {
     name: "complex-activation-cron",
     timeZone: "Asia/Tehran",
   })
@@ -240,21 +240,24 @@ export class OrderActionService {
     const newOrders = await this.model
       .find({
         created_at: { $gt: lastCreatedAt },
+        stauts: 5,
       })
       .lean()
       .exec();
 
-    await this.httpService.post(
-      `${sofreBaseUrl}/order/last-added/${process.env.COMPLEX_ID}`,
-      {
-        complex_id: process.env.COMPLEX_ID,
-        orders: newOrders,
-      },
-      {
-        headers: {
-          "api-key": process.env.COMPLEX_TOKEN,
+    await lastValueFrom(
+      this.httpService.post(
+        `${sofreBaseUrl}/order/last-added/${process.env.COMPLEX_ID}`,
+        {
+          complex_id: process.env.COMPLEX_ID,
+          orders: newOrders,
         },
-      }
+        {
+          headers: {
+            "api-key": process.env.COMPLEX_TOKEN,
+          },
+        }
+      )
     );
     return "success";
   }

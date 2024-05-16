@@ -13,6 +13,7 @@ import {
   Put,
   Query,
   Req,
+  UseGuards,
 } from "@nestjs/common";
 import { OrderCreateService } from "./service/order-create.service";
 import { messages } from "src/helpers/constants";
@@ -22,6 +23,8 @@ import { EditPriceDto } from "./dto/edit-price.dto";
 import { EditDeliveryDto } from "./dto/edit-delivery.dto";
 import { RemoveItemFromOrderDto } from "./dto/remove-item.dto";
 import { OrderStatsService } from "./service/order-stats.service";
+import { HasAccessGuard } from "src/guards/access.guard";
+import { AccessLevel } from "src/helpers/decorators";
 
 @Controller("orders")
 export class OrderController {
@@ -38,6 +41,8 @@ export class OrderController {
   }
 
   @Get("/complex/cash-bank/:complexId/:cashbankId")
+  @AccessLevel([1, 2, 3, 4])
+  @UseGuards(HasAccessGuard)
   async findCashbankOrders(
     @Query() queryParams: { [props: string]: string },
     @Param("complexId") complexId: string,
@@ -79,11 +84,15 @@ export class OrderController {
 
   // this route is for create order by complex employee
   @Post("/employee")
+  @AccessLevel([1, 2, 3, 4, 5, 6, 7, 8])
+  @UseGuards(HasAccessGuard)
   async createOrderByEmployee(@Body() body: CreateOrderDto) {
     return await this.createService.createByEmployee(body);
   }
 
   @Put("/employee/add/:id")
+  @AccessLevel([1, 2, 3, 4])
+  @UseGuards(HasAccessGuard)
   async addItemsToOrderByEmployee(
     @Param("id") recordId: string,
     @Body() body: AddItemToOrderDto
@@ -95,6 +104,8 @@ export class OrderController {
   }
 
   @Put("/edit-address/:id")
+  @AccessLevel([1, 2, 3, 4])
+  @UseGuards(HasAccessGuard)
   async editAddress(
     @Param("id") recordId: string,
     @Body() body: EditAddressDto
@@ -106,6 +117,8 @@ export class OrderController {
   }
 
   @Put("/edit-delivery/:id")
+  @AccessLevel([1, 2, 3, 4])
+  @UseGuards(HasAccessGuard)
   async editDelivery(
     @Param("id") recordId: string,
     @Body() body: EditDeliveryDto
@@ -117,6 +130,8 @@ export class OrderController {
   }
 
   @Put("/edit-prices/:id")
+  @AccessLevel([1, 2, 4])
+  @UseGuards(HasAccessGuard)
   async editPrices(@Param("id") recordId: string, @Body() body: EditPriceDto) {
     return await this.actionService.editPrices({
       new_values: body,
@@ -125,6 +140,8 @@ export class OrderController {
   }
 
   @Put("/remove-item/:id")
+  @AccessLevel([1, 2, 4])
+  @UseGuards(HasAccessGuard)
   async removeItem(
     @Param("id") recordId: string,
     @Body() body: RemoveItemFromOrderDto
@@ -136,6 +153,8 @@ export class OrderController {
   }
 
   @Put("/:complexId/:id")
+  @AccessLevel([1, 2, 3, 4])
+  @UseGuards(HasAccessGuard)
   async editOrder(
     @Req() req: Request,
     @Param("id") recordId: string,
