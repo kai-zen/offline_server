@@ -226,11 +226,7 @@ export class OrderActionService {
     return theRecord;
   }
 
-  @Cron(CronExpression.EVERY_2_HOURS, {
-    name: "complex-activation-cron",
-    timeZone: "Asia/Tehran",
-  })
-  async handleCron() {
+  async uploadOrders() {
     const res = await lastValueFrom(
       this.httpService.get(
         `${sofreBaseUrl}/order/last-added/${process.env.COMPLEX_ID}`
@@ -244,7 +240,6 @@ export class OrderActionService {
       })
       .lean()
       .exec();
-
     await lastValueFrom(
       this.httpService.post(
         `${sofreBaseUrl}/order/last-added/${process.env.COMPLEX_ID}`,
@@ -260,5 +255,13 @@ export class OrderActionService {
       )
     );
     return "success";
+  }
+
+  @Cron(CronExpression.EVERY_2_HOURS, {
+    name: "complex-activation-cron",
+    timeZone: "Asia/Tehran",
+  })
+  async handleCron() {
+    await this.uploadOrders();
   }
 }
