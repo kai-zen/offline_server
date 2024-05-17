@@ -34,23 +34,20 @@ export class DiscountService {
         }
       )
     );
-    for await (const record of res.data) {
+    await this.model.deleteMany({});
+    const modifiedResults = (res.data || []).map((record) => {
       const productsObjectIds = (record.products || []).map((p) =>
         toObjectId(p)
       );
       const foldersObjectIds = (record.folders || []).map((f) => toObjectId(f));
-      const modifiedResponse = {
+      return {
         ...record,
         products: productsObjectIds || [],
         folders: foldersObjectIds || [],
         _id: toObjectId(record._id),
         complex: toObjectId(record.complex),
       };
-      await this.model.updateMany(
-        { _id: modifiedResponse._id },
-        { $set: modifiedResponse },
-        { upsert: true }
-      );
-    }
+    });
+    await this.model.insertMany(modifiedResults);
   }
 }

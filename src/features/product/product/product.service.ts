@@ -84,24 +84,21 @@ export class ProductService {
         }
       )
     );
-    for await (const record of res.data) {
+    await this.model.deleteMany({});
+    const modifiedResults = (res.data || []).map((record) => {
       const pricesObjectIds = record.prices.map((p) => ({
         ...p,
         _id: toObjectId(p._id),
       }));
-      const modifiedResponse = {
+      return {
         ...record,
         prices: pricesObjectIds,
         folder: toObjectId(record.folder),
         _id: toObjectId(record._id),
         complex: toObjectId(record.complex),
       };
-      await this.model.updateMany(
-        { _id: modifiedResponse._id },
-        { $set: modifiedResponse },
-        { upsert: true }
-      );
-    }
+    });
+    await this.model.insertMany(modifiedResults);
   }
 }
 

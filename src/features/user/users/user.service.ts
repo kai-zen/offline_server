@@ -82,7 +82,7 @@ export class UserService {
       );
       if (res?.data?.length > 0) {
         for await (const record of res.data) {
-          await this.model.updateMany(
+          await this.model.updateOne(
             { _id: toObjectId(record._id) },
             { $set: record },
             { upsert: true }
