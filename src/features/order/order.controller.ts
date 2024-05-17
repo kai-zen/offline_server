@@ -86,7 +86,7 @@ export class OrderController {
   @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
   async uploadOrders() {
-    return await this.actionService.handleCron();
+    return await this.actionService.uploadOrders();
   }
 
   // this route is for create order by complex employee

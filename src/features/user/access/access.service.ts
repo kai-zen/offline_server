@@ -96,14 +96,9 @@ export class AccessService {
     await this.model.insertMany(modifiedResults);
   }
 
-  async hasAccess(
-    user_id: string | Types.ObjectId,
-    complex_id: string,
-    types: number[]
-  ) {
+  async hasAccess(user_id: string | Types.ObjectId, types: number[]) {
     return await this.model.findOne({
       user: user_id,
-      complex: complex_id,
       type: { $in: types },
     });
   }
