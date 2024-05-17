@@ -10,6 +10,10 @@ export class UserController {
     return await this.service.findAll(queryParams);
   }
 
+  @Get("/is-running") isServerRunning() {
+    return true;
+  }
+
   @Get("/:id")
   async findById(@Param("id") complexId: string) {
     return await this.service.findById(complexId);
