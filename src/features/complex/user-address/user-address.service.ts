@@ -3,11 +3,11 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { toObjectId } from "src/helpers/functions";
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -68,6 +68,103 @@ export class ComplexUserAddressService {
         _id: user?._id,
       },
     };
+  }
+
+  async create(data: {
+    name: string;
+    description: string;
+    details: string;
+    latitude: number;
+    longitude: number;
+    complex_id: string;
+    user_id: string;
+  }) {
+    const {
+      name,
+      description,
+      latitude,
+      longitude,
+      user_id,
+      complex_id,
+      details,
+    } = data || {};
+
+    const newRecord = new this.model({
+      name,
+      description,
+      user: toObjectId(user_id),
+      complex: toObjectId(complex_id),
+      latitude,
+      longitude,
+      details,
+    });
+    return await newRecord.save();
+  }
+
+  async addByOrdering(data: {
+    address: {
+      name: string;
+      description: string;
+      latitude: number;
+      longitude: number;
+    };
+    complex_id: string;
+    user_id: string;
+  }) {
+    const { address, user_id, complex_id } = data;
+    const { name, description, latitude, longitude } = address || {};
+
+    const doesItExist = await this.model.exists({
+      description,
+      user: toObjectId(user_id),
+      complex: toObjectId(complex_id),
+    });
+    if (doesItExist) return;
+
+    const newRecord = new this.model({
+      name,
+      description,
+      user: toObjectId(user_id),
+      complex: toObjectId(complex_id),
+      latitude,
+      longitude,
+      details: "",
+    });
+    return await newRecord.save();
+  }
+
+  async findAndEdit(
+    id: string,
+    newData: {
+      name: string;
+      description: string;
+      details: string;
+      latitude: number;
+      longitude: number;
+      complex_id: string;
+    }
+  ) {
+    const { name, description, latitude, longitude, details, complex_id } =
+      newData || {};
+
+    const theRecord = await this.model.findOne({
+      _id: id,
+      complex: toObjectId(complex_id),
+    });
+    if (!theRecord) throw new NotFoundException(messages[404]);
+
+    theRecord.name = name;
+    theRecord.description = description;
+    theRecord.details = details;
+    theRecord.latitude = latitude;
+    theRecord.longitude = longitude;
+
+    return await theRecord.save();
+  }
+
+  async deleteOne(id: string) {
+    await this.model.deleteOne({ _id: id });
+    return "success";
   }
 
   async updateData() {
