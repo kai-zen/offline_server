@@ -3,11 +3,11 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { toObjectId } from "src/helpers/functions";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
-import { messages, sofreBaseUrl } from "src/helpers/constants";
+import { sofreBaseUrl } from "src/helpers/constants";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -151,7 +151,7 @@ export class ComplexUserAddressService {
       _id: id,
       complex: toObjectId(complex_id),
     });
-    if (!theRecord) throw new NotFoundException(messages[404]);
+    if (!theRecord) return;
 
     theRecord.name = name;
     theRecord.description = description;
