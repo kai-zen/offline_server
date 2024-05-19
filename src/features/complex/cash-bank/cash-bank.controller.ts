@@ -1,4 +1,4 @@
-import { Controller, Get, Put } from "@nestjs/common";
+import { Controller, Get, Param, Put } from "@nestjs/common";
 import { CashBankService } from "./cash-bank.service";
 
 @Controller("cash-bank")
@@ -18,5 +18,16 @@ export class CashBankController {
   @Put()
   async updateData() {
     return await this.service.updateData();
+  }
+
+  @Put("/close/:complexId/:id")
+  async closeCashbank(
+    @Param("id") recordId: string,
+    @Param("complexId") complexId: string
+  ) {
+    return await this.service.closeCashBank({
+      complex_id: complexId,
+      id: recordId,
+    });
   }
 }

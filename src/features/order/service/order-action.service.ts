@@ -226,7 +226,7 @@ export class OrderActionService {
     return theRecord;
   }
 
-  async uploadOrders() {
+  async newOrders() {
     const res = await lastValueFrom(
       this.httpService.get(
         `${sofreBaseUrl}/orders/last-added/${process.env.COMPLEX_ID}`
@@ -234,12 +234,14 @@ export class OrderActionService {
     );
     const lastCreatedAt = new Date(res.data);
     const newOrders = await this.model
-      .find({
-        created_at: { $gt: lastCreatedAt },
-        status: 5,
-      })
+      .find({ created_at: { $gt: lastCreatedAt }, status: 5 })
       .lean()
       .exec();
+    return newOrders;
+  }
+
+  async uploadOrders() {
+    const newOrders = await this.newOrders();
     await lastValueFrom(
       this.httpService.post(
         `${sofreBaseUrl}/orders/offline`,
