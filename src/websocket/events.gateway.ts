@@ -47,7 +47,7 @@ export class EventsGateway {
   async addOrder(complex_id: string, orderData: OrderDocument) {
     this.server
       .to(`orders-${complex_id}`)
-      .emit("live-orders", { ...orderData.toObject(), is_update: false });
+      .emit("local-live-orders", { ...orderData.toObject(), is_update: false });
   }
 
   async callWaiter(
@@ -69,10 +69,10 @@ export class EventsGateway {
       .emit("order", { ...order.toObject(), is_update: true });
     this.server
       .to(`orders-${complex_id}`)
-      .emit("live-orders", { ...order.toObject(), is_update: true });
+      .emit("local-live-orders", { ...order.toObject(), is_update: true });
   }
 
-  @SubscribeMessage("live-orders")
+  @SubscribeMessage("local-live-orders")
   findAll(@MessageBody() body: OrderDocument) {
     return body;
   }
