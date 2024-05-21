@@ -15,7 +15,7 @@ async function bootstrap() {
       crossOriginResourcePolicy: false,
     })
   );
-  const server = await app.listen(process.env.PORT, "192.168.1.7");
+  const server = await app.listen(process.env.PORT, "0.0.0.0");
   server.setTimeout(300_000); // 5 minutes
 }
 bootstrap();
