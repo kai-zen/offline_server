@@ -31,7 +31,9 @@ export class ShippingRangeController {
       Number(lat),
       Number(lng),
     ]);
-    return theRange?.price || "not in range";
+    return typeof theRange?.price === "number"
+      ? theRange.price || 0
+      : "not in range";
   }
 
   @Put()
