@@ -21,7 +21,7 @@ export class ShippingRangeService {
     return await this.model.find().exec();
   }
 
-  async findCorrespondingRange(coords: [number, number], complex_id: string) {
+  async findCorrespondingRange(coords: [number, number]) {
     const theComplex = await this.complexService.findTheComplex();
     if (!theComplex) throw new NotFoundException("مجموعه پیدا نشد.");
 
@@ -37,12 +37,7 @@ export class ShippingRangeService {
       [latitude, longitude]
     );
     const ranges = await this.model
-      .find({
-        $and: [
-          { radius: { $gt: theDistance } },
-          { complex: toObjectId(complex_id) },
-        ],
-      })
+      .find({ radius: { $gt: theDistance } })
       .sort({ radius: 1 });
     return ranges?.[0] || null;
   }

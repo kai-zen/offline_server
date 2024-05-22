@@ -67,26 +67,22 @@ export class OrderThirdMethodsService {
     return productsFullData;
   }
 
-  async shippingRangeHandler(data: {
-    complex_id: string;
-    user_address?: {
-      name: string;
-      description: string;
-      latitude: number;
-      longitude: number;
-    };
+  async shippingRangeHandler(user_address?: {
+    name: string;
+    description: string;
+    latitude: number;
+    longitude: number;
   }) {
-    const { user_address, complex_id } = data;
     let theRange: ShippingRangeDocument | null;
     if (user_address) {
       const { latitude, longitude } = user_address || {};
       if (!latitude || !longitude)
         throw new BadRequestException("مختصات جغرافیایی وارد نشده است.");
       else
-        theRange = await this.shippingRangeService.findCorrespondingRange(
-          [user_address.latitude, user_address.longitude],
-          complex_id
-        );
+        theRange = await this.shippingRangeService.findCorrespondingRange([
+          user_address.latitude,
+          user_address.longitude,
+        ]);
 
       if (!theRange)
         throw new ForbiddenException(

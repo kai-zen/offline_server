@@ -35,10 +35,10 @@ export class ComplexUserAddressService {
       const { latitude, longitude } = address || {};
       const shippingPrice =
         (
-          await this.shippingRangeService.findCorrespondingRange(
-            [latitude, longitude],
-            complexId
-          )
+          await this.shippingRangeService.findCorrespondingRange([
+            latitude,
+            longitude,
+          ])
         )?.price || null;
       addressesWithShippingPrice.push({
         ...address,

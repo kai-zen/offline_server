@@ -1,5 +1,11 @@
 import { ShippingRangeService } from "./shipping-range.service";
-import { Controller, Get, Put } from "@nestjs/common";
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Put,
+  Query,
+} from "@nestjs/common";
 
 @Controller("shipping-range")
 export class ShippingRangeController {
@@ -8,6 +14,24 @@ export class ShippingRangeController {
   @Get()
   async findAll() {
     return await this.service.findAll();
+  }
+
+  @Get("/:complexId")
+  async findByComplex() {
+    return await this.service.findAll();
+  }
+
+  @Get("/:complexId/price")
+  async shippingPriceCalculator(
+    @Query() queryParams: { [props: string]: string }
+  ) {
+    const { lat, lng } = queryParams;
+    if (!Number(lat) || !Number(lng)) throw new BadRequestException();
+    const theRange = await this.service.findCorrespondingRange([
+      Number(lat),
+      Number(lng),
+    ]);
+    return theRange?.price || "not in range";
   }
 
   @Put()

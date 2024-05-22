@@ -74,10 +74,8 @@ export class OrderCreateService {
     const productsFullData =
       await this.orderThirdMethods.productDataHandler(products);
 
-    const theRange = await this.orderThirdMethods.shippingRangeHandler({
-      complex_id,
-      user_address,
-    });
+    const theRange =
+      await this.orderThirdMethods.shippingRangeHandler(user_address);
 
     const theCashBank = await this.cashBankService.findById(cashbank_id);
     if ((payment_type !== 1 && !theCashBank) || payment_type === 2)
