@@ -181,6 +181,6 @@ export class OrderThirdMethodsService {
         ],
       })
       .countDocuments();
-    return todayOrdersCount + 1;
+    return todayOrdersCount + 501;
   }
 }
