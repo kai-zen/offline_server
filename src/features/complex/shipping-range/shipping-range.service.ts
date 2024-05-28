@@ -39,7 +39,7 @@ export class ShippingRangeService {
     const ranges = await this.model
       .find({ radius: { $gt: theDistance } })
       .sort({ radius: 1 });
-    return ranges?.[0] || null;
+    return ranges?.[0];
   }
 
   async updateData() {

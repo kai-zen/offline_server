@@ -77,11 +77,13 @@ export class OrderCreateService {
     const theRange =
       await this.orderThirdMethods.shippingRangeHandler(user_address);
 
-    const theCashBank = await this.cashBankService.findById(cashbank_id);
-    if ((payment_type !== 1 && !theCashBank) || payment_type === 2)
+    if ((payment_type !== 1 && !cashbank_id) || payment_type === 2)
       throw new BadRequestException(messages[400]);
-    if (cashbank_id && !theCashBank)
-      throw new NotFoundException("صندوق مورد نظر شما وجود ندارد.");
+
+    const theCashBank = cashbank_id
+      ? await this.cashBankService.findById(cashbank_id)
+      : null;
+    throw new NotFoundException("صندوق مورد نظر شما وجود ندارد.");
 
     // calculate different prices
     if (!shipping_price)
@@ -187,7 +189,10 @@ export class OrderCreateService {
     );
     const total_price = order_price + tax;
 
-    theOrder.products = [...theOrder.products, ...productsFullData];
+    theOrder.products = [
+      ...theOrder.products,
+      ...productsFullData.map((p) => ({ ...p, diff: p.quantity })),
+    ];
     theOrder.total_price += total_price;
     theOrder.complex_discount += complex_discount;
     theOrder.tax += tax;
@@ -231,9 +236,17 @@ export class OrderCreateService {
     const theProductData = { ...copy[theOrderProductIndex] };
     if (!theProductData) throw new NotFoundException("محصول مربوطه یافت نشد.");
 
+    const modifiedProducts = copy.map((p, i) => ({
+      ...p,
+      diff: i === theOrderProductIndex ? -1 : 0,
+    }));
+
     if (copy[theOrderProductIndex].quantity > 1)
       copy[theOrderProductIndex].quantity -= 1;
-    else if (copy.length === 1) throw new BadRequestException(messages[400]);
+    else if (copy.length === 1)
+      throw new BadRequestException(
+        "بجای حذف تمام محصولات، سفارش را لغو کنید."
+      );
     else copy.splice(theOrderProductIndex, 1);
 
     const originalPrice = await this.productService.findPrice(
@@ -250,7 +263,19 @@ export class OrderCreateService {
     const edited_order = await theOrder.save();
 
     // websocket
-    await this.eventsGateway.changeOrder({ complex_id, order: edited_order });
+    const socketMessage = `یک ${theProductData?.product?.name} ${
+      theProductData.price.title || ""
+    } از فاکتور ${edited_order.factor_number} کم شد`;
+
+    const order = {
+      ...edited_order.toObject(),
+      products: modifiedProducts,
+    } as OrderDocument;
+    await this.eventsGateway.changeOrder({
+      complex_id,
+      order,
+      message: socketMessage,
+    });
     return edited_order;
   }
 }

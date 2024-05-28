@@ -33,16 +33,13 @@ export class ComplexUserAddressService {
     const addressesWithShippingPrice = [];
     for await (const address of results) {
       const { latitude, longitude } = address || {};
-      const shippingPrice =
-        (
-          await this.shippingRangeService.findCorrespondingRange([
-            latitude,
-            longitude,
-          ])
-        )?.price || null;
+      const theRange = await this.shippingRangeService.findCorrespondingRange([
+        latitude,
+        longitude,
+      ]);
       addressesWithShippingPrice.push({
         ...address,
-        shipping: shippingPrice || "not in range",
+        shipping: theRange ? theRange.price || 0 : "not in range",
       });
     }
 

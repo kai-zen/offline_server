@@ -50,6 +50,9 @@ export class OrderProductItem {
 
   @Prop({ default: false, required: false })
   added_later: boolean;
+
+  @Prop()
+  diff?: number;
 }
 
 @Schema({ versionKey: false })

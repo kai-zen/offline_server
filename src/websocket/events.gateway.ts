@@ -62,14 +62,22 @@ export class EventsGateway {
     this.server.to(`waiter-${complex_id}`).emit("call-waiter", data);
   }
 
-  async changeOrder(data: { order: OrderDocument; complex_id: string }) {
-    const { order, complex_id } = data;
-    this.server
-      .to(`order-${order._id.toString()}`)
-      .emit("order", { ...order.toObject(), is_update: true });
-    this.server
-      .to(`orders-${complex_id}`)
-      .emit("local-live-orders", { ...order.toObject(), is_update: true });
+  async changeOrder(data: {
+    order: OrderDocument;
+    complex_id: string;
+    message?: string;
+  }) {
+    const { order, complex_id, message } = data;
+    this.server.to(`order-${order._id.toString()}`).emit("order", {
+      ...(order.toObject ? order.toObject() : order),
+      is_update: true,
+      message,
+    });
+    this.server.to(`orders-${complex_id}`).emit("local-live-orders", {
+      ...(order.toObject ? order.toObject() : order),
+      is_update: true,
+      message,
+    });
   }
 
   @SubscribeMessage("local-live-orders")

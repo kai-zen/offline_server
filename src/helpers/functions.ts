@@ -106,3 +106,9 @@ export const htmlSanitizer = (userInput: string) => {
     allowedAttributes: { a: ["href"] },
   });
 };
+
+export const findCommonElements = (arr1: any[], arr2: any[]) => {
+  return arr1.filter(
+    (item) => arr2.findIndex((item2) => item2._id === item._id) !== -1
+  );
+};
