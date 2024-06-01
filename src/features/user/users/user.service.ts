@@ -29,7 +29,6 @@ export class UserService {
         mobile: d.phone_number,
         username: `user${String(i + 1)}`,
         image: null,
-        email: "",
         name: d.name,
       }))
     );
