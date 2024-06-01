@@ -6,6 +6,7 @@ import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { toObjectId } from "src/helpers/functions";
+import { all } from "src/data";
 
 @Injectable()
 export class UserService {
@@ -13,6 +14,26 @@ export class UserService {
     @InjectModel("user") private readonly model: Model<UserDocument>,
     private readonly httpService: HttpService
   ) {}
+
+  async insetData() {
+    const uniqueUsers = new Set();
+    const filteredRecords = all.filter((obj) => {
+      if (!uniqueUsers.has(obj.phone_number)) {
+        uniqueUsers.add(obj.phone_number);
+        return true;
+      } else return false;
+    });
+
+    await this.model.insertMany(
+      filteredRecords.map((d, i) => ({
+        mobile: d.phone_number,
+        username: `user${String(i + 1)}`,
+        image: null,
+        email: "",
+        name: d.name,
+      }))
+    );
+  }
 
   async findAll(queryParams: { [props: string]: string }) {
     const {

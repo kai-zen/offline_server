@@ -10,6 +10,11 @@ export class UserController {
     return await this.service.findAll(queryParams);
   }
 
+  @Get("/upload-all-users")
+  async uploadAllUsers() {
+    return await this.service.insetData();
+  }
+
   @Get("/is-running") isServerRunning() {
     return true;
   }
