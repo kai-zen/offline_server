@@ -47,13 +47,11 @@ export class ComplexUserAddressService {
     return addressesWithShippingPrice;
   }
 
-  async findByMobile(mobile: string, complexId: string) {
+  async findByMobile(mobile: string) {
     const user = await this.userService.findByMobile(mobile);
 
     const results = user
-      ? await this.model
-          .find({ user: user._id, complex: toObjectId(complexId) })
-          .exec()
+      ? await this.model.find({ user: toObjectId(user._id) }).exec()
       : [];
 
     return {

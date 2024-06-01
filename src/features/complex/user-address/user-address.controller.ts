@@ -33,11 +33,8 @@ export class ComplexUserAddressController {
   }
 
   @Get("/mobile/:complexId/:mobileNumber")
-  async findUserRecordsWithMobile(
-    @Param("mobileNumber") mobileNumber: string,
-    @Param("complexId") complexId: string
-  ) {
-    return await this.service.findByMobile(mobileNumber, complexId);
+  async findUserRecordsWithMobile(@Param("mobileNumber") mobileNumber: string) {
+    return await this.service.findByMobile(mobileNumber);
   }
 
   @Put("/:id")
