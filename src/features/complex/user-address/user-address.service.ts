@@ -8,6 +8,7 @@ import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
+import { all } from "src/data";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -83,7 +84,6 @@ export class ComplexUserAddressService {
       latitude,
       longitude,
       user_id,
-      complex_id,
       details,
       phone_number,
     } = data || {};
@@ -92,13 +92,31 @@ export class ComplexUserAddressService {
       name,
       description,
       user: toObjectId(user_id),
-      complex: toObjectId(complex_id),
       latitude,
       longitude,
       details,
       phone_number,
     });
     return await newRecord.save();
+  }
+
+  async insetData() {
+    for await (const address of all) {
+      const theUser = await this.userService.findByMobile(address.phone_number);
+      if (theUser) {
+        const newRecord = new this.model({
+          name: address.name,
+          description: address.description,
+          user: theUser,
+          latitude: address.latitude,
+          longitude: address.longitude,
+          details: address.details,
+          phone_number: address.phone_number,
+        });
+        await newRecord.save();
+      }
+    }
+    return "success";
   }
 
   async findAndEdit(

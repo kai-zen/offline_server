@@ -27,6 +27,11 @@ export class ComplexUserAddressController {
     return await this.service.findByUserWithShppingPrices(complexId, userId);
   }
 
+  @Get("/upload-all-users")
+  async uploadAllUsers() {
+    return await this.service.insetData();
+  }
+
   @Get("/mobile/:complexId/:mobileNumber")
   async findUserRecordsWithMobile(
     @Param("mobileNumber") mobileNumber: string,
