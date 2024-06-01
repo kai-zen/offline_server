@@ -31,7 +31,10 @@ export class UserService {
       name: d.name,
     }));
 
-    await this.model.insertMany(readyData);
+    for await (const user of readyData) {
+      const newRecord = new this.model(user);
+      await newRecord.save();
+    }
   }
 
   async findAll(queryParams: { [props: string]: string }) {
