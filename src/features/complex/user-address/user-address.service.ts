@@ -103,7 +103,7 @@ export class ComplexUserAddressService {
   async insetData() {
     for await (const address of all) {
       const theUser = await this.userService.findByMobile(address.phone_number);
-      if (theUser) {
+      if (theUser && address.description) {
         const newRecord = new this.model({
           name: address.name,
           description: address.description,
