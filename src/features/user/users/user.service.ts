@@ -24,14 +24,14 @@ export class UserService {
       } else return false;
     });
 
-    await this.model.insertMany(
-      filteredRecords.map((d, i) => ({
-        mobile: d.phone_number,
-        username: `user${String(i + 1)}`,
-        image: null,
-        name: d.name,
-      }))
-    );
+    const readyData = filteredRecords.map((d) => ({
+      mobile: d.phone_number,
+      username: d.phone_number,
+      image: null,
+      name: d.name,
+    }));
+
+    await this.model.insertMany(readyData);
   }
 
   async findAll(queryParams: { [props: string]: string }) {
