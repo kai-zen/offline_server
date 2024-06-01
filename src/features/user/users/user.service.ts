@@ -16,10 +16,10 @@ export class UserService {
   ) {}
 
   async insetData() {
-    const uniqueUsers = new Set();
+    const uniqueUsers = [];
     const filteredRecords = all.filter((obj) => {
-      if (!uniqueUsers.has(obj.phone_number)) {
-        uniqueUsers.add(obj.phone_number);
+      if (!uniqueUsers.includes(obj.phone_number)) {
+        uniqueUsers.push(obj.phone_number);
         return true;
       } else return false;
     });
