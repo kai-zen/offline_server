@@ -141,7 +141,7 @@ export class OrderFetchService {
       {
         $or: [
           { table_number: { $nin: [null, undefined] } },
-          { order_type: { $in: [2, 3] } },
+          { order_type: { $in: [1, 2] } },
           { payment_type: { $gt: 1 } },
         ],
       },

@@ -123,6 +123,13 @@ export class OrderController {
     });
   }
 
+  @Put("/toggle-on-hold/:id")
+  @AccessLevel([1, 2, 3, 4])
+  @UseGuards(HasAccessGuard)
+  async toggleOnHold(@Param("id") recordId: string) {
+    return await this.actionService.toggleOnHold(recordId);
+  }
+
   @Put("/edit-delivery/:id")
   @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)

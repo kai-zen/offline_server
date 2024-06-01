@@ -1,7 +1,7 @@
 import { EventsGateway } from "src/websocket/events.gateway";
 import { InjectModel } from "@nestjs/mongoose";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { OrderDocument } from "../order.schema";
 import { toObjectId } from "src/helpers/functions";
 import {
@@ -224,6 +224,29 @@ export class OrderActionService {
     // websocket
     await this.eventsGateway.changeOrder({ order: theOrder, complex_id });
     return theRecord;
+  }
+
+  async toggleOnHold(order_id: string | Types.ObjectId) {
+    const theRecord = await this.model
+      .findById(order_id)
+      .populate("products.product")
+      .populate("complex")
+      .populate("user")
+      .exec();
+    if (!theRecord) throw new NotFoundException(messages[404]);
+    if (theRecord.payment_type > 1)
+      throw new BadRequestException("این سفارش قبلا پرداخت شده است.");
+
+    const currentVal = theRecord.on_hold;
+    theRecord.on_hold = !currentVal;
+    const theOrder = await theRecord.save();
+
+    // websocket
+    await this.eventsGateway.changeOrder({
+      order: theOrder,
+      complex_id: theRecord.complex._id.toString(),
+    });
+    return theOrder;
   }
 
   async newOrders() {

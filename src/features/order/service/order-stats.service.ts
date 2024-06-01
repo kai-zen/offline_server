@@ -125,6 +125,7 @@ export class OrderStatsService {
       complex: toObjectId(complexId),
       status: { $nin: [1, 6, 7] },
       payment_type: 1,
+      on_hold: false,
     });
   }
 
@@ -144,6 +145,7 @@ export class OrderStatsService {
     const filters: any[] = [
       { complex: toObjectId(complex_id) },
       { status: { $nin: [6, 7] } },
+      { payment_type: { $gt: 1 } },
       {
         created_at: {
           $lte: endDate || new Date(),

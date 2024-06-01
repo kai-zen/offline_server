@@ -75,6 +75,7 @@ export class ComplexUserAddressService {
     longitude: number;
     complex_id: string;
     user_id: string;
+    phone_number: string;
   }) {
     const {
       name,
@@ -84,6 +85,7 @@ export class ComplexUserAddressService {
       user_id,
       complex_id,
       details,
+      phone_number,
     } = data || {};
 
     const newRecord = new this.model({
@@ -94,38 +96,7 @@ export class ComplexUserAddressService {
       latitude,
       longitude,
       details,
-    });
-    return await newRecord.save();
-  }
-
-  async addByOrdering(data: {
-    address: {
-      name: string;
-      description: string;
-      latitude: number;
-      longitude: number;
-    };
-    complex_id: string;
-    user_id: string;
-  }) {
-    const { address, user_id, complex_id } = data;
-    const { name, description, latitude, longitude } = address || {};
-
-    const doesItExist = await this.model.exists({
-      description,
-      user: toObjectId(user_id),
-      complex: toObjectId(complex_id),
-    });
-    if (doesItExist) return;
-
-    const newRecord = new this.model({
-      name,
-      description,
-      user: toObjectId(user_id),
-      complex: toObjectId(complex_id),
-      latitude,
-      longitude,
-      details: "",
+      phone_number,
     });
     return await newRecord.save();
   }
@@ -138,23 +109,21 @@ export class ComplexUserAddressService {
       details: string;
       latitude: number;
       longitude: number;
-      complex_id: string;
+      phone_number: string;
     }
   ) {
-    const { name, description, latitude, longitude, details, complex_id } =
+    const { name, description, latitude, longitude, details, phone_number } =
       newData || {};
 
-    const theRecord = await this.model.findOne({
-      _id: id,
-      complex: toObjectId(complex_id),
-    });
+    const theRecord = await this.model.findById(id);
     if (!theRecord) return;
 
     theRecord.name = name;
-    theRecord.description = description;
+    if (!theRecord.is_copied) theRecord.description = description;
     theRecord.details = details;
     theRecord.latitude = latitude;
     theRecord.longitude = longitude;
+    theRecord.phone_number = phone_number;
 
     return await theRecord.save();
   }

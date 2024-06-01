@@ -105,6 +105,9 @@ export class Order {
   @Prop()
   table_number: string;
 
+  @Prop({ default: false })
+  on_hold: boolean;
+
   @Prop({ default: 1 })
   status: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   // ثبت - آماده‌سازی - ارسال|آماده تحویل - سرو - تحویل شد - رد - لغو

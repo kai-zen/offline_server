@@ -1,7 +1,6 @@
 import mongoose, { HydratedDocument } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "src/features/user/users/user.schema";
-import { ComplexDocument } from "../complex/complex.schema";
 
 @Schema({ versionKey: false })
 export class ComplexUserAddress {
@@ -14,21 +13,20 @@ export class ComplexUserAddress {
   @Prop()
   details: string;
 
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "complex",
-    required: true,
-  })
-  complex: ComplexDocument;
-
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "user", required: true })
   user: UserDocument;
+
+  @Prop({ default: false })
+  is_copied: boolean;
 
   @Prop({ required: true })
   latitude: number;
 
   @Prop({ required: true })
   longitude: number;
+
+  @Prop({ required: true })
+  phone_number: string;
 }
 
 export type ComplexUserAddressDocument = HydratedDocument<ComplexUserAddress>;

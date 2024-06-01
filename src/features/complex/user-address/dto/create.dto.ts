@@ -18,6 +18,10 @@ export class CreateComplexUserAddressDto {
   user_id: string;
 
   @IsString()
+  @IsNotEmpty({ message: "شماره تماس تعیین نشده است." })
+  phone_number: string;
+
+  @IsString()
   @IsNotEmpty({ message: "مجموعه تعیین نشده است." })
   complex_id: string;
 

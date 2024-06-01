@@ -83,7 +83,8 @@ export class OrderCreateService {
     const theCashBank = cashbank_id
       ? await this.cashBankService.findById(cashbank_id)
       : null;
-    throw new NotFoundException("صندوق مورد نظر شما وجود ندارد.");
+    if (!theCashBank)
+      throw new NotFoundException("صندوق مورد نظر شما وجود ندارد.");
 
     // calculate different prices
     if (!shipping_price)
