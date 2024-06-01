@@ -101,6 +101,7 @@ export class ComplexUserAddressService {
   }
 
   async insetData() {
+    await this.model.deleteMany({});
     for await (const address of all) {
       const theUser = await this.userService.findByMobile(address.phone_number);
       if (theUser && address.description) {
