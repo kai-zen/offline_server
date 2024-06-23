@@ -22,23 +22,19 @@ export class EventsGateway {
   async handleConnection() {
     this.server.on("connection", async (socket) => {
       const { localToken, complex_id } = socket.handshake.query;
-      if (localToken) {
-        if (complex_id) {
-          const tokenData = await this.jwtService.verifyAsync(
-            localToken as string,
-            {
-              secret: "BQR0yzn6vMN1auL7gTimEf",
-            }
-          );
-          const theAccess = await this.accessService.hasAccess(
-            tokenData._id,
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-          );
-          if (theAccess) {
-            socket.join(`orders-${complex_id}`);
-            if ([1, 2, 5, 6].includes(theAccess.type))
-              socket.join(`waiter-${complex_id}`);
-          }
+      if (complex_id && localToken) {
+        const tokenData = await this.jwtService.verifyAsync(
+          localToken as string,
+          { secret: "BQR0yzn6vMN1auL7gTimEf" }
+        );
+        const theAccess = await this.accessService.hasAccess(
+          tokenData._id,
+          [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        );
+        if (theAccess) {
+          socket.join(`orders-${complex_id}`);
+          if ([1, 2, 5, 6].includes(theAccess.type))
+            socket.join(`waiter-${complex_id}`);
         }
       }
     });
