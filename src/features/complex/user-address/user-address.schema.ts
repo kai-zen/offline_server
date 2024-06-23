@@ -13,16 +13,16 @@ export class ComplexUserAddress {
   @Prop()
   details: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "user", required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "user" })
   user: UserDocument;
 
   @Prop({ default: false })
   is_copied: boolean;
 
-  @Prop({ required: true })
+  @Prop()
   latitude: number;
 
-  @Prop({ required: true })
+  @Prop()
   longitude: number;
 
   @Prop({ required: true })

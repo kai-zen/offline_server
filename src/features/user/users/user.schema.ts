@@ -11,8 +11,6 @@ export class User extends Document {
   birthday: Date;
 
   @Prop({
-    sparse: true,
-    unique: true,
     trim: true,
     lowercase: true,
   })

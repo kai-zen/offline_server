@@ -8,7 +8,6 @@ import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
-import { all } from "src/data";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -34,10 +33,13 @@ export class ComplexUserAddressService {
     const addressesWithShippingPrice = [];
     for await (const address of results) {
       const { latitude, longitude } = address || {};
-      const theRange = await this.shippingRangeService.findCorrespondingRange([
-        latitude,
-        longitude,
-      ]);
+      const theRange =
+        latitude && longitude
+          ? await this.shippingRangeService.findCorrespondingRange([
+              latitude,
+              longitude,
+            ])
+          : null;
       addressesWithShippingPrice.push({
         ...address,
         shipping: theRange ? theRange.price || 0 : "not in range",
@@ -96,26 +98,6 @@ export class ComplexUserAddressService {
       phone_number,
     });
     return await newRecord.save();
-  }
-
-  async insetData() {
-    await this.model.deleteMany({});
-    for await (const address of all) {
-      const theUser = await this.userService.findByMobile(address.phone_number);
-      if (theUser && address.description) {
-        const newRecord = new this.model({
-          name: address.name,
-          description: address.description,
-          user: theUser,
-          latitude: address.latitude,
-          longitude: address.longitude,
-          details: address.details,
-          phone_number: address.phone_number,
-        });
-        await newRecord.save();
-      }
-    }
-    return "success";
   }
 
   async findAndEdit(
