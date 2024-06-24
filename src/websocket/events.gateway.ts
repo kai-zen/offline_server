@@ -8,6 +8,7 @@ import {
 } from "@nestjs/websockets";
 import { Server } from "socket.io";
 import { OrderDocument } from "src/features/order/order.schema";
+import { printerDataType } from "src/helpers/types";
 
 @WebSocketGateway({ cors: { origin: "*" } })
 export class EventsGateway {
@@ -27,14 +28,9 @@ export class EventsGateway {
           localToken as string,
           { secret: "BQR0yzn6vMN1auL7gTimEf" }
         );
-        const theAccess = await this.accessService.hasAccess(
-          tokenData._id,
-          [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        );
+        const theAccess = await this.accessService.hasAccess(tokenData._id);
         if (theAccess) {
           socket.join(`orders-${complex_id}`);
-          if ([1, 2, 5, 6].includes(theAccess.type))
-            socket.join(`waiter-${complex_id}`);
         }
       }
     });
@@ -46,16 +42,11 @@ export class EventsGateway {
       .emit("local-live-orders", { ...orderData.toObject(), is_update: false });
   }
 
-  async callWaiter(
+  async printReceipt(
     complex_id: string,
-    data: {
-      table_number: number | string;
-      _id: string;
-      description?: string;
-      is_deleted?: boolean;
-    }
+    data: { printer: printerDataType; receipt: any[] }
   ) {
-    this.server.to(`waiter-${complex_id}`).emit("call-waiter", data);
+    this.server.to(`orders-${complex_id}`).emit("print-receipt", data);
   }
 
   async changeOrder(data: {
@@ -81,15 +72,9 @@ export class EventsGateway {
     return body;
   }
 
-  @SubscribeMessage("call-waiter")
-  callWaiterMessage(
-    @MessageBody()
-    body: {
-      table_number: number | string;
-      _id: string;
-      description?: string;
-      is_deleted?: boolean;
-    }
+  @SubscribeMessage("print-receipt")
+  printReceiptMessage(
+    @MessageBody() body: { printer: printerDataType; receipt: any[] }
   ) {
     return body;
   }

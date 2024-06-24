@@ -96,10 +96,10 @@ export class AccessService {
     await this.model.insertMany(modifiedResults);
   }
 
-  async hasAccess(user_id: string | Types.ObjectId, types: number[]) {
+  async hasAccess(user_id: string | Types.ObjectId, types?: number[]) {
     return await this.model.findOne({
       user: user_id,
-      type: { $in: types },
+      type: { $in: types || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
     });
   }
 

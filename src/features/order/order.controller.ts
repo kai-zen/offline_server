@@ -25,6 +25,7 @@ import { RemoveItemFromOrderDto } from "./dto/remove-item.dto";
 import { OrderStatsService } from "./service/order-stats.service";
 import { HasAccessGuard } from "src/guards/access.guard";
 import { AccessLevel } from "src/helpers/decorators";
+import { PrintDto } from "./dto/print.dto";
 
 @Controller("orders")
 export class OrderController {
@@ -95,6 +96,16 @@ export class OrderController {
   @UseGuards(HasAccessGuard)
   async createOrderByEmployee(@Body() body: CreateOrderDto) {
     return await this.createService.createByEmployee(body);
+  }
+
+  @Post("/print/:complexId")
+  @AccessLevel([1, 2, 4, 5, 7, 8])
+  @UseGuards(HasAccessGuard)
+  async printReceipt(
+    @Body() body: PrintDto,
+    @Param("complexId") complexId: string
+  ) {
+    return await this.actionService.printReceipt(complexId, body);
   }
 
   @Put("/employee/add/:id")

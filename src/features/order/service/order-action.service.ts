@@ -16,6 +16,7 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { AccessService } from "src/features/user/access/access.service";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
+import { printerDataType } from "src/helpers/types";
 
 @Injectable()
 export class OrderActionService {
@@ -28,6 +29,14 @@ export class OrderActionService {
     private readonly cashBankService: CashBankService,
     private readonly httpService: HttpService
   ) {}
+
+  async printReceipt(
+    complex_id: string,
+    data: { printer: printerDataType; receipt: any[] }
+  ) {
+    await this.eventsGateway.printReceipt(complex_id, data);
+    return "success";
+  }
 
   async findAndEdit(data: {
     id: string;
