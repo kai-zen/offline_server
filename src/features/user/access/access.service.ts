@@ -119,4 +119,8 @@ export class AccessService {
     });
     return theAccess;
   }
+
+  async findDeliveryGuys(complex: Types.ObjectId) {
+    return await this.model.find({ complex, type: 9 });
+  }
 }
