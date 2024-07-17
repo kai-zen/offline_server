@@ -27,10 +27,13 @@ export class CreateOrderDto {
   @IsObject()
   @IsOptional()
   user_address?: {
+    address_id: string;
     name: string;
     description: string;
     latitude: number;
     longitude: number;
+    details: string;
+    phone_number: string;
   };
 
   @IsArray()

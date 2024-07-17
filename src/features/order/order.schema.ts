@@ -5,9 +5,18 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "src/features/user/users/user.schema";
 import { AccessDocument } from "src/features/user/access/access.schema";
 import { CashBankDocument } from "src/features/complex/cash-bank/cash-bank.schema";
+import { ComplexUserAddressDocument } from "../complex/user-address/user-address.schema";
+import { AreaDocument } from "../complex/area/area.schema";
 
 @Schema({ versionKey: false })
 export class OrderAddress {
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "complex-user-address",
+    default: null,
+  })
+  address_id?: ComplexUserAddressDocument;
+
   @Prop()
   name: string;
 
@@ -19,6 +28,12 @@ export class OrderAddress {
 
   @Prop()
   longitude: number;
+
+  @Prop()
+  details: string;
+
+  @Prop()
+  phone_number: string;
 }
 
 @Schema({ versionKey: false })
@@ -48,9 +63,6 @@ export class OrderProductItem {
   @Prop({ default: 1, min: 1 })
   quantity: number;
 
-  @Prop({ default: false, required: false })
-  added_later: boolean;
-
   @Prop()
   diff?: number;
 }
@@ -61,10 +73,7 @@ export class Order {
   order_type: 1 | 2 | 3; // سایت - تلفنی - حضوری
 
   @Prop({ default: 1 })
-  payment_type: 1 | 2 | 3 | 4 | 5 | 6; // pending - gateway - pos - cash - card - debt
-
-  @Prop({ default: false })
-  needs_pack: boolean;
+  payment_type: 1 | 2 | 3 | 4 | 5 | 6 | 7; // pending - gateway - pos - cash - card - debt - other
 
   @Prop()
   description: string;
@@ -78,7 +87,7 @@ export class Order {
   @Prop({ type: OrderAddress, default: null })
   user_address: OrderAddress | null;
 
-  @Prop()
+  @Prop({ default: "" })
   user_phone: string;
 
   @Prop([{ type: OrderProductItem, required: true }])
@@ -91,7 +100,7 @@ export class Order {
   packing_price: number;
 
   @Prop({ required: true })
-  total_price: number; // total price is not affected by discount
+  total_price: number; // total price is affected by discount
 
   @Prop({ default: 0 })
   extra_price: number;
@@ -102,8 +111,14 @@ export class Order {
   @Prop({ default: 0 })
   user_discount: number;
 
+  @Prop({ default: 0 })
+  user_cashback: number;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "area", default: null })
+  area: AreaDocument | null;
+
   @Prop()
-  table_number: string;
+  table_number: number;
 
   @Prop({ default: false })
   on_hold: boolean;
@@ -112,7 +127,7 @@ export class Order {
   status: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   // ثبت - آماده‌سازی - ارسال|آماده تحویل - سرو - تحویل شد - رد - لغو
 
-  @Prop()
+  @Prop({ required: true })
   factor_number: number;
 
   @Prop()
@@ -123,6 +138,9 @@ export class Order {
 
   @Prop()
   created_at: Date;
+
+  @Prop({ default: null })
+  payed_at: Date | null;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "access" })
   delivery_guy: AccessDocument;

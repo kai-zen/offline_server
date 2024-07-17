@@ -8,7 +8,6 @@ import {
 } from "@nestjs/websockets";
 import { Server } from "socket.io";
 import { OrderDocument } from "src/features/order/order.schema";
-import { printerDataType } from "src/helpers/types";
 
 @WebSocketGateway({ cors: { origin: "*" } })
 export class EventsGateway {
@@ -45,7 +44,7 @@ export class EventsGateway {
 
   async printReceipt(
     complex_id: string,
-    data: { printer: printerDataType; receipt: any[] }
+    data: { printer: any; receipt: any[] }
   ) {
     this.server.to(`orders-${complex_id}`).emit("print-receipt", data);
   }

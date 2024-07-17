@@ -1,10 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Scope } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { OrderDocument } from "../order.schema";
 import { toObjectId } from "src/helpers/functions";
+import { OrderDocument } from "../../order.schema";
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class OrderStatsService {
   constructor(
     @InjectModel("order")
@@ -17,7 +17,7 @@ export class OrderStatsService {
         $and: [
           { complex: toObjectId(complex_id) },
           {
-            created_at: {
+            payed_at: {
               $gte: new Date().setHours(0, 0, 0, 0),
               $lte: new Date().setHours(23, 59, 59, 999),
             },
@@ -46,7 +46,7 @@ export class OrderStatsService {
         $and: [
           { complex: toObjectId(complex_id) },
           {
-            created_at: {
+            payed_at: {
               $lte: startOfToday,
               $gte: nDaysAgo,
             },
@@ -75,7 +75,9 @@ export class OrderStatsService {
   async pastDaysQuantity(complex_id: string, howManyDays: number) {
     const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
     const n = howManyDays || 7;
+
     const nDaysAgo = new Date(new Date().setDate(new Date().getDate() - n));
+    nDaysAgo.setHours(0, 0, 0, 0);
 
     const results = await this.model
       .aggregate([
@@ -131,8 +133,8 @@ export class OrderStatsService {
 
   async financeReport(data: {
     complex_id: string;
-    start: string;
-    end?: string;
+    start: string | Date;
+    end?: string | Date;
     cash_bank?: string;
   }) {
     const { complex_id, end, start, cash_bank } = data;
@@ -145,9 +147,8 @@ export class OrderStatsService {
     const filters: any[] = [
       { complex: toObjectId(complex_id) },
       { status: { $nin: [6, 7] } },
-      { payment_type: { $gt: 1 } },
       {
-        created_at: {
+        payed_at: {
           $lte: endDate || new Date(),
           $gte: startDate,
         },

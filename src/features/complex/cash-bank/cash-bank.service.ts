@@ -11,8 +11,9 @@ import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
-import { OrderStatsService } from "src/features/order/service/order-stats.service";
-import { OrderActionService } from "src/features/order/service/order-action.service";
+import { OrderStatsService } from "src/features/order/service/R/stats.service";
+import { OrderActionService } from "src/features/order/service/U/actions.service";
+import { OrderOtherCreateService } from "src/features/order/service/C/other.service";
 
 @Injectable()
 export class CashBankService {
@@ -22,7 +23,7 @@ export class CashBankService {
     @Inject(forwardRef(() => OrderStatsService))
     private readonly ordersStatsService: OrderStatsService,
     @Inject(forwardRef(() => OrderActionService))
-    private readonly ordersActionService: OrderActionService,
+    private readonly orderOtherCreateService: OrderOtherCreateService,
     private readonly httpService: HttpService
   ) {}
 
@@ -50,7 +51,7 @@ export class CashBankService {
       throw new BadRequestException(
         "پیش از بستن صندوق باید سفارشات پرداخت نشده تعیین وضعیت شوند."
       );
-    const newOrders = await this.ordersActionService.newOrders();
+    const newOrders = await this.orderOtherCreateService.newOrders();
     if (newOrders.length > 0)
       throw new BadRequestException(
         "پیش از بستن صندوق باید سفارشات داخلی خود را روی سرور مرکزی آپلود کنید."

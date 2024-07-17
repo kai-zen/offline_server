@@ -1,14 +1,19 @@
-export interface printerDataType {
-  id?: number;
+import { ProductDocument } from "src/features/product/product/product.schema";
+
+export interface OrderUserAddress {
   name: string;
-  title: string;
-  paper_width: string;
-  factor_type: string;
-  categories: {
-    name: string;
-    row: number;
-    _id: string;
-  }[];
-  types: number[];
-  is_common: boolean;
+  description: string;
+  latitude: number;
+  longitude: number;
+  phone_number: string;
+}
+
+export interface OrderFullProductDataType {
+  product: ProductDocument;
+  quantity: number;
+  price: {
+    amount: number;
+    title: string;
+    price_id: string;
+  };
 }

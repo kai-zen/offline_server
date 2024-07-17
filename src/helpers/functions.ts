@@ -2,6 +2,7 @@ import * as fs from "fs";
 import mongoose, { PipelineStage } from "mongoose";
 import { Request } from "express";
 import * as sanitizeHtml from "sanitize-html";
+import { ProductDocument } from "src/features/product/product/product.schema";
 
 export const extractTokenFromHeader = (
   request: Request
@@ -19,6 +20,9 @@ export const deleteFile = (filepath: string) => {
     return;
   });
 };
+
+export const p2e = (s: string) =>
+  String(s).replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
 
 export const str2bool = (val: string) => {
   if (!val || isNaN(Number(val))) return "reject";
@@ -112,3 +116,23 @@ export const findCommonElements = (arr1: any[], arr2: any[]) => {
     (item) => arr2.findIndex((item2) => item2._id === item._id) !== -1
   );
 };
+
+export const findItemByPriceId = (
+  array: {
+    product: ProductDocument;
+    quantity: number;
+    price: {
+      amount: number;
+      title: string;
+      price_id: string;
+    };
+  }[],
+  price_id: string
+) =>
+  array.find((item) => {
+    const itemPrice = item.price?.price_id?.toString
+      ? item.price.price_id.toString()
+      : item.price?.price_id;
+    const priceId = price_id?.toString ? price_id.toString() : price_id;
+    return itemPrice === priceId;
+  });
