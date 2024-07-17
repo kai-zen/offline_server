@@ -16,6 +16,8 @@ import CashBankModule from "./features/complex/cash-bank/cash-bank.module";
 import ComplexUserAddressModule from "./features/complex/user-address/user-address.module";
 import ProductFolderModule from "./features/product/folders/folder.module";
 import { JwtModule, JwtService } from "@nestjs/jwt";
+import PrinterModule from "./features/complex/printer/printer.module";
+import AreaModule from "./features/complex/area/area.module";
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { JwtModule, JwtService } from "@nestjs/jwt";
     ProductFolderModule,
     CashBankModule,
     ComplexUserAddressModule,
+    PrinterModule,
+    AreaModule,
     // websocket
     EventsModule,
   ],

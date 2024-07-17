@@ -8,6 +8,9 @@ export class Access {
   @Prop({ required: true })
   type: number;
 
+  @Prop({ default: "" })
+  name: string;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "complex" })
   complex: ComplexDocument;
 

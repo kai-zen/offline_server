@@ -1,32 +1,28 @@
-import { DiscountDocument } from "./discount.schema";
-import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+import { sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { toObjectId } from "src/helpers/functions";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { Injectable } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
+import { PrinterDocument } from "./printer.schema";
 
 @Injectable()
-export class DiscountService {
+export class PrinterService {
   constructor(
-    @InjectModel("discount")
-    private readonly model: Model<DiscountDocument>,
+    @InjectModel("printer")
+    private readonly model: Model<PrinterDocument>,
     private readonly httpService: HttpService
   ) {}
 
   async findAll() {
-    return await this.model
-      .find()
-      .populate("products")
-      .populate("folders")
-      .exec();
+    return await this.model.find().exec();
   }
 
   async updateData() {
     const res = await lastValueFrom(
       this.httpService.get(
-        `${sofreBaseUrl}/discount/localdb/${process.env.COMPLEX_ID}`,
+        `${sofreBaseUrl}/printer/localdb/${process.env.COMPLEX_ID}`,
         {
           headers: {
             "api-key": process.env.COMPLEX_TOKEN,
@@ -36,16 +32,15 @@ export class DiscountService {
     );
     await this.model.deleteMany({});
     const modifiedResults = (res.data || []).map((record) => {
-      const productsObjectIds = (record.products || []).map((p) =>
-        toObjectId(p?._id || p)
-      );
-      const foldersObjectIds = (record.folders || []).map((f) =>
-        toObjectId(f?._id || f)
-      );
+      const areas =
+        (record.areas || []).map((a) => toObjectId(a?._id || a)) || [];
+      const folders =
+        (record.folders || []).map((f) => toObjectId(f?._id || f)) || [];
+
       return {
         ...record,
-        products: productsObjectIds || [],
-        folders: foldersObjectIds || [],
+        folders,
+        areas,
         _id: toObjectId(record._id),
         complex: toObjectId(record.complex),
       };

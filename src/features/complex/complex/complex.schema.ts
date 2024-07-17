@@ -65,6 +65,12 @@ export class Complex {
   @Prop({ default: "#000" })
   color: string;
 
+  @Prop()
+  domain: string;
+
+  @Prop({ default: null, min: 5, max: 95 })
+  discount_limit: number;
+
   @Prop({ default: 0 })
   service: number;
 

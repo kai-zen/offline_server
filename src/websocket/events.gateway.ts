@@ -26,7 +26,7 @@ export class EventsGateway {
       if (complex_id && localToken) {
         const tokenData = await this.jwtService.verifyAsync(
           localToken as string,
-          { secret: "BQR0yzn6vMN1auL7gTimEf" }
+          { secret: process.env.JWT_SECRET }
         );
         const theAccess = await this.accessService.hasAccess(tokenData._id);
         if (theAccess) {
@@ -37,9 +37,10 @@ export class EventsGateway {
   }
 
   async addOrder(complex_id: string, orderData: OrderDocument) {
-    this.server
-      .to(`orders-${complex_id}`)
-      .emit("local-live-orders", { ...orderData.toObject(), is_update: false });
+    this.server.to(`orders-${complex_id}`).emit("local-live-orders", {
+      ...(orderData.toObject ? orderData.toObject() : orderData),
+      is_update: false,
+    });
   }
 
   async printReceipt(
@@ -69,13 +70,6 @@ export class EventsGateway {
 
   @SubscribeMessage("local-live-orders")
   findAll(@MessageBody() body: OrderDocument) {
-    return body;
-  }
-
-  @SubscribeMessage("print-receipt")
-  printReceiptMessage(
-    @MessageBody() body: { printer: printerDataType; receipt: any[] }
-  ) {
     return body;
   }
 
