@@ -13,7 +13,6 @@ async function bootstrap() {
     helmet({
       crossOriginEmbedderPolicy: false,
       crossOriginResourcePolicy: false,
-      contentSecurityPolicy: false,
     })
   );
   const server = await app.listen(process.env.PORT, "0.0.0.0");
