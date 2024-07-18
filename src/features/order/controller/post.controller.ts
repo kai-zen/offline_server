@@ -21,8 +21,6 @@ export class OrderPostController {
   }
 
   @Post("/print/:complexId")
-  @AccessLevel([1, 2, 3, 4, 5, 7, 8])
-  @UseGuards(HasAccessGuard)
   async printReceipt(@Body() body: any, @Param("complexId") complexId: string) {
     return await this.actionService.printReceipt(complexId, body);
   }

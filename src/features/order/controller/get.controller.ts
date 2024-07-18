@@ -1,13 +1,9 @@
-import { AccessLevel } from "src/helpers/decorators";
-import { HasAccessGuard } from "src/guards/access.guard";
-import { IsLoggedInGuard } from "src/guards/auth.guard";
 import {
   BadRequestException,
   Controller,
   Get,
   Param,
   Query,
-  UseGuards,
 } from "@nestjs/common";
 import { messages } from "src/helpers/constants";
 import { OrderFetchService } from "../service/R/fetch.service";
@@ -25,19 +21,12 @@ export class OrderGetController {
     return await this.fetchService.findAll(queryParams);
   }
 
-  @Get("/user")
-  @UseGuards(IsLoggedInGuard)
-  async findUserOrders(@Query() queryParams: { [props: string]: string }) {
-    return await this.fetchService.findUserOrders(queryParams);
-  }
-
   @Get("/last-added/:complexId")
   async lastAddedOrder(@Param("complexId") complexId: string) {
     return await this.fetchService.lastAddedOrder(complexId);
   }
 
   @Get("/user/complex/:complexId")
-  @UseGuards(IsLoggedInGuard)
   async findUserComplexOrders(
     @Query() queryParams: { [props: string]: string },
     @Param("complexId") complexId: string
@@ -46,8 +35,6 @@ export class OrderGetController {
   }
 
   @Get("/complex/live/:complexId")
-  @AccessLevel([1, 2, 3, 4, 5, 6, 7, 8, 9])
-  @UseGuards(HasAccessGuard)
   async findComplexLiveOrders(@Param("complexId") complexId: string) {
     return await this.fetchService.findComplexLiveOrders(complexId);
   }
@@ -94,8 +81,6 @@ export class OrderGetController {
   }
 
   @Get("/complex/:complexId/stats/past-days/:day")
-  @AccessLevel([1, 2, 3])
-  @UseGuards(HasAccessGuard)
   async getPastDaysStats(
     @Param("complexId") complexId: string,
     @Param("day") day: string
@@ -104,8 +89,6 @@ export class OrderGetController {
   }
 
   @Get("/complex/:complexId/stats/finance")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async financeStats(
     @Param("complexId") complexId: string,
     @Query() queryParams: { [props: string]: string }
