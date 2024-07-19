@@ -6,12 +6,14 @@ import { lastValueFrom } from "rxjs";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { HttpService } from "@nestjs/axios";
 import { sofreBaseUrl } from "src/helpers/constants";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class OrderOtherCreateService {
   constructor(
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
+    private readonly complexService: ComplexService,
     private readonly httpService: HttpService
   ) {}
 
@@ -21,9 +23,18 @@ export class OrderOtherCreateService {
         `${sofreBaseUrl}/orders/last-added/${process.env.COMPLEX_ID}`
       )
     );
-    const lastCreatedAt = new Date(res.data);
+    let lastCreatedAt: Date;
+    if (res.data && new Date(res.data)) lastCreatedAt = new Date(res.data);
+    else {
+      const theComplex = await this.complexService.findTheComplex();
+      lastCreatedAt = new Date(theComplex.last_orders_update);
+    }
     const newOrders = await this.model
-      .find({ created_at: { $gt: lastCreatedAt }, status: 5 })
+      .find(
+        lastCreatedAt
+          ? { created_at: { $gt: lastCreatedAt }, status: 5 }
+          : { status: 5 }
+      )
       .lean()
       .exec();
     return newOrders;
@@ -45,10 +56,11 @@ export class OrderOtherCreateService {
         }
       )
     );
+    await this.complexService.updatedOrders();
     return "success";
   }
 
-  @Cron(CronExpression.EVERY_3_HOURS, {
+  @Cron(CronExpression.EVERY_2_HOURS, {
     name: "complex-activation-cron",
     timeZone: "Asia/Tehran",
   })

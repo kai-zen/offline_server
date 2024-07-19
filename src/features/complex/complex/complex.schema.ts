@@ -74,6 +74,15 @@ export class Complex {
   @Prop({ default: 0 })
   service: number;
 
+  @Prop({ default: null })
+  last_addresses_update: Date;
+
+  @Prop({ default: null })
+  last_users_update: Date;
+
+  @Prop({ default: null })
+  last_orders_update: Date;
+
   @Prop({ default: 0 })
   tax: number;
 }

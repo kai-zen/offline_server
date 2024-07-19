@@ -21,11 +21,6 @@ export class OrderGetController {
     return await this.fetchService.findAll(queryParams);
   }
 
-  @Get("/last-added/:complexId")
-  async lastAddedOrder(@Param("complexId") complexId: string) {
-    return await this.fetchService.lastAddedOrder(complexId);
-  }
-
   @Get("/user/complex/:complexId")
   async findUserComplexOrders(
     @Query() queryParams: { [props: string]: string },

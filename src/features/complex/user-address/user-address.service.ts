@@ -7,7 +7,8 @@ import { Injectable } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { requestHeader, sofreBaseUrl } from "src/helpers/constants";
+import { ComplexService } from "../complex/comlex.service";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -16,7 +17,8 @@ export class ComplexUserAddressService {
     private readonly model: Model<ComplexUserAddress>,
     private readonly userService: UserService,
     private readonly shippingRangeService: ShippingRangeService,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findByUser(user_id: string) {
@@ -133,17 +135,38 @@ export class ComplexUserAddressService {
   }
 
   async updateData() {
+    const theComplex = await this.complexService.findTheComplex();
+    const timeNumber = new Date(theComplex.last_addresses_update).getTime();
+    if (timeNumber) {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
+          requestHeader
+        )
+      );
+      if (res.data && res.data.length > 0)
+        for await (const record of res.data) {
+          const modifiedResponse = {
+            ...record,
+            _id: toObjectId(record._id),
+          };
+          await this.model.updateOne(
+            { _id: modifiedResponse._id },
+            { $set: modifiedResponse },
+            { upsert: true }
+          );
+        }
+    } else await this.updateForFirstTime();
+  }
+
+  async updateForFirstTime() {
     let hasMore = true;
     let page = 1;
     while (hasMore) {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`,
-          {
-            headers: {
-              "api-key": process.env.COMPLEX_TOKEN,
-            },
-          }
+          requestHeader
         )
       );
       if (res.data && res.data.length > 0) {

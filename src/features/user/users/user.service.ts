@@ -3,15 +3,17 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { UserDocument } from "./user.schema";
 import { lastValueFrom } from "rxjs";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { requestHeader, sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { toObjectId } from "src/helpers/functions";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel("user") private readonly model: Model<UserDocument>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll(queryParams: { [props: string]: string }) {
@@ -67,17 +69,38 @@ export class UserService {
   }
 
   async updateData() {
+    const theComplex = await this.complexService.findTheComplex();
+    const timeNumber = new Date(theComplex.last_users_update).getTime();
+    if (timeNumber) {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
+          requestHeader
+        )
+      );
+      if (res.data && res.data.length > 0)
+        for await (const record of res.data) {
+          const modifiedResponse = {
+            ...record,
+            _id: toObjectId(record._id),
+          };
+          await this.model.updateOne(
+            { _id: modifiedResponse._id },
+            { $set: modifiedResponse },
+            { upsert: true }
+          );
+        }
+    } else await this.updateForFirstTime();
+  }
+
+  async updateForFirstTime() {
     let hasMore = true;
     let page = 1;
     while (hasMore) {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}/${page}`,
-          {
-            headers: {
-              "api-key": process.env.COMPLEX_TOKEN,
-            },
-          }
+          requestHeader
         )
       );
       if (res?.data?.length > 0) {

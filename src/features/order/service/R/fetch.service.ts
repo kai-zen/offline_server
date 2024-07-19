@@ -333,17 +333,6 @@ export class OrderFetchService {
       .exec();
   }
 
-  async lastAddedOrder(complex_id: string) {
-    const [theOrder] =
-      (await this.model
-        .find({ complex: complex_id, order_type: { $in: [1, 2] } })
-        .sort({ created_at: -1 })
-        .limit(1)
-        .lean()
-        .exec()) || [];
-    return theOrder.created_at;
-  }
-
   async todayCount(complex_id: string) {
     const todayOrdersCount = await this.model
       .find({

@@ -4,13 +4,20 @@ import { Body, Controller, Param, Post, UseGuards } from "@nestjs/common";
 import { OrderCreateService } from "../service/C/by-emp.service";
 import { OrderActionService } from "../service/U/actions.service";
 import { CreateOrderDto } from "../dto/create.dto";
+import { OrderOtherCreateService } from "../service/C/other.service";
 
 @Controller("orders")
 export class OrderPostController {
   constructor(
     private readonly actionService: OrderActionService,
-    private readonly createService: OrderCreateService
+    private readonly createService: OrderCreateService,
+    private readonly orderOtherCreateService: OrderOtherCreateService
   ) {}
+
+  @Post("/upload")
+  async uploadOrders() {
+    await this.orderOtherCreateService.uploadOrders();
+  }
 
   // this route is for create order by complex employee
   @Post("/employee")

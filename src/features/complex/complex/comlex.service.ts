@@ -32,8 +32,26 @@ export class ComplexService {
     );
   }
 
+  async updatedAddress() {
+    const theRecord = await this.model.findOne({}).exec();
+    theRecord.last_addresses_update = new Date();
+    return await theRecord.save();
+  }
+
+  async updatedUsers() {
+    const theRecord = await this.model.findOne({}).exec();
+    theRecord.last_users_update = new Date();
+    return await theRecord.save();
+  }
+
+  async updatedOrders() {
+    const theRecord = await this.model.findOne({}).exec();
+    theRecord.last_orders_update = new Date();
+    return await theRecord.save();
+  }
+
   async findTheComplex() {
-    return this.model.findOne({}).exec();
+    return await this.model.findOne({}).exec();
   }
 
   async isOwner(user_id: string | Types.ObjectId, complex_id: string) {
