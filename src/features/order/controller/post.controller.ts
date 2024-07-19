@@ -1,6 +1,6 @@
 import { AccessLevel } from "src/helpers/decorators";
 import { HasAccessGuard } from "src/guards/access.guard";
-import { Body, Controller, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { OrderCreateService } from "../service/C/by-emp.service";
 import { OrderActionService } from "../service/U/actions.service";
 import { CreateOrderDto } from "../dto/create.dto";
@@ -28,7 +28,7 @@ export class OrderPostController {
   }
 
   @Post("/print/:complexId")
-  async printReceipt(@Body() body: any, @Param("complexId") complexId: string) {
-    return await this.actionService.printReceipt(complexId, body);
+  async printReceipt(@Body() body: any) {
+    return await this.actionService.printReceipt(body);
   }
 }

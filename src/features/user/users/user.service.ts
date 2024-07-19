@@ -75,7 +75,7 @@ export class UserService {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
-          { headers: { "api-key": process.env.COMPLEX_TOKEN } }
+          { headers: { "api-key": process.env.SECRET } }
         )
       );
       if (res.data && res.data.length > 0)
@@ -100,7 +100,7 @@ export class UserService {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}/${page}`,
-          { headers: { "api-key": process.env.COMPLEX_TOKEN } }
+          { headers: { "api-key": process.env.SECRET } }
         )
       );
       if (res?.data?.length > 0) {

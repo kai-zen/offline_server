@@ -141,7 +141,7 @@ export class ComplexUserAddressService {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
-          { headers: { "api-key": process.env.COMPLEX_TOKEN } }
+          { headers: { "api-key": process.env.SECRET } }
         )
       );
       if (res.data && res.data.length > 0)
@@ -166,7 +166,7 @@ export class ComplexUserAddressService {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`,
-          { headers: { "api-key": process.env.COMPLEX_TOKEN } }
+          { headers: { "api-key": process.env.SECRET } }
         )
       );
       if (res.data && res.data.length > 0) {

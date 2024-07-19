@@ -25,11 +25,8 @@ export class OrderActionService {
     private readonly accessService: AccessService
   ) {}
 
-  async printReceipt(
-    complex_id: string,
-    data: { printer: any; receipt: any[] }
-  ) {
-    await this.eventsGateway.printReceipt(complex_id, data);
+  async printReceipt(data: { printer: any; receipt: any[] }) {
+    await this.eventsGateway.printReceipt(data);
     return "success";
   }
 
@@ -51,7 +48,6 @@ export class OrderActionService {
     // websocket
     await this.eventsGateway.changeOrder({
       order: theOrder,
-      complex_id: theRecord.complex._id.toString(),
     });
     return theOrder;
   }
@@ -155,7 +151,6 @@ export class OrderActionService {
     // websocket
     await this.eventsGateway.changeOrder({
       order: theOrder,
-      complex_id,
       message: socketMessage,
     });
     return theOrder;
@@ -202,7 +197,6 @@ export class OrderActionService {
     // websocket
     await this.eventsGateway.changeOrder({
       order: theOrder,
-      complex_id,
     });
     return theOrder;
   }
@@ -239,7 +233,7 @@ export class OrderActionService {
     const theOrder = await theRecord.save();
 
     // websocket
-    await this.eventsGateway.changeOrder({ order: theOrder, complex_id });
+    await this.eventsGateway.changeOrder({ order: theOrder });
     return theRecord;
   }
 
@@ -296,7 +290,7 @@ export class OrderActionService {
     const theOrder = await theRecord.save();
 
     // websocket
-    await this.eventsGateway.changeOrder({ order: theOrder, complex_id });
+    await this.eventsGateway.changeOrder({ order: theOrder });
 
     return theRecord;
   }

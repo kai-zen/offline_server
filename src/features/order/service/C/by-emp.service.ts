@@ -190,7 +190,7 @@ export class OrderCreateService {
       { path: "user", select: "name mobile" },
       { path: "complex_user", select: "name" },
     ]);
-    await this.eventsGateway.addOrder(complex_id, completedData);
+    await this.eventsGateway.addOrder(completedData);
 
     return created_order;
   }

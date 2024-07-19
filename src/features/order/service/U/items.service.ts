@@ -98,7 +98,6 @@ export class OrderEditItemsService {
 
     // websocket
     await this.eventsGateway.changeOrder({
-      complex_id,
       order: { ...copy, products: combined } as OrderDocument,
       message: `موارد فاکتور ${theRecord.factor_number} اصلاح شد.`,
     });
@@ -158,7 +157,6 @@ export class OrderEditItemsService {
       (p) => `${p.product?.name} ${p.price?.title || ""}، `
     )} به فاکتور ${theOrder.factor_number} اضافه شد`;
     await this.eventsGateway.changeOrder({
-      complex_id,
       order: edited_order,
       message: socketMessage,
     });
@@ -237,7 +235,6 @@ export class OrderEditItemsService {
       products: modifiedProducts,
     } as OrderDocument;
     await this.eventsGateway.changeOrder({
-      complex_id,
       order,
       message: socketMessage,
     });

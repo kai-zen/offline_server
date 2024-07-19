@@ -63,7 +63,7 @@ export class CashBankService {
         {},
         {
           headers: {
-            "api-key": process.env.COMPLEX_TOKEN,
+            "api-key": process.env.SECRET,
           },
         }
       )
@@ -78,7 +78,7 @@ export class CashBankService {
         `${sofreBaseUrl}/cash-bank/localdb/${process.env.COMPLEX_ID}`,
         {
           headers: {
-            "api-key": process.env.COMPLEX_TOKEN,
+            "api-key": process.env.SECRET,
           },
         }
       )

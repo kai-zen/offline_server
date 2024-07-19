@@ -103,15 +103,12 @@ export class OrderEditPaymentAndStatusService {
         socketMessage = `فاکتور ${theRecord.factor_number} لغو شد.`;
       if (oldStatus === 1 && status === 2) socketMessage = "created";
     }
-
-    const complex_id = theRecord.complex._id.toString();
     const theOrder = await theRecord.save();
 
     // websocket
     if (theOrder.status > 1 || oldStatus > 1 || theOrder.table_number)
       await this.eventsGateway.changeOrder({
         order: theOrder,
-        complex_id,
         message: socketMessage,
       });
     return "success";
@@ -183,14 +180,12 @@ export class OrderEditPaymentAndStatusService {
         theRecord.cash_bank = theCashBank;
     }
 
-    const complex_id = theRecord.complex._id.toString();
     const theOrder = await theRecord.save();
 
     // websocket
     if (theRecord.status > 1 || theOrder.table_number)
       await this.eventsGateway.changeOrder({
         order: theOrder,
-        complex_id,
       });
 
     return "success";
@@ -225,14 +220,12 @@ export class OrderEditPaymentAndStatusService {
     }
     if (oldStatus === 1 && status === 2) socketMessage = "created";
 
-    const complex_id = theRecord.complex._id.toString();
     const theOrder = await theRecord.save();
 
     // websocket
     if (theOrder.status > 1 || oldStatus > 1 || theOrder.table_number)
       await this.eventsGateway.changeOrder({
         order: theOrder,
-        complex_id,
         message: socketMessage,
       });
     return "success";

@@ -25,13 +25,13 @@ import AreaModule from "./features/complex/area/area.module";
       isGlobal: true,
       envFilePath: ".env",
     }),
-    MongooseModule.forRoot(process.env.DB_CONNECTION_STRING),
+    MongooseModule.forRoot("mongodb://localhost:27017/local-sofre"),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     ScheduleModule.forRoot(),
     JwtModule.registerAsync({
       global: true,
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get("JWT_SECRET"),
+      useFactory: async () => ({
+        secret: "POKp6aK2DpGViU2wVvHYb3q00tDn5b",
       }),
       inject: [ConfigService],
     }),
