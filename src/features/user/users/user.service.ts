@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { UserDocument } from "./user.schema";
 import { lastValueFrom } from "rxjs";
-import { requestHeader, sofreBaseUrl } from "src/helpers/constants";
+import { sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { toObjectId } from "src/helpers/functions";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
@@ -75,7 +75,7 @@ export class UserService {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
-          requestHeader
+          { headers: { "api-key": process.env.COMPLEX_TOKEN } }
         )
       );
       if (res.data && res.data.length > 0)
@@ -100,7 +100,7 @@ export class UserService {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}/${page}`,
-          requestHeader
+          { headers: { "api-key": process.env.COMPLEX_TOKEN } }
         )
       );
       if (res?.data?.length > 0) {
