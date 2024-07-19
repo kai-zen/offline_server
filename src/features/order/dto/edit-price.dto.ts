@@ -18,8 +18,6 @@ export class EditPriceDto {
   user_discount: number;
 
   @IsString()
-  @IsNotEmpty({
-    message: "مجموعه تعیین نشده است.",
-  })
+  @IsNotEmpty({ message: "مجموعه تعیین نشده است." })
   complex_id: string;
 }

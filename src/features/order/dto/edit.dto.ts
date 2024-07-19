@@ -11,10 +11,6 @@ export class EditOrderDto {
 
   @IsString()
   @IsOptional()
-  complex_description?: string;
-
-  @IsString()
-  @IsOptional()
   cash_bank?: string;
 }
 

@@ -10,8 +10,6 @@ export class RemoveItemFromOrderDto {
   product_id: string;
 
   @IsString()
-  @IsNotEmpty({
-    message: "مجموعه تعیین نشده است.",
-  })
+  @IsNotEmpty({ message: "مجموعه تعیین نشده است." })
   complex_id: string;
 }

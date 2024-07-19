@@ -11,11 +11,11 @@ import {
 export class CreateOrderDto {
   @IsNumber()
   @IsOptional()
-  order_type: 1 | 2 | 3; // سایت - تلفنی - حضوری
+  order_type: 1 | 2; // سایت - تلفنی - حضوری
 
   @IsNumber()
   @IsOptional()
-  payment_type: 1 | 2 | 3 | 4 | 5 | 6;
+  payment_type: 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
   @IsString()
   description: string;
@@ -37,14 +37,8 @@ export class CreateOrderDto {
   };
 
   @IsArray()
-  @IsNotEmpty({
-    message: "محصولی انتخاب نشده است.",
-  })
+  @IsNotEmpty({ message: "محصولی انتخاب نشده است." })
   products: { product_id: string; quantity: number; price_index: number }[];
-
-  @IsString()
-  @IsOptional()
-  discount_id: string;
 
   @IsString()
   @IsOptional()
@@ -57,17 +51,20 @@ export class CreateOrderDto {
   @IsBoolean()
   needs_pack: boolean;
 
-  @IsBoolean()
-  is_platform: boolean;
-
   @IsNumber()
   @IsOptional()
   shpipping_price?: number;
 
+  @IsNumber()
+  @IsOptional()
+  extra_price?: number;
+
+  @IsNumber()
+  @IsOptional()
+  user_discount?: number;
+
   @IsString()
-  @IsNotEmpty({
-    message: "مجموعه تعیین نشده است.",
-  })
+  @IsNotEmpty({ message: "مجموعه تعیین نشده است." })
   complex_id: string;
 }
 

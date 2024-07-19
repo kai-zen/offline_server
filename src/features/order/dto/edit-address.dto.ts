@@ -20,6 +20,10 @@ export class EditAddressDto {
   } | null;
 
   @IsString()
+  @IsOptional()
+  table_number?: string;
+
+  @IsString()
   @IsNotEmpty({
     message: "مجموعه تعیین نشده است.",
   })
