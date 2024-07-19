@@ -2,11 +2,8 @@ import { JwtService } from "@nestjs/jwt";
 import { NextFunction, Request, Response } from "express";
 import { UserDocument } from "../user.schema";
 import { UserService } from "../user.service";
-import {
-  Injectable,
-  NestMiddleware,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { ForbiddenException, Injectable, NestMiddleware } from "@nestjs/common";
+import { messages } from "src/helpers/constants";
 
 declare global {
   namespace Express {
@@ -34,7 +31,7 @@ export class CurrentUserMiddleware implements NestMiddleware {
         const user = await this.userService.findById(tokenData._id);
         if (user) req.currentUser = user;
       } catch {
-        throw new UnauthorizedException();
+        throw new ForbiddenException(messages[403]);
       }
     }
     next();

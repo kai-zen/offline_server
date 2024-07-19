@@ -97,6 +97,8 @@ export class AccessService {
   }
 
   async hasAccess(user_id: string | Types.ObjectId, types?: number[]) {
+    const count = await this.model.countDocuments();
+    if (count === 0) return true;
     return await this.model.findOne({
       user: user_id,
       type: { $in: types || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },

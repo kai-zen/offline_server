@@ -10,6 +10,11 @@ export class PrinterController {
     return await this.service.findAll();
   }
 
+  @Get("/:complexId")
+  async findByComplex() {
+    return await this.service.findAll();
+  }
+
   @Put()
   async updateData() {
     return await this.service.updateData();

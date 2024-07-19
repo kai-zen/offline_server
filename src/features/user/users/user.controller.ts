@@ -11,7 +11,9 @@ export class UserController {
   }
 
   @Get("/is-running") isServerRunning() {
-    return true;
+    return {
+      is_connected: true,
+    };
   }
 
   @Get("/:id")

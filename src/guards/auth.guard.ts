@@ -2,9 +2,9 @@ import { messages } from "src/helpers/constants";
 import { Request } from "express";
 import {
   CanActivate,
-  UnauthorizedException,
   ExecutionContext,
   Injectable,
+  ForbiddenException,
 } from "@nestjs/common";
 
 @Injectable()
@@ -15,6 +15,6 @@ export class IsLoggedInGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
     const user = request.currentUser;
     if (user) return true;
-    throw new UnauthorizedException(messages[401]);
+    throw new ForbiddenException(messages[403]);
   }
 }
