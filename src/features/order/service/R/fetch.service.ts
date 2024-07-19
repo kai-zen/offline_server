@@ -44,7 +44,6 @@ export class OrderFetchService {
       .skip((parseInt(page) - 1) * parseInt(limit))
       .populate("products.product")
       .populate("complex")
-      .populate("complex_user", "name")
       .populate("user")
       .lean()
       .exec();
@@ -106,7 +105,6 @@ export class OrderFetchService {
       .skip((parseInt(page) - 1) * parseInt(limit))
       .populate("products.product")
       .populate("user")
-      .populate("complex_user", "name")
       .populate("cash_bank", "-complex")
       .select("-complex")
       .lean()
@@ -149,7 +147,6 @@ export class OrderFetchService {
       .skip((parseInt(page) - 1) * parseInt(limit))
       .populate("products.product")
       .populate("user")
-      .populate("complex_user", "name")
       .populate("cash_bank", "-complex")
       .select("-complex")
       .lean()
@@ -187,7 +184,6 @@ export class OrderFetchService {
       .skip((parseInt(page) - 1) * parseInt(limit))
       .populate("products.product")
       .populate("user")
-      .populate("complex_user", "name")
       .lean()
       .exec();
 
@@ -255,7 +251,6 @@ export class OrderFetchService {
       .populate("products.product")
       .populate("delivery_guy", "-complex -type")
       .populate("user")
-      .populate("complex_user", "name")
       .select("-complex")
       .lean()
       .exec();
@@ -317,7 +312,6 @@ export class OrderFetchService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
   }
 

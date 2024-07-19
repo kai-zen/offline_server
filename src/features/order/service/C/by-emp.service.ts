@@ -46,7 +46,6 @@ export class OrderCreateService {
       phone_number: string;
     };
     delivery_time?: number | null;
-    complex_user_id?: string;
     shipping_price?: number;
     extra_price?: number;
     user_discount?: number;
@@ -63,7 +62,6 @@ export class OrderCreateService {
       complex_id,
       table_number,
       cashbank_id,
-      complex_user_id,
       extra_price,
       delivery_time,
     } = data || {};
@@ -182,7 +180,6 @@ export class OrderCreateService {
       service: servicePrice,
       cash_bank: payment_type === 1 ? null : theCashBank || null,
       created_at: new Date(),
-      complex_user: complex_user_id ? toObjectId(complex_user_id) : null,
       status: 2,
       delivery_time,
     });

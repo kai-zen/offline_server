@@ -37,7 +37,6 @@ export class OrderEditPaymentAndStatusService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);
 
@@ -133,7 +132,6 @@ export class OrderEditPaymentAndStatusService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);
 
@@ -205,7 +203,6 @@ export class OrderEditPaymentAndStatusService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);
 

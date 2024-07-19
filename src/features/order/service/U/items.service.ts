@@ -36,7 +36,6 @@ export class OrderEditItemsService {
       })
       .populate("products.product")
       .populate("user", "name mobile")
-      .populate("complex_user", "name")
       .exec();
     if (!theRecord) throw new BadRequestException(messages[404]);
     if (theRecord?.status > 4)
@@ -120,7 +119,6 @@ export class OrderEditItemsService {
       })
       .populate("products.product")
       .populate("user", "name mobile")
-      .populate("complex_user", "name")
       .exec();
     if (!theOrder) throw new NotFoundException(messages[404]);
     if (theOrder.status > 4)

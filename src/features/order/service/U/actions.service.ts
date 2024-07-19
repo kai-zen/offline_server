@@ -39,7 +39,6 @@ export class OrderActionService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);
     if (theRecord.payment_type > 1)
@@ -83,7 +82,6 @@ export class OrderActionService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
 
     if (!theRecord) throw new NotFoundException(messages[400]);
@@ -181,7 +179,6 @@ export class OrderActionService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
 
     if (!theRecord) throw new NotFoundException("سفارش مربوطه پیدا نشد.");
@@ -224,7 +221,6 @@ export class OrderActionService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
 
     if (theRecord.status > 4)
@@ -268,7 +264,6 @@ export class OrderActionService {
       .populate("products.product")
       .populate("complex")
       .populate("user")
-      .populate("complex_user", "name")
       .exec();
 
     if (theRecord.status > 4)
