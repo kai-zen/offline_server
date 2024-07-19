@@ -21,6 +21,8 @@ import { OrderEditItemsService } from "./service/U/items.service";
 import { OrderCreateService } from "./service/C/by-emp.service";
 import { OrderThirdMethodsService } from "./service/helpers.service";
 import AreaModule from "../complex/area/area.module";
+import ComplexModule from "../complex/complex/complex.module";
+import { OrderOtherCreateService } from "./service/C/other.service";
 
 const Order = MongooseModule.forFeature([
   { name: "order", schema: OrderSchema },
@@ -36,6 +38,7 @@ const Order = MongooseModule.forFeature([
     DiscountModule,
     AccessModule,
     ComplexUserAddressModule,
+    ComplexModule,
     AreaModule,
     forwardRef(() => CashBankModule),
     HttpModule,
@@ -49,6 +52,7 @@ const Order = MongooseModule.forFeature([
     OrderEditItemsService,
     OrderCreateService,
     OrderThirdMethodsService,
+    OrderOtherCreateService,
   ],
   exports: [OrderActionService, OrderStatsService],
 })
