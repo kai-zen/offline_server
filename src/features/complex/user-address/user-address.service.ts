@@ -7,7 +7,7 @@ import { Injectable } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
-import { requestHeader, sofreBaseUrl } from "src/helpers/constants";
+import { sofreBaseUrl } from "src/helpers/constants";
 import { ComplexService } from "../complex/comlex.service";
 
 @Injectable()
@@ -141,7 +141,7 @@ export class ComplexUserAddressService {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
-          requestHeader
+          { headers: { "api-key": process.env.COMPLEX_TOKEN } }
         )
       );
       if (res.data && res.data.length > 0)
@@ -166,7 +166,7 @@ export class ComplexUserAddressService {
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`,
-          requestHeader
+          { headers: { "api-key": process.env.COMPLEX_TOKEN } }
         )
       );
       if (res.data && res.data.length > 0) {
