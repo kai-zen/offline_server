@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  NotFoundException,
   forwardRef,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
@@ -9,7 +10,7 @@ import { Model } from "mongoose";
 import { CashBank } from "./cash-bank.schema";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
 import { OrderStatsService } from "src/features/order/service/R/stats.service";
 import { OrderActionService } from "src/features/order/service/U/actions.service";
@@ -45,29 +46,32 @@ export class CashBankService {
       _id: toObjectId(id),
       complex: toObjectId(complex_id),
     });
-    if (!theRecord) return;
-    const hasOpen = await this.ordersStatsService.hasOpenOrders(complex_id);
+    if (!theRecord) throw new NotFoundException(messages[404]);
+
+    const hasOpen = await this.ordersStatsService.hasOpenOrders(complex_id, id);
     if (hasOpen)
       throw new BadRequestException(
         "پیش از بستن صندوق باید سفارشات پرداخت نشده تعیین وضعیت شوند."
       );
-    const newOrders = await this.orderOtherCreateService.newOrders();
-    if (newOrders.length > 0)
-      throw new BadRequestException(
-        "پیش از بستن صندوق باید سفارشات داخلی خود را روی سرور مرکزی آپلود کنید."
-      );
 
-    await lastValueFrom(
-      this.httpService.put(
-        `${sofreBaseUrl}/cash-bank/close/${process.env.COMPLEX_ID}/${id}`,
-        {},
-        {
-          headers: {
-            "api-key": process.env.SECRET,
-          },
-        }
-      )
-    );
+    await this.orderOtherCreateService.uploadOrders();
+
+    try {
+      await lastValueFrom(
+        this.httpService.put(
+          `${sofreBaseUrl}/cash-bank/close/${process.env.COMPLEX_ID}/${id}`,
+          {},
+          {
+            headers: {
+              "api-key": process.env.SECRET,
+            },
+          }
+        )
+      );
+    } catch (err) {
+      throw new BadRequestException("ا درخواست بستن صندوق شما انجام نشد.");
+    }
+
     theRecord.last_print = new Date();
     return await theRecord.save();
   }

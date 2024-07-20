@@ -122,9 +122,10 @@ export class OrderStatsService {
     return quantities;
   }
 
-  async hasOpenOrders(complexId: string) {
+  async hasOpenOrders(complexId: string, cashbankId: string) {
     return await this.model.exists({
       complex: toObjectId(complexId),
+      cash_bank: toObjectId(cashbankId),
       status: { $nin: [1, 6, 7] },
       payment_type: 1,
       on_hold: false,

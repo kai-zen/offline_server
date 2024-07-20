@@ -54,6 +54,6 @@ const Order = MongooseModule.forFeature([
     OrderThirdMethodsService,
     OrderOtherCreateService,
   ],
-  exports: [OrderActionService, OrderStatsService],
+  exports: [OrderActionService, OrderStatsService, OrderOtherCreateService],
 })
 export default class OrderModule {}
