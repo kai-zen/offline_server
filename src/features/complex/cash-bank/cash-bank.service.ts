@@ -13,7 +13,6 @@ import { lastValueFrom } from "rxjs";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
 import { OrderStatsService } from "src/features/order/service/R/stats.service";
-import { OrderActionService } from "src/features/order/service/U/actions.service";
 import { OrderOtherCreateService } from "src/features/order/service/C/other.service";
 
 @Injectable()
@@ -23,7 +22,7 @@ export class CashBankService {
     private readonly model: Model<CashBank>,
     @Inject(forwardRef(() => OrderStatsService))
     private readonly ordersStatsService: OrderStatsService,
-    @Inject(forwardRef(() => OrderActionService))
+    @Inject(forwardRef(() => OrderOtherCreateService))
     private readonly orderOtherCreateService: OrderOtherCreateService,
     private readonly httpService: HttpService
   ) {}
