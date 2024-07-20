@@ -173,7 +173,6 @@ export class OrderCreateService {
     // websocket
     const completedData = await this.model.populate(created_order, [
       { path: "user", select: "name mobile" },
-      { path: "complex_user", select: "name" },
     ]);
     await this.eventsGateway.addOrder(completedData);
 
