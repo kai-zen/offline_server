@@ -1,9 +1,7 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
-  forwardRef,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
@@ -20,9 +18,7 @@ export class CashBankService {
   constructor(
     @InjectModel("cash-bank")
     private readonly model: Model<CashBank>,
-    @Inject(forwardRef(() => OrderStatsService))
     private readonly ordersStatsService: OrderStatsService,
-    @Inject(forwardRef(() => OrderOtherCreateService))
     private readonly orderOtherCreateService: OrderOtherCreateService,
     private readonly httpService: HttpService
   ) {}

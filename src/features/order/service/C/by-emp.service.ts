@@ -3,15 +3,8 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { UserDocument } from "src/features/user/users/user.schema";
 import { UserService } from "src/features/user/users/user.service";
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  forwardRef,
-} from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { p2e, toObjectId } from "src/helpers/functions";
-import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { OrderDocument } from "../../order.schema";
 import { OrderThirdMethodsService } from "../helpers.service";
 import { AreaService } from "src/features/complex/area/area.service";
@@ -24,9 +17,7 @@ export class OrderCreateService {
     private readonly userService: UserService,
     private readonly eventsGateway: EventsGateway,
     private readonly orderThirdMethods: OrderThirdMethodsService,
-    private readonly areaService: AreaService,
-    @Inject(forwardRef(() => CashBankService))
-    private readonly cashBankService: CashBankService
+    private readonly areaService: AreaService
   ) {}
 
   async createByEmployee(data: {
@@ -106,12 +97,6 @@ export class OrderCreateService {
         "امکان انتخاب شیوه پرداخت درگاه وجود ندارد."
       );
 
-    const theCashBank = cashbank_id
-      ? await this.cashBankService.findById(cashbank_id)
-      : null;
-    if (cashbank_id && !theCashBank && payment_type !== 1)
-      throw new NotFoundException("صندوق مورد نظر شما وجود ندارد.");
-
     // calculate different prices
     if (typeof shipping_price !== "number")
       shipping_price = Boolean(!user_address?.description || table_number)
@@ -178,7 +163,7 @@ export class OrderCreateService {
       extra_price: extra_price || 0,
       tax,
       service: servicePrice,
-      cash_bank: payment_type === 1 ? null : theCashBank || null,
+      cash_bank: payment_type === 1 ? null : toObjectId(cashbank_id) || null,
       created_at: new Date(),
       status: 2,
       delivery_time,
