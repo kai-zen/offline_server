@@ -41,12 +41,11 @@ export class EventsGateway {
   }
 
   @SubscribeMessage("local-live-orders")
-  findAll(@MessageBody() body: OrderDocument) {
+  localOrders(@MessageBody() body: OrderDocument) {
     return body;
   }
-
-  @SubscribeMessage("order")
-  orderStatus(@MessageBody() body: OrderDocument) {
+  @SubscribeMessage("print-receipt")
+  receiptPrinter(@MessageBody() body: { printer: any; receipt: any[] }) {
     return body;
   }
 }

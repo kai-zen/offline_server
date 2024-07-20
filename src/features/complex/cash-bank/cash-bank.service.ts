@@ -51,21 +51,22 @@ export class CashBankService {
 
     await this.orderOtherCreateService.uploadOrders();
 
-    try {
-      await lastValueFrom(
-        this.httpService.put(
-          `${sofreBaseUrl}/cash-bank/close/${process.env.COMPLEX_ID}/${id}`,
-          {},
-          {
-            headers: {
-              "api-key": process.env.SECRET,
-            },
-          }
-        )
-      );
-    } catch (err) {
-      throw new BadRequestException("ا درخواست بستن صندوق شما انجام نشد.");
-    }
+    // try {
+    await lastValueFrom(
+      this.httpService.put(
+        `${sofreBaseUrl}/cash-bank/close/${process.env.COMPLEX_ID}/${id}`,
+        {},
+        {
+          headers: {
+            "api-key": process.env.SECRET,
+          },
+        }
+      )
+    );
+    // }
+    // catch (err) {
+    //   throw new BadRequestException("درخواست بستن صندوق شما انجام نشد.");
+    // }
 
     theRecord.last_print = new Date();
     return await theRecord.save();
