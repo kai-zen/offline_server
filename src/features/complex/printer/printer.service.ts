@@ -47,4 +47,16 @@ export class PrinterService {
     });
     await this.model.insertMany(modifiedResults);
   }
+
+  async deleteOne(id: string) {
+    const theRecord = await this.model.findOne({
+      _id: toObjectId(id),
+    });
+    if (!theRecord) return;
+
+    await this.model.deleteOne({
+      _id: toObjectId(id),
+    });
+    return "success";
+  }
 }
