@@ -21,6 +21,23 @@ export class ComplexUserAddressService {
     private readonly complexService: ComplexService
   ) {}
 
+  async findAll(complexId: string, queryParams: { [props: string]: string }) {
+    const { search = "", limit = "8" } = queryParams || {};
+    const results = await this.model
+      .find({
+        complex: toObjectId(complexId),
+        $or: [
+          { name: { $regex: search } },
+          { phone_number: { $regex: search } },
+          { description: { $regex: search } },
+        ],
+      })
+      .limit(parseInt(limit))
+      .exec();
+
+    return results;
+  }
+
   async findByUser(user_id: string) {
     return await this.model.find({ user: toObjectId(user_id) }).exec();
   }
@@ -49,6 +66,10 @@ export class ComplexUserAddressService {
     }
 
     return addressesWithShippingPrice;
+  }
+
+  async findById(id: string) {
+    return await this.model.findById(id).exec();
   }
 
   async findByMobile(mobile: string) {
