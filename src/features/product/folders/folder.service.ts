@@ -30,12 +30,18 @@ export class ProductFolderService {
         }
       )
     );
-    await this.model.deleteMany({});
-    const modifiedResults = (res.data || []).map((record) => ({
-      ...record,
-      _id: toObjectId(record._id),
-      complex: toObjectId(record.complex),
-    }));
-    await this.model.insertMany(modifiedResults);
+    for await (const record of res.data) {
+      const modifiedResponse = {
+        ...record,
+        _id: toObjectId(record._id),
+        complex: toObjectId(record.complex),
+      };
+      await this.model.updateOne(
+        { _id: modifiedResponse._id },
+        { $set: modifiedResponse },
+        { upsert: true }
+      );
+    }
+    return "success";
   }
 }
