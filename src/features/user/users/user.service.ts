@@ -70,7 +70,11 @@ export class UserService {
 
   async updateData() {
     const theComplex = await this.complexService.findTheComplex();
-    const timeNumber = new Date(theComplex.last_users_update).getTime();
+    if (!theComplex) return;
+    const timeNumber = theComplex.last_users_update
+      ? new Date(theComplex.last_users_update).getTime()
+      : null;
+
     if (timeNumber) {
       const res = await lastValueFrom(
         this.httpService.get(
@@ -78,7 +82,7 @@ export class UserService {
           { headers: { "api-key": process.env.SECRET } }
         )
       );
-      if (res.data && res.data.length > 0)
+      if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
           const modifiedResponse = {
             ...record,
@@ -90,6 +94,9 @@ export class UserService {
             { upsert: true }
           );
         }
+        await this.complexService.updatedUsers();
+        return "success";
+      }
     } else await this.updateForFirstTime();
   }
 
@@ -114,5 +121,7 @@ export class UserService {
         ++page;
       } else hasMore = false;
     }
+    await this.complexService.updatedUsers();
+    return "success";
   }
 }

@@ -157,7 +157,11 @@ export class ComplexUserAddressService {
 
   async updateData() {
     const theComplex = await this.complexService.findTheComplex();
-    const timeNumber = new Date(theComplex.last_addresses_update).getTime();
+    if (!theComplex) return;
+    const timeNumber = theComplex.last_addresses_update
+      ? new Date(theComplex.last_addresses_update).getTime()
+      : null;
+
     if (timeNumber) {
       const res = await lastValueFrom(
         this.httpService.get(
@@ -165,7 +169,7 @@ export class ComplexUserAddressService {
           { headers: { "api-key": process.env.SECRET } }
         )
       );
-      if (res.data && res.data.length > 0)
+      if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
           const modifiedResponse = {
             ...record,
@@ -177,7 +181,10 @@ export class ComplexUserAddressService {
             { upsert: true }
           );
         }
-    } else await this.updateForFirstTime();
+        await this.complexService.updatedAddress();
+        return "success";
+      }
+    } else return await this.updateForFirstTime();
   }
 
   async updateForFirstTime() {
@@ -205,5 +212,7 @@ export class ComplexUserAddressService {
         ++page;
       } else hasMore = false;
     }
+    await this.complexService.updatedAddress();
+    return "success";
   }
 }
