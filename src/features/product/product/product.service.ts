@@ -164,21 +164,25 @@ export class ProductService {
         }
       )
     );
-    await this.model.deleteMany({});
-    const modifiedResults = (res.data || []).map((record) => {
+
+    for await (const record of res.data) {
       const pricesObjectIds = record.prices.map((p) => ({
         ...p,
         _id: toObjectId(p._id),
       }));
-      return {
+      const modifiedResponse = {
         ...record,
         prices: pricesObjectIds,
         folder: toObjectId(record.folder),
         _id: toObjectId(record._id),
         complex: toObjectId(record.complex),
       };
-    });
-    await this.model.insertMany(modifiedResults);
+      await this.model.updateOne(
+        { _id: modifiedResponse._id },
+        { $set: modifiedResponse },
+        { upsert: true }
+      );
+    }
   }
 }
 

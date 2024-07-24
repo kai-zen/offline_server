@@ -1,7 +1,6 @@
 import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { toObjectId } from "src/helpers/functions";
 import { Injectable } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
@@ -9,6 +8,7 @@ import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { ComplexService } from "../complex/comlex.service";
+import { RangeService } from "../range/range.service";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -16,10 +16,27 @@ export class ComplexUserAddressService {
     @InjectModel("complex-user-address")
     private readonly model: Model<ComplexUserAddress>,
     private readonly userService: UserService,
-    private readonly shippingRangeService: ShippingRangeService,
+    private readonly rangeService: RangeService,
     private readonly httpService: HttpService,
     private readonly complexService: ComplexService
   ) {}
+
+  async findAll(complexId: string, queryParams: { [props: string]: string }) {
+    const { search = "", limit = "8" } = queryParams || {};
+    const results = await this.model
+      .find({
+        complex: toObjectId(complexId),
+        $or: [
+          { name: { $regex: search } },
+          { phone_number: { $regex: search } },
+          { description: { $regex: search } },
+        ],
+      })
+      .limit(parseInt(limit))
+      .exec();
+
+    return results;
+  }
 
   async findByUser(user_id: string) {
     return await this.model.find({ user: toObjectId(user_id) }).exec();
@@ -37,10 +54,10 @@ export class ComplexUserAddressService {
       const { latitude, longitude } = address || {};
       const theRange =
         latitude && longitude
-          ? await this.shippingRangeService.findCorrespondingRange([
+          ? await this.rangeService.findCorrespondingRange({
               latitude,
               longitude,
-            ])
+            })
           : null;
       addressesWithShippingPrice.push({
         ...address,
@@ -49,6 +66,10 @@ export class ComplexUserAddressService {
     }
 
     return addressesWithShippingPrice;
+  }
+
+  async findById(id: string) {
+    return await this.model.findById(id).exec();
   }
 
   async findByMobile(mobile: string) {
@@ -136,7 +157,11 @@ export class ComplexUserAddressService {
 
   async updateData() {
     const theComplex = await this.complexService.findTheComplex();
-    const timeNumber = new Date(theComplex.last_addresses_update).getTime();
+    if (!theComplex) return;
+    const timeNumber = theComplex.last_addresses_update
+      ? new Date(theComplex.last_addresses_update).getTime()
+      : null;
+
     if (timeNumber) {
       const res = await lastValueFrom(
         this.httpService.get(
@@ -144,7 +169,7 @@ export class ComplexUserAddressService {
           { headers: { "api-key": process.env.SECRET } }
         )
       );
-      if (res.data && res.data.length > 0)
+      if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
           const modifiedResponse = {
             ...record,
@@ -156,7 +181,10 @@ export class ComplexUserAddressService {
             { upsert: true }
           );
         }
-    } else await this.updateForFirstTime();
+        await this.complexService.updatedAddress();
+        return "success";
+      }
+    } else return await this.updateForFirstTime();
   }
 
   async updateForFirstTime() {
@@ -184,5 +212,7 @@ export class ComplexUserAddressService {
         ++page;
       } else hasMore = false;
     }
+    await this.complexService.updatedAddress();
+    return "success";
   }
 }

@@ -35,8 +35,8 @@ export class CashBankService {
     return await this.model.findById(id);
   }
 
-  async closeCashBank(data: { complex_id: string; id: string }) {
-    const { id, complex_id } = data || {};
+  async closeCashBank(data: { complex_id: string; id: string; token: string }) {
+    const { id, complex_id, token } = data || {};
     const theRecord = await this.model.findOne({
       _id: toObjectId(id),
       complex: toObjectId(complex_id),
@@ -59,6 +59,7 @@ export class CashBankService {
         {
           headers: {
             "api-key": process.env.SECRET,
+            Authorization: token,
           },
         }
       )
@@ -83,12 +84,18 @@ export class CashBankService {
         }
       )
     );
-    await this.model.deleteMany({});
-    const modifiedResults = (res.data || []).map((record) => ({
-      ...record,
-      _id: toObjectId(record._id),
-      complex: toObjectId(record.complex),
-    }));
-    await this.model.insertMany(modifiedResults);
+    for await (const record of res.data) {
+      const modifiedResponse = {
+        ...record,
+        _id: toObjectId(record._id),
+        complex: toObjectId(record.complex),
+      };
+      await this.model.updateOne(
+        { _id: modifiedResponse._id },
+        { $set: modifiedResponse },
+        { upsert: true }
+      );
+    }
+    return "success";
   }
 }

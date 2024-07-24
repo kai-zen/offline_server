@@ -3,7 +3,6 @@ import ComplexModule from "./features/complex/complex/complex.module";
 import DiscountModule from "./features/product/discount/discount.module";
 import OrderModule from "./features/order/order.module";
 import ProductModule from "./features/product/product/product.module";
-import ShippingRangeModule from "./features/complex/shipping-range/shipping-range.module";
 import UserModule from "./features/user/users/user.module";
 import { APP_GUARD } from "@nestjs/core";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -18,6 +17,8 @@ import ProductFolderModule from "./features/product/folders/folder.module";
 import { JwtModule, JwtService } from "@nestjs/jwt";
 import PrinterModule from "./features/complex/printer/printer.module";
 import AreaModule from "./features/complex/area/area.module";
+import RegionModule from "./features/region/region.module";
+import RangeModule from "./features/complex/range/range.module";
 
 @Module({
   imports: [
@@ -39,7 +40,6 @@ import AreaModule from "./features/complex/area/area.module";
     UserModule,
     ComplexModule,
     AccessModule,
-    ShippingRangeModule,
     ProductModule,
     DiscountModule,
     OrderModule,
@@ -48,6 +48,8 @@ import AreaModule from "./features/complex/area/area.module";
     ComplexUserAddressModule,
     PrinterModule,
     AreaModule,
+    RegionModule,
+    RangeModule,
     // websocket
     EventsModule,
   ],

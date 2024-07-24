@@ -1,10 +1,10 @@
 import { ComplexDocument } from "./complex.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 
 @Injectable()
 export class ComplexService {
@@ -34,18 +34,21 @@ export class ComplexService {
 
   async updatedAddress() {
     const theRecord = await this.model.findOne({}).exec();
+    if (!theRecord) throw new NotFoundException(messages[404]);
     theRecord.last_addresses_update = new Date();
     return await theRecord.save();
   }
 
   async updatedUsers() {
     const theRecord = await this.model.findOne({}).exec();
+    if (!theRecord) throw new NotFoundException(messages[404]);
     theRecord.last_users_update = new Date();
     return await theRecord.save();
   }
 
   async updatedOrders() {
     const theRecord = await this.model.findOne({}).exec();
+    if (!theRecord) throw new NotFoundException(messages[404]);
     theRecord.last_orders_update = new Date();
     return await theRecord.save();
   }
