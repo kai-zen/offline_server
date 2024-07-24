@@ -26,7 +26,7 @@ export class CurrentUserMiddleware implements NestMiddleware {
     if (type === "Bearer") {
       try {
         const tokenData = await this.jwtService.verifyAsync(token, {
-          secret: "POKp6aK2DpGViU2wVvHYb3q00tDn5b",
+          secret: process.env.GLOBAL_SECRET,
         });
         const user = await this.userService.findById(tokenData._id);
         if (user) req.currentUser = user;
