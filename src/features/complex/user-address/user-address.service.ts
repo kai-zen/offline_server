@@ -1,7 +1,6 @@
 import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { toObjectId } from "src/helpers/functions";
 import { Injectable } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
@@ -9,6 +8,7 @@ import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { ComplexService } from "../complex/comlex.service";
+import { RangeService } from "../range/range.service";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -16,7 +16,7 @@ export class ComplexUserAddressService {
     @InjectModel("complex-user-address")
     private readonly model: Model<ComplexUserAddress>,
     private readonly userService: UserService,
-    private readonly shippingRangeService: ShippingRangeService,
+    private readonly rangeService: RangeService,
     private readonly httpService: HttpService,
     private readonly complexService: ComplexService
   ) {}
@@ -54,10 +54,10 @@ export class ComplexUserAddressService {
       const { latitude, longitude } = address || {};
       const theRange =
         latitude && longitude
-          ? await this.shippingRangeService.findCorrespondingRange([
+          ? await this.rangeService.findCorrespondingRange({
               latitude,
               longitude,
-            ])
+            })
           : null;
       addressesWithShippingPrice.push({
         ...address,

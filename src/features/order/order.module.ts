@@ -1,6 +1,5 @@
 import DiscountModule from "src/features/product/discount/discount.module";
 import ProductModule from "src/features/product/product/product.module";
-import ShippingRangeModule from "src/features/complex/shipping-range/shipping-range.module";
 import UserModule from "src/features/user/users/user.module";
 import { EventsModule } from "src/websocket/events.module";
 import { forwardRef, Module } from "@nestjs/common";
@@ -23,6 +22,7 @@ import { OrderThirdMethodsService } from "./service/helpers.service";
 import AreaModule from "../complex/area/area.module";
 import ComplexModule from "../complex/complex/complex.module";
 import { OrderOtherCreateService } from "./service/C/other.service";
+import RangeModule from "../complex/range/range.module";
 
 const Order = MongooseModule.forFeature([
   { name: "order", schema: OrderSchema },
@@ -32,7 +32,7 @@ const Order = MongooseModule.forFeature([
   imports: [
     Order,
     ProductModule,
-    ShippingRangeModule,
+    RangeModule,
     UserModule,
     EventsModule,
     DiscountModule,

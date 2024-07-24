@@ -4,8 +4,6 @@ import { DiscountService } from "src/features/product/discount/discount.service"
 import { messages } from "src/helpers/constants";
 import { OrderDocument } from "../order.schema";
 import { ProductDocument } from "src/features/product/product/product.schema";
-import { ShippingRangeDocument } from "src/features/complex/shipping-range/shipping-range.schema";
-import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { Model } from "mongoose";
 import {
   BadRequestException,
@@ -17,6 +15,8 @@ import { Complex } from "src/features/complex/complex/complex.schema";
 import { toObjectId } from "src/helpers/functions";
 import { InjectModel } from "@nestjs/mongoose";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
+import { RangeService } from "src/features/complex/range/range.service";
+import { RangeDocument } from "src/features/complex/range/range.schema";
 
 @Injectable()
 export class OrderThirdMethodsService {
@@ -25,7 +25,7 @@ export class OrderThirdMethodsService {
     private readonly model: Model<OrderDocument>,
     private readonly productService: ProductFetchService,
     private readonly complexService: ComplexService,
-    private readonly shippingRangeService: ShippingRangeService,
+    private readonly rangeService: RangeService,
     private readonly discountService: DiscountService
   ) {}
 
@@ -73,16 +73,16 @@ export class OrderThirdMethodsService {
     latitude: number;
     longitude: number;
   }) {
-    let theRange: ShippingRangeDocument | null;
+    let theRange: RangeDocument | null;
     if (user_address) {
       const { latitude, longitude } = user_address || {};
       if (!latitude || !longitude)
         throw new BadRequestException("مختصات جغرافیایی وارد نشده است.");
       else
-        theRange = await this.shippingRangeService.findCorrespondingRange([
-          user_address.latitude,
-          user_address.longitude,
-        ]);
+        theRange = await this.rangeService.findCorrespondingRange({
+          latitude: user_address.latitude,
+          longitude: user_address.longitude,
+        });
 
       if (!theRange)
         throw new ForbiddenException(

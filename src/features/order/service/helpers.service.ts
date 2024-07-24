@@ -2,8 +2,6 @@ import { discountCalculator } from "src/features/product/product/helpers/functio
 import { DiscountService } from "src/features/product/discount/discount.service";
 import { OrderDocument } from "../order.schema";
 import { ProductDocument } from "src/features/product/product/product.schema";
-import { ShippingRangeDocument } from "src/features/complex/shipping-range/shipping-range.schema";
-import { ShippingRangeService } from "src/features/complex/shipping-range/shipping-range.service";
 import { Model, Types } from "mongoose";
 import {
   BadRequestException,
@@ -16,6 +14,8 @@ import { toObjectId } from "src/helpers/functions";
 import { InjectModel } from "@nestjs/mongoose";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
 import ProductService from "src/features/product/product/product.service";
+import { RangeService } from "src/features/complex/range/range.service";
+import { RangeDocument } from "src/features/complex/range/range.schema";
 
 @Injectable()
 export class OrderThirdMethodsService {
@@ -23,7 +23,7 @@ export class OrderThirdMethodsService {
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
     private readonly complexService: ComplexService,
-    private readonly shippingRangeService: ShippingRangeService,
+    private readonly rangeService: RangeService,
     private readonly discountService: DiscountService,
     private readonly productService: ProductService
   ) {}
@@ -114,15 +114,15 @@ export class OrderThirdMethodsService {
     if (!complex_id || !user_address)
       throw new BadRequestException("اطلاعات وارد شده ناقص است.");
 
-    let theRange: ShippingRangeDocument | null;
+    let theRange: RangeDocument | null;
     const { latitude, longitude } = user_address || {};
     if (!latitude || !longitude)
       throw new BadRequestException("مختصات جغرافیایی وارد نشده است.");
     else
-      theRange = await this.shippingRangeService.findCorrespondingRange([
-        user_address.latitude,
-        user_address.longitude,
-      ]);
+      theRange = await this.rangeService.findCorrespondingRange({
+        latitude: user_address.latitude,
+        longitude: user_address.longitude,
+      });
 
     if (!theRange)
       throw new ForbiddenException(

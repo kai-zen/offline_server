@@ -1,4 +1,3 @@
-import { ShippingRangeService } from "./shipping-range.service";
 import {
   BadRequestException,
   Controller,
@@ -6,10 +5,11 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
+import { RangeService } from "./range.service";
 
-@Controller("shipping-range")
-export class ShippingRangeController {
-  constructor(private service: ShippingRangeService) {}
+@Controller("range")
+export class RangeController {
+  constructor(private service: RangeService) {}
 
   @Get()
   async findAll() {
@@ -27,10 +27,10 @@ export class ShippingRangeController {
   ) {
     const { lat, lng } = queryParams;
     if (!Number(lat) || !Number(lng)) throw new BadRequestException();
-    const theRange = await this.service.findCorrespondingRange([
-      Number(lat),
-      Number(lng),
-    ]);
+    const theRange = await this.service.findCorrespondingRange({
+      latitude: Number(lat),
+      longitude: Number(lng),
+    });
     return typeof theRange?.price === "number"
       ? theRange.price || 0
       : "not in range";
