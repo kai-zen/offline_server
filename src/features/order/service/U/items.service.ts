@@ -102,7 +102,7 @@ export class OrderEditItemsService {
     try {
       await lastValueFrom(
         this.httpService.put(
-          `${sofreBaseUrl}/orders/last-added/${process.env.COMPLEX_ID}`,
+          `${sofreBaseUrl}/product/change-stock/${process.env.COMPLEX_ID}`,
           { products: differences },
           { headers: { "api-key": process.env.SECRET } }
         )
