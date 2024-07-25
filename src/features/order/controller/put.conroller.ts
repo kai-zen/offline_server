@@ -4,11 +4,9 @@ import { Body, Controller, Param, Put, UseGuards } from "@nestjs/common";
 import { OrderActionService } from "../service/U/actions.service";
 import { ModifyOrderItemsDto } from "../dto/modify.dto";
 import { OrderEditItemsService } from "../service/U/items.service";
-import { AddItemToOrderDto } from "../dto/add.dto";
 import { EditAddressDto } from "../dto/edit-address.dto";
 import { EditDeliveryDto } from "../dto/edit-delivery.dto";
 import { EditPriceDto } from "../dto/edit-price.dto";
-import { RemoveItemFromOrderDto } from "../dto/remove-item.dto";
 import { EditOrderDto } from "../dto/edit.dto";
 import { OrderEditPaymentAndStatusService } from "../service/U/pay-and-status.service";
 import { ChangeOrderUserDto } from "../dto/modify-user.dto";
@@ -26,31 +24,6 @@ export class OrderPutController {
   @UseGuards(HasAccessGuard)
   async modifyItems(@Body() body: ModifyOrderItemsDto) {
     return await this.editItemsService.modifyItems(body);
-  }
-
-  @Put("/employee/add/:id")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
-  async addItemsToOrderByEmployee(
-    @Param("id") recordId: string,
-    @Body() body: AddItemToOrderDto
-  ) {
-    return await this.editItemsService.addItemsToExistingOrder({
-      ...body,
-      order_id: recordId,
-    });
-  }
-
-  @Put("/remove-item/:id")
-  @AccessLevel([1, 2, 3, 4])
-  async removeItem(
-    @Param("id") recordId: string,
-    @Body() body: RemoveItemFromOrderDto
-  ) {
-    return await this.editItemsService.removeItemFromExistingOrder({
-      ...body,
-      order_id: recordId,
-    });
   }
 
   @Put("/employee/modify-user")
