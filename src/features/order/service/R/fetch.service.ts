@@ -122,20 +122,15 @@ export class OrderFetchService {
     };
   }
 
-  async findCashbankOrders(complex_id: string, cash_bank: string) {
+  async findCashbankOrders(cash_bank: string) {
     const theCashbank = await this.cashbankService.findById(cash_bank);
     if (!theCashbank) throw new NotFoundException(messages[404]);
 
-    const filters: any[] = [
-      {
-        complex: complex_id,
-        cash_bank: cash_bank,
-        payed_at: { $gte: new Date(theCashbank.last_print) },
-      },
-    ];
-
     const results = await this.model
-      .find({ $and: filters })
+      .find({
+        cash_bank,
+        payed_at: { $gte: new Date(theCashbank.last_print) },
+      })
       .sort({ created_at: -1 })
       .populate("products.product")
       .populate("user")

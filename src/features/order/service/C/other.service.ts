@@ -22,14 +22,8 @@ export class OrderOtherCreateService {
     const lastCreatedAt = theComplex.last_orders_update
       ? new Date(theComplex.last_orders_update)
       : null;
-    const newOrders = await this.model
-      .find(
-        lastCreatedAt
-          ? { created_at: { $gt: lastCreatedAt }, status: 5 }
-          : { status: 5 }
-      )
-      .exec();
-    return newOrders;
+    const filters = lastCreatedAt ? { payed_at: { $gt: lastCreatedAt } } : {};
+    return await this.model.find(filters).exec();
   }
 
   async uploadOrders() {
@@ -42,16 +36,13 @@ export class OrderOtherCreateService {
             complex_id: process.env.COMPLEX_ID,
             orders: newOrders,
           },
-          {
-            headers: {
-              "api-key": process.env.SECRET,
-            },
-          }
+          { headers: { "api-key": process.env.SECRET } }
         )
       );
       await this.complexService.updatedOrders();
     } catch (err) {
       console.log(err);
+      return err.response.data;
     }
     return "success";
   }

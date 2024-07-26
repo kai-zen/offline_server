@@ -50,7 +50,6 @@ export class CashBankService {
       );
 
     await this.orderOtherCreateService.uploadOrders();
-
     try {
       await lastValueFrom(
         this.httpService.put(

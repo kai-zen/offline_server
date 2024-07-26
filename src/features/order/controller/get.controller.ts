@@ -35,11 +35,8 @@ export class OrderGetController {
   }
 
   @Get("/complex/cash-bank/:complexId/:cashbankId")
-  async findCashbankOrders(
-    @Param("complexId") complexId: string,
-    @Param("cashbankId") cashbankId: string
-  ) {
-    return await this.fetchService.findCashbankOrders(complexId, cashbankId);
+  async findCashbankOrders(@Param("cashbankId") cashbankId: string) {
+    return await this.fetchService.findCashbankOrders(cashbankId);
   }
 
   @Get("/complex/:complexId")
