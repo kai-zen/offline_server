@@ -51,50 +51,50 @@ export class CashBankService {
 
     await this.orderOtherCreateService.uploadOrders();
 
-    // try {
-    await lastValueFrom(
-      this.httpService.put(
-        `${sofreBaseUrl}/cash-bank/close/${process.env.COMPLEX_ID}/${id}`,
-        {},
-        {
-          headers: {
-            "api-key": process.env.SECRET,
-            Authorization: token,
-          },
-        }
-      )
-    );
-    // }
-    // catch (err) {
-    //   throw new BadRequestException("درخواست بستن صندوق شما انجام نشد.");
-    // }
+    try {
+      await lastValueFrom(
+        this.httpService.put(
+          `${sofreBaseUrl}/cash-bank/close/${process.env.COMPLEX_ID}/${id}`,
+          {},
+          {
+            headers: {
+              "api-key": process.env.SECRET,
+              Authorization: token,
+            },
+          }
+        )
+      );
+    } catch (err) {
+      console.log(err, "cash-bank/close");
+      throw new BadRequestException("درخواست بستن صندوق شما انجام نشد.");
+    }
 
     theRecord.last_print = new Date();
     return await theRecord.save();
   }
 
   async updateData() {
-    const res = await lastValueFrom(
-      this.httpService.get(
-        `${sofreBaseUrl}/cash-bank/localdb/${process.env.COMPLEX_ID}`,
-        {
-          headers: {
-            "api-key": process.env.SECRET,
-          },
-        }
-      )
-    );
-    for await (const record of res.data) {
-      const modifiedResponse = {
-        ...record,
-        _id: toObjectId(record._id),
-        complex: toObjectId(record.complex),
-      };
-      await this.model.updateOne(
-        { _id: modifiedResponse._id },
-        { $set: modifiedResponse },
-        { upsert: true }
+    try {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/cash-bank/localdb/${process.env.COMPLEX_ID}`,
+          { headers: { "api-key": process.env.SECRET } }
+        )
       );
+      for await (const record of res.data || []) {
+        const modifiedResponse = {
+          ...record,
+          _id: toObjectId(record._id),
+          complex: toObjectId(record.complex),
+        };
+        await this.model.updateOne(
+          { _id: modifiedResponse._id },
+          { $set: modifiedResponse },
+          { upsert: true }
+        );
+      }
+    } catch (err) {
+      console.log(err, "cash-bank/localdb");
     }
     return "success";
   }
