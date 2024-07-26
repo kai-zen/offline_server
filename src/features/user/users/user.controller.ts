@@ -10,18 +10,8 @@ export class UserController {
     return await this.service.findAll(queryParams);
   }
 
-  @Get("/user/:complexId")
-  async findAllByComplex(@Query() queryParams: { [props: string]: string }) {
-    return await this.service.findAll(queryParams);
-  }
-
   @Get("/complex-user")
   async findAll2(@Query() queryParams: { [props: string]: string }) {
-    return await this.service.findAll(queryParams);
-  }
-
-  @Get("/complex-user/:complexId")
-  async findAllByComplex2(@Query() queryParams: { [props: string]: string }) {
     return await this.service.findAll(queryParams);
   }
 
@@ -35,6 +25,16 @@ export class UserController {
     return {
       is_connected: true,
     };
+  }
+
+  @Get("/user/:complexId")
+  async findAllByComplex(@Query() queryParams: { [props: string]: string }) {
+    return await this.service.findAll(queryParams);
+  }
+
+  @Get("/complex-user/:complexId")
+  async findAllByComplex2(@Query() queryParams: { [props: string]: string }) {
+    return await this.service.findAll(queryParams);
   }
 
   @Get("/user/:id")
