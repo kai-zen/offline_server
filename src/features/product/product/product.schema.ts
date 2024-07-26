@@ -47,12 +47,6 @@ export class Product {
   })
   complex: ComplexDocument;
 
-  @Prop({ default: true })
-  has_stock: boolean;
-
-  @Prop({ default: true })
-  is_active: boolean;
-
   @Prop({ default: false })
   has_shipping: boolean; // equals to unable to pack
 
