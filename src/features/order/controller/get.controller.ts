@@ -36,15 +36,10 @@ export class OrderGetController {
 
   @Get("/complex/cash-bank/:complexId/:cashbankId")
   async findCashbankOrders(
-    @Query() queryParams: { [props: string]: string },
     @Param("complexId") complexId: string,
     @Param("cashbankId") cashbankId: string
   ) {
-    return await this.fetchService.findCashbankOrders(
-      complexId,
-      cashbankId,
-      queryParams
-    );
+    return await this.fetchService.findCashbankOrders(complexId, cashbankId);
   }
 
   @Get("/complex/:complexId")

@@ -122,13 +122,7 @@ export class OrderFetchService {
     };
   }
 
-  async findCashbankOrders(
-    complex_id: string,
-    cash_bank: string,
-    queryParams: { [props: string]: string }
-  ) {
-    const { limit = "12", page = "1" } = queryParams || {};
-
+  async findCashbankOrders(complex_id: string, cash_bank: string) {
     const theCashbank = await this.cashbankService.findById(cash_bank);
     if (!theCashbank) throw new NotFoundException(messages[404]);
 
@@ -143,8 +137,6 @@ export class OrderFetchService {
     const results = await this.model
       .find({ $and: filters })
       .sort({ created_at: -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit))
       .populate("products.product")
       .populate("user")
       .populate("cash_bank", "-complex")
@@ -152,16 +144,7 @@ export class OrderFetchService {
       .lean()
       .exec();
 
-    const totalDocuments = await this.model
-      .find({ $and: filters })
-      .countDocuments()
-      .exec();
-    const numberOfPages = Math.ceil(totalDocuments / parseInt(limit));
-
-    return {
-      items: productDataFormatter(results),
-      numberOfPages,
-    };
+    return productDataFormatter(results);
   }
 
   async findShiftOrders(

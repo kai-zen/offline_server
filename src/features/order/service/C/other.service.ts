@@ -18,45 +18,41 @@ export class OrderOtherCreateService {
   ) {}
 
   async newOrders() {
-    const res = await lastValueFrom(
-      this.httpService.get(
-        `${sofreBaseUrl}/orders/last-added/${process.env.COMPLEX_ID}`
-      )
-    );
-    let lastCreatedAt: Date;
-    if (res.data && new Date(res.data)) lastCreatedAt = new Date(res.data);
-    else {
-      const theComplex = await this.complexService.findTheComplex();
-      lastCreatedAt = new Date(theComplex.last_orders_update);
-    }
+    const theComplex = await this.complexService.findTheComplex();
+    const lastCreatedAt = theComplex.last_orders_update
+      ? new Date(theComplex.last_orders_update)
+      : null;
     const newOrders = await this.model
       .find(
         lastCreatedAt
           ? { created_at: { $gt: lastCreatedAt }, status: 5 }
           : { status: 5 }
       )
-      .lean()
       .exec();
     return newOrders;
   }
 
   async uploadOrders() {
     const newOrders = await this.newOrders();
-    await lastValueFrom(
-      this.httpService.post(
-        `${sofreBaseUrl}/orders/offline`,
-        {
-          complex_id: process.env.COMPLEX_ID,
-          orders: newOrders,
-        },
-        {
-          headers: {
-            "api-key": process.env.SECRET,
+    try {
+      await lastValueFrom(
+        this.httpService.post(
+          `${sofreBaseUrl}/orders/offline`,
+          {
+            complex_id: process.env.COMPLEX_ID,
+            orders: newOrders,
           },
-        }
-      )
-    );
-    await this.complexService.updatedOrders();
+          {
+            headers: {
+              "api-key": process.env.SECRET,
+            },
+          }
+        )
+      );
+      await this.complexService.updatedOrders();
+    } catch (err) {
+      console.log(err);
+    }
     return "success";
   }
 
