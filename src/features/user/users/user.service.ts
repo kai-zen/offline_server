@@ -27,13 +27,12 @@ export class UserService {
 
     const sortObj = {};
     if (sort) sortObj[sort] = direction === "asc" ? -1 : 1;
-    const searchRegex = new RegExp(`^${search}`, "i");
 
     const filters = {
       $or: [
-        { name: searchRegex },
-        { username: searchRegex },
-        { mobile: searchRegex },
+        { name: { $regex: search } },
+        { username: { $regex: search } },
+        { mobile: { $regex: search } },
       ],
     };
     const results = await this.model

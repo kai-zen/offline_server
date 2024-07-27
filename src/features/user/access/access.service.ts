@@ -25,14 +25,16 @@ export class AccessService {
       type,
     } = queryParams || {};
 
-    const searchRegex = new RegExp(`^${search}`, "i");
     const applyingLimit = parseInt(limit) || 12;
 
     const filters = {
       $and: [
         { type: type ? parseInt(type) : { $lte: 10 } },
         {
-          $or: [{ "user.mobile": searchRegex }, { "user.name": searchRegex }],
+          $or: [
+            { "user.mobile": { $regex: search } },
+            { "user.name": { $regex: search } },
+          ],
         },
       ],
     };
