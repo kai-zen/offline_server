@@ -3,12 +3,14 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { toObjectId } from "src/helpers/functions";
 import { OrderDocument } from "../../order.schema";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderStatsService {
   constructor(
     @InjectModel("order")
-    private readonly model: Model<OrderDocument>
+    private readonly model: Model<OrderDocument>,
+    private readonly complexService: ComplexService
   ) {}
 
   async todayStats(complex_id: string) {
@@ -140,6 +142,7 @@ export class OrderStatsService {
   }) {
     const { complex_id, end, start, cash_bank } = data;
     const startDate = new Date(start);
+    const theComplex = await this.complexService.findTheComplex();
 
     const endDate = end
       ? new Date(end)
@@ -157,6 +160,8 @@ export class OrderStatsService {
     ];
 
     if (cash_bank) filters.push({ cash_bank: toObjectId(cash_bank) });
+    if (theComplex?.last_addresses_update)
+      filters.push({ created_at: { $gt: theComplex.last_orders_update } });
 
     const results = await this.model
       .aggregate([

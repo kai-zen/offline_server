@@ -8,6 +8,7 @@ import { lastValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class ProductService {
@@ -15,7 +16,8 @@ export class ProductService {
     @InjectModel("product")
     private readonly model: Model<ProductDocument>,
     private readonly discountService: DiscountService,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -81,6 +83,7 @@ export class ProductService {
     const { complex_id, days, params } = data;
     const { limit, page = "1", from, to, cash_bank } = params || {};
     const applyingLimit = parseInt(limit) || 12;
+    const theComplex = await this.complexService.findTheComplex();
 
     const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
     const n = days || 7;
@@ -112,6 +115,8 @@ export class ProductService {
       if (cash_bank)
         filters.push({ $eq: ["$cash_bank", toObjectId(cash_bank)] });
     }
+    if (theComplex?.last_addresses_update)
+      filters.push({ $gt: ["$created_at", theComplex.last_orders_update] });
 
     const [queryResult] = await this.model.aggregate([
       { $match: { complex: toObjectId(complex_id) } },
