@@ -26,18 +26,25 @@ export class OrderOtherCreateService {
     return await this.model.find(filters).exec();
   }
 
-  async uploadOrders() {
+  async uploadOrders(data?: { cashbank_id: string; token: string }) {
+    const { cashbank_id, token } = data || {};
     const newOrders = await this.newOrders();
+    const sendingData = cashbank_id
+      ? {
+          complex_id: process.env.COMPLEX_ID,
+          orders: newOrders,
+          cashbank_id,
+        }
+      : {
+          complex_id: process.env.COMPLEX_ID,
+          orders: newOrders,
+        };
+
     try {
       await lastValueFrom(
-        this.httpService.post(
-          `${sofreBaseUrl}/orders/offline`,
-          {
-            complex_id: process.env.COMPLEX_ID,
-            orders: newOrders,
-          },
-          { headers: { "api-key": process.env.SECRET } }
-        )
+        this.httpService.post(`${sofreBaseUrl}/orders/offline`, sendingData, {
+          headers: { "api-key": process.env.SECRET, token },
+        })
       );
       await this.complexService.updatedOrders();
     } catch (err) {

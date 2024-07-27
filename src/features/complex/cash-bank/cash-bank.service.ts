@@ -49,20 +49,11 @@ export class CashBankService {
         "پیش از بستن صندوق باید سفارشات پرداخت نشده تعیین وضعیت شوند."
       );
 
-    await this.orderOtherCreateService.uploadOrders();
     try {
-      await lastValueFrom(
-        this.httpService.put(
-          `${sofreBaseUrl}/cash-bank/close/${process.env.COMPLEX_ID}/${id}`,
-          {},
-          {
-            headers: {
-              "api-key": process.env.SECRET,
-              Authorization: token,
-            },
-          }
-        )
-      );
+      await this.orderOtherCreateService.uploadOrders({
+        cashbank_id: id,
+        token,
+      });
     } catch (err) {
       console.log(err, "cash-bank/close");
       throw new BadRequestException("درخواست بستن صندوق شما انجام نشد.");
