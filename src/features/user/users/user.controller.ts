@@ -1,5 +1,7 @@
+import { AccessLevel } from "src/helpers/decorators";
 import { UserService } from "./user.service";
-import { Controller, Get, Param, Put, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Put, Query } from "@nestjs/common";
+import { SetNameDto } from "./dto/set-name.dto";
 
 @Controller()
 export class UserController {
@@ -50,6 +52,12 @@ export class UserController {
   @Put("/user")
   async updateData() {
     return await this.service.updateData();
+  }
+
+  @Put("/complex-users/set-name")
+  @AccessLevel([1, 2, 3, 4, 5])
+  async setName(@Body() body: SetNameDto) {
+    return await this.service.setName(body);
   }
 
   @Put("/complex-users")

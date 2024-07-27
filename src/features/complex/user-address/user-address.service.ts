@@ -73,20 +73,21 @@ export class ComplexUserAddressService {
   }
 
   async findByMobile(mobile: string) {
-    const user = await this.userService.findByMobile(mobile);
+    let user = await this.userService.findByMobile(mobile);
+    if (!user) user = await this.userService.createUser(mobile);
 
-    const results = user
-      ? await this.model.find({ user: toObjectId(user._id as any) }).exec()
-      : [];
+    const results = await this.model
+      .find({ user: toObjectId(user._id as any) })
+      .exec();
 
     return {
       addresses: results,
       user: {
-        image: user?.image || "",
-        name: user?.name || "",
-        mobile,
-        username: user?.username || "",
-        _id: user?._id,
+        image: user.image,
+        name: user.name,
+        mobile: user.mobile,
+        username: user.username,
+        _id: user._id,
       },
     };
   }

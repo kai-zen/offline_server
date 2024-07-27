@@ -67,6 +67,15 @@ export class UserService {
     return await newRecord.save();
   }
 
+  async setName(data: { id: string; name: string }) {
+    const { name, id } = data;
+    const theRecord = await this.model.findById(id);
+    if (theRecord) {
+      theRecord.name = name;
+      return await theRecord.save();
+    }
+  }
+
   async updateData() {
     const theComplex = await this.complexService.findTheComplex();
     if (!theComplex) return;
