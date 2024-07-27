@@ -22,10 +22,10 @@ export class ComplexUserAddressService {
   ) {}
 
   async findAll(complexId: string, queryParams: { [props: string]: string }) {
-    const { search = "", limit = "8" } = queryParams || {};
+    const { search = "", limit = "16" } = queryParams || {};
+
     const results = await this.model
       .find({
-        complex: toObjectId(complexId),
         $or: [
           { name: { $regex: search } },
           { phone_number: { $regex: search } },
