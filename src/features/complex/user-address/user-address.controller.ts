@@ -26,7 +26,7 @@ export class ComplexUserAddressController {
     @Param("complexId") complexId: string,
     @Query() queryParams: { [props: string]: string }
   ) {
-    return await this.service.findAll(complexId, queryParams);
+    return await this.service.findAll(queryParams);
   }
 
   @Get("/with-price/:complexId/:userId")

@@ -21,7 +21,7 @@ export class ComplexUserAddressService {
     private readonly complexService: ComplexService
   ) {}
 
-  async findAll(complexId: string, queryParams: { [props: string]: string }) {
+  async findAll(queryParams: { [props: string]: string }) {
     const { search = "", limit = "16" } = queryParams || {};
 
     const results = await this.model
