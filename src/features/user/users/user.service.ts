@@ -84,8 +84,10 @@ export class UserService {
       );
       if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
+          const name = record.complexUser?.name || record.name || "";
           const modifiedResponse = {
             ...record,
+            name,
             _id: toObjectId(record._id),
           };
           await this.model.updateOne(
