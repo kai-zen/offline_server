@@ -76,7 +76,7 @@ export class ComplexUserAddressService {
     const user = await this.userService.findByMobile(mobile);
 
     const results = user
-      ? await this.model.find({ user: toObjectId(user._id) }).exec()
+      ? await this.model.find({ user: toObjectId(user._id as any) }).exec()
       : [];
 
     return {
