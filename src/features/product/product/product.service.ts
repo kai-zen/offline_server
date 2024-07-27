@@ -27,7 +27,7 @@ export class ProductService {
         "complex",
         "image name min_online_ordering_price packing tax service"
       )
-      .populate("product-folder")
+      .populate("folder")
       .lean()
       .exec();
 
@@ -47,7 +47,7 @@ export class ProductService {
         "complex",
         "image name min_online_ordering_price packing tax service"
       )
-      .populate("product-folder")
+      .populate("folder")
       .lean()
       .exec();
 
@@ -63,7 +63,7 @@ export class ProductService {
   async findById(id: string) {
     return await this.model
       .findById(id)
-      .populate("product-folder")
+      .populate("folder")
       .populate("complex")
       .exec();
   }
