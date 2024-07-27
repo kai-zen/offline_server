@@ -22,6 +22,7 @@ import {
 } from "src/helpers/aggregate-constants";
 import { ShiftDocument } from "src/features/complex/shift/shift.schema";
 import { AccessService } from "src/features/user/access/access.service";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderFetchService {
@@ -32,7 +33,8 @@ export class OrderFetchService {
     private req: Request,
     @Inject(forwardRef(() => CashBankService))
     private readonly cashbankService: CashBankService,
-    private readonly accessService: AccessService
+    private readonly accessService: AccessService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll(queryParams: { [props: string]: string }) {
@@ -212,6 +214,7 @@ export class OrderFetchService {
   }
 
   async findComplexLiveOrders(complex_id: string) {
+    const theComplex = await this.complexService.findTheComplex();
     const filters: any[] = [
       { complex: complex_id },
       { status: { $in: [1, 2, 3, 4] } },
@@ -223,6 +226,9 @@ export class OrderFetchService {
         ],
       },
     ];
+    if (theComplex?.last_addresses_update)
+      filters.push({ created_at: { $gt: theComplex.last_orders_update } });
+
     const results = await this.model
       .find({ $and: filters })
       .sort({ created_at: -1 })
