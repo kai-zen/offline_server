@@ -20,6 +20,8 @@ export class UserController {
   @Get("/user/is-running") isServerRunning() {
     return {
       is_connected: true,
+      version: 1,
+      installed: 1,
     };
   }
 
