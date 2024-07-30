@@ -36,14 +36,11 @@ export class CashBankService {
   }
 
   async closeCashBank(data: { complex_id: string; id: string; token: string }) {
-    const { id, complex_id, token } = data || {};
-    const theRecord = await this.model.findOne({
-      _id: toObjectId(id),
-      complex: toObjectId(complex_id),
-    });
+    const { id, token } = data || {};
+    const theRecord = await this.model.findById(id);
     if (!theRecord) throw new NotFoundException(messages[404]);
 
-    const hasOpen = await this.ordersStatsService.hasOpenOrders(complex_id, id);
+    const hasOpen = await this.ordersStatsService.hasOpenOrders(id);
     if (hasOpen)
       throw new BadRequestException(
         "پیش از بستن صندوق باید سفارشات پرداخت نشده تعیین وضعیت شوند."
