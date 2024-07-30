@@ -93,13 +93,14 @@ export class UserService {
       if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
           const name = record.complexUser?.name || record.name || "";
+          const objecIdId = toObjectId(record._id);
           const modifiedResponse = {
             ...record,
             name,
-            _id: toObjectId(record._id),
+            _id: objecIdId,
           };
           await this.model.updateOne(
-            { _id: modifiedResponse._id },
+            { _id: objecIdId },
             { $set: modifiedResponse },
             { upsert: true }
           );
@@ -122,9 +123,16 @@ export class UserService {
       );
       if (res?.data?.length > 0) {
         for await (const record of res.data) {
+          const name = record.complexUser?.name || record.name || "";
+          const objecIdId = toObjectId(record._id);
+          const modifiedResponse = {
+            ...record,
+            name,
+            _id: objecIdId,
+          };
           await this.model.updateOne(
-            { _id: toObjectId(record._id) },
-            { $set: record },
+            { _id: objecIdId },
+            { $set: modifiedResponse },
             { upsert: true }
           );
         }
