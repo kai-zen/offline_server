@@ -221,6 +221,6 @@ export class OrderThirdMethodsService {
         ],
       })
       .countDocuments();
-    return todayOrdersCount + 101;
+    return todayOrdersCount + Number(process.env.FIRST_RECEIPT || 500);
   }
 }
