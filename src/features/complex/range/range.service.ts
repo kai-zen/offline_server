@@ -24,8 +24,6 @@ export class RangeService {
   async findCorrespondingRange(data: { latitude: number; longitude: number }) {
     const { latitude, longitude } = data;
 
-    await this.regionService.updateDB();
-
     const theRegion = await this.regionService.findRegionByCoordinates({
       lat: latitude,
       lng: longitude,
@@ -40,6 +38,8 @@ export class RangeService {
   }
 
   async updateData() {
+    await this.regionService.updateDB();
+
     const res = await lastValueFrom(
       this.httpService.get(
         `${sofreBaseUrl}/range/localdb/${process.env.COMPLEX_ID}`,

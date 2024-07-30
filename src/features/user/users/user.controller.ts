@@ -20,7 +20,7 @@ export class UserController {
   @Get("/user/is-running") isServerRunning() {
     return {
       is_connected: true,
-      local_server_version: 2,
+      local_server_version: 1,
     };
   }
 
