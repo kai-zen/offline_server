@@ -14,12 +14,6 @@ import { messages } from "src/helpers/constants";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { OrderDocument } from "../../order.schema";
 import { productDataFormatter } from "../../helpers/functions";
-import {
-  userOrderCommentsLookup,
-  userOrderComplexLookup,
-  userOrderGroup,
-  userOrderProject,
-} from "src/helpers/aggregate-constants";
 import { ShiftDocument } from "src/features/complex/shift/shift.schema";
 import { AccessService } from "src/features/user/access/access.service";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
@@ -125,14 +119,20 @@ export class OrderFetchService {
   }
 
   async findCashbankOrders(cash_bank: string) {
+    const theComplex = await this.complexService.findTheComplex();
+
     const theCashbank = await this.cashbankService.findById(cash_bank);
     if (!theCashbank) throw new NotFoundException(messages[404]);
 
+    const filters: any[] = [
+      { cash_bank: theCashbank._id },
+      { payed_at: { $gte: new Date(theCashbank.last_print) } },
+    ];
+    if (theComplex?.last_orders_update)
+      filters.push({ created_at: { $gt: theComplex.last_orders_update } });
+
     const results = await this.model
-      .find({
-        cash_bank,
-        payed_at: { $gte: new Date(theCashbank.last_print) },
-      })
+      .find({ $and: filters })
       .sort({ created_at: -1 })
       .populate("products.product")
       .populate("user")
@@ -226,7 +226,7 @@ export class OrderFetchService {
         ],
       },
     ];
-    if (theComplex?.last_addresses_update)
+    if (theComplex?.last_orders_update)
       filters.push({ created_at: { $gt: theComplex.last_orders_update } });
 
     const results = await this.model
@@ -239,76 +239,6 @@ export class OrderFetchService {
       .lean()
       .exec();
     return productDataFormatter(results);
-  }
-
-  async findUserOrders(
-    queryParams: { [props: string]: string },
-    complex_id?: string
-  ) {
-    const { limit, page = "1" } = queryParams || {};
-    const applyingLimit = parseInt(limit) || 12;
-    const userId = this.req.currentUser._id;
-
-    const filters = complex_id
-      ? { $and: [{ user: userId }, { complex: toObjectId(complex_id) }] }
-      : { user: userId };
-
-    const [queryResult] =
-      (await this.model.aggregate([
-        { $match: filters },
-        { $unwind: "$products" },
-        {
-          $lookup: {
-            from: "products",
-            localField: "products.product",
-            foreignField: "_id",
-            as: "product_details",
-          },
-        },
-        { $unwind: "$product_details" },
-        { $project: userOrderProject },
-        { $group: userOrderGroup },
-        { $lookup: userOrderComplexLookup },
-        { $unwind: "$complex" },
-        { $lookup: userOrderCommentsLookup },
-        { $unwind: { path: "$comment", preserveNullAndEmptyArrays: true } },
-        { $sort: { created_at: -1 } },
-        {
-          $facet: {
-            results: [
-              { $skip: (parseInt(page) - 1) * applyingLimit },
-              { $limit: applyingLimit },
-            ],
-            totalDocuments: [{ $count: "count" }],
-          },
-        },
-      ])) || [];
-    if (!queryResult) throw new NotFoundException(messages[404]);
-    const { results, totalDocuments } = queryResult;
-    const numberOfPages = Math.ceil(totalDocuments?.[0]?.count / applyingLimit);
-
-    return { items: results, numberOfPages };
-  }
-
-  async findById(id: string) {
-    return await this.model
-      .findById(id)
-      .populate("products.product")
-      .populate("complex")
-      .populate("user")
-      .exec();
-  }
-
-  async findDetails(id: string, complex_id: string) {
-    return await this.model
-      .findOne({
-        _id: toObjectId(id),
-        complex: toObjectId(complex_id),
-        status: { $in: [2, 3, 4, 5] },
-      })
-      .populate("products.product")
-      .select("-user_phone -user_address -user -complex_user")
-      .exec();
   }
 
   async todayCount(complex_id: string) {

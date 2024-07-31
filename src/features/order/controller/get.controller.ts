@@ -21,14 +21,6 @@ export class OrderGetController {
     return await this.fetchService.findAll(queryParams);
   }
 
-  @Get("/user/complex/:complexId")
-  async findUserComplexOrders(
-    @Query() queryParams: { [props: string]: string },
-    @Param("complexId") complexId: string
-  ) {
-    return await this.fetchService.findUserOrders(queryParams, complexId);
-  }
-
   @Get("/complex/live/:complexId")
   async findComplexLiveOrders(@Param("complexId") complexId: string) {
     return await this.fetchService.findComplexLiveOrders(complexId);
@@ -93,13 +85,5 @@ export class OrderGetController {
   @Get("/complex/orders-count/:complexId")
   async todayCount(@Param("complexId") complexId: string) {
     return await this.fetchService.todayCount(complexId);
-  }
-
-  @Get("/details/:complexId/:id")
-  async findById(
-    @Param("id") recordId: string,
-    @Param("complexId") complexId: string
-  ) {
-    return await this.fetchService.findDetails(recordId, complexId);
   }
 }
