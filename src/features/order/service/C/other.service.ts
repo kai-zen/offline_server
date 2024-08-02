@@ -22,7 +22,9 @@ export class OrderOtherCreateService {
     const lastCreatedAt = theComplex.last_orders_update
       ? new Date(theComplex.last_orders_update)
       : null;
-    const filters = lastCreatedAt ? { payed_at: { $gt: lastCreatedAt } } : {};
+    const filters = lastCreatedAt
+      ? { created_at: { $gt: lastCreatedAt }, status: { $lt: 6 } }
+      : { status: { $lt: 6 } };
     return await this.model.find(filters).exec();
   }
 
