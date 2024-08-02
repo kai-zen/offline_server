@@ -223,9 +223,8 @@ export class OrderFetchService {
       .find({ $and: filters })
       .sort({ created_at: -1 })
       .populate("products.product")
-      .populate("delivery_guy", "-complex -type")
+      .populate("delivery_guy")
       .populate("user")
-      .select("-complex")
       .lean()
       .exec();
     return productDataFormatter(results);
