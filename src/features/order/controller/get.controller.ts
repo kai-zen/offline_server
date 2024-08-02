@@ -22,8 +22,8 @@ export class OrderGetController {
   }
 
   @Get("/complex/live/:complexId")
-  async findComplexLiveOrders(@Param("complexId") complexId: string) {
-    return await this.fetchService.findComplexLiveOrders(complexId);
+  async findComplexLiveOrders() {
+    return await this.fetchService.findComplexLiveOrders();
   }
 
   @Get("/complex/cash-bank/:complexId/:cashbankId")

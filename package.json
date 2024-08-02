@@ -5,12 +5,24 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "main": "dist/main.js",
+  "bin": "dist/main.js",
   "scripts": {
     "build": "nest build",
     "start": "nest start TZ='Asia/Tehran'",
     "dev": "nest start --watch TZ='Asia/Tehran'",
     "debug": "nest start --debug --watch",
-    "prod": "node dist/main"
+    "prod": "node dist/main",
+    "pkg": "pkg . --out-dir build"
+  },
+  "pkg": {
+    "assets": [
+      "dist/**/*",
+      "node_modules/**/*"
+    ],
+    "targets": [
+      "node14-win-x64"
+    ]
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",

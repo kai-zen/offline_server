@@ -213,19 +213,9 @@ export class OrderFetchService {
     return formattedData;
   }
 
-  async findComplexLiveOrders(complex_id: string) {
+  async findComplexLiveOrders() {
     const theComplex = await this.complexService.findTheComplex();
-    const filters: any[] = [
-      { complex: complex_id },
-      { status: { $in: [1, 2, 3, 4] } },
-      {
-        $or: [
-          { table_number: { $nin: [null, undefined] } },
-          { order_type: { $in: [1, 2] } },
-          { payment_type: { $gt: 1 } },
-        ],
-      },
-    ];
+    const filters: any[] = [{ status: { $lt: 5 } }];
     if (theComplex?.last_orders_update)
       filters.push({ created_at: { $gt: theComplex.last_orders_update } });
 
