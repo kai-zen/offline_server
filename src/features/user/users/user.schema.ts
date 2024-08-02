@@ -16,12 +16,6 @@ export class User extends Document {
   })
   email: string;
 
-  @Prop({
-    unique: true,
-    default: "",
-  })
-  username: string;
-
   @Prop({ required: true, unique: true, length: 11 })
   mobile: string;
 
