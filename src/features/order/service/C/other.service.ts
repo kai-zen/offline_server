@@ -43,7 +43,7 @@ export class OrderOtherCreateService {
       );
       await this.complexService.updatedOrders();
     } catch (err) {
-      console.log(err);
+      console.log(err.response.data);
       return err.response.data;
     }
     return "success";
