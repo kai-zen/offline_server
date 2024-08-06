@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, IsLatitude, IsLongitude } from "class-validator";
+import {
+  IsNotEmpty,
+  IsString,
+  IsLatitude,
+  IsLongitude,
+  IsOptional,
+} from "class-validator";
 
 export class CreateComplexUserAddressDto {
   @IsString()
@@ -28,10 +34,12 @@ export class CreateComplexUserAddressDto {
   @IsLatitude({
     message: "عرض جغرافیایی وارد شده معتبر نیست.",
   })
+  @IsOptional()
   latitude: number;
 
   @IsLongitude({
     message: "طول جغرافیایی وارد شده معتبر نیست.",
   })
+  @IsOptional()
   longitude: number;
 }
