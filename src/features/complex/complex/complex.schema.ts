@@ -171,6 +171,15 @@ export class Complex {
 
   @Prop()
   api_key: string;
+
+  @Prop({ default: null })
+  last_addresses_update: Date;
+
+  @Prop({ default: null })
+  last_users_update: Date;
+
+  @Prop({ default: null })
+  last_orders_update: Date;
 }
 
 export type ComplexDocument = HydratedDocument<Complex>;
