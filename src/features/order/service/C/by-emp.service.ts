@@ -42,6 +42,7 @@ export class OrderCreateService {
     user_discount?: number;
     user_phone?: string;
     table_number?: string;
+    navigation_link?: string;
   }) {
     const {
       order_type,
@@ -55,6 +56,7 @@ export class OrderCreateService {
       cashbank_id,
       extra_price,
       delivery_time,
+      navigation_link,
     } = data || {};
     let { shipping_price, user_discount } = data;
 
@@ -167,6 +169,8 @@ export class OrderCreateService {
       created_at: new Date(),
       status: 2,
       delivery_time,
+      submitted_offline: true,
+      navigation_link: navigation_link || "",
     });
     const created_order = await newRecord.save();
 

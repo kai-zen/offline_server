@@ -29,6 +29,10 @@ export class EditAddressDto {
   })
   complex_id: string;
 
+  @IsString()
+  @IsOptional()
+  navigation_link?: string;
+
   @IsNumber()
   @IsOptional()
   shipping_price?: number;

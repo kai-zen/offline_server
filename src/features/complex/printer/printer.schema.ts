@@ -2,8 +2,8 @@ import mongoose, { HydratedDocument } from "mongoose";
 import { ComplexDocument } from "src/features/complex/complex/complex.schema";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { schemaConfig } from "src/helpers/constants";
-import { ProductFolderDocument } from "src/features/product/folders/folder.schema";
 import { AreaDocument } from "../area/area.schema";
+import { ProductFolderDocument } from "src/features/product/folders/folder.schema";
 
 @Schema(schemaConfig)
 export class Printer {

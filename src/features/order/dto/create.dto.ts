@@ -64,6 +64,10 @@ export class CreateOrderDto {
   user_discount?: number;
 
   @IsString()
+  @IsOptional()
+  navigation_link?: string;
+
+  @IsString()
   @IsNotEmpty({ message: "مجموعه تعیین نشده است." })
   complex_id: string;
 }

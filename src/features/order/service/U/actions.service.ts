@@ -66,9 +66,16 @@ export class OrderActionService {
     } | null;
     table_number?: string;
     shipping_price?: number;
+    navigation_link?: string;
   }) {
-    const { address, order_id, complex_id, table_number, shipping_price } =
-      data;
+    const {
+      address,
+      order_id,
+      complex_id,
+      table_number,
+      shipping_price,
+      navigation_link,
+    } = data;
     let socketMessage = "";
     const theRecord = await this.model
       .findOne({
@@ -146,6 +153,7 @@ export class OrderActionService {
       theRecord.shipping_price = 0;
       theRecord.service = 0;
     }
+    theRecord.navigation_link = navigation_link || "";
 
     const theOrder = await theRecord.save();
     // websocket
@@ -231,7 +239,6 @@ export class OrderActionService {
     if (!theDeliveryGuy) throw new NotFoundException(messages[404]);
     theRecord.delivery_guy = theDeliveryGuy;
     const theOrder = await theRecord.save();
-
     // websocket
     await this.eventsGateway.changeOrder({ order: theOrder });
     return theRecord;
