@@ -19,6 +19,7 @@ import PrinterModule from "./features/complex/printer/printer.module";
 import AreaModule from "./features/complex/area/area.module";
 import RegionModule from "./features/region/region.module";
 import RangeModule from "./features/complex/range/range.module";
+import { BackupModule } from "./features/backup/backup.module";
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import RangeModule from "./features/complex/range/range.module";
     AreaModule,
     RegionModule,
     RangeModule,
+    BackupModule,
     // websocket
     EventsModule,
   ],
