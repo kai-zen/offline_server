@@ -20,4 +20,8 @@ export class EditPriceDto {
   @IsString()
   @IsNotEmpty({ message: "مجموعه تعیین نشده است." })
   complex_id: string;
+
+  @IsNumber()
+  @IsOptional()
+  tip: number;
 }

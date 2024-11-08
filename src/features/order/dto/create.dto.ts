@@ -70,6 +70,10 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty({ message: "مجموعه تعیین نشده است." })
   complex_id: string;
+
+  @IsNumber()
+  @IsOptional()
+  tip?: number;
 }
 
 // 1."ثبت شده"

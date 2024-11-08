@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import mongoose, { PipelineStage } from "mongoose";
+import mongoose, { PipelineStage, Types } from "mongoose";
 import { Request } from "express";
 import * as sanitizeHtml from "sanitize-html";
 import { ProductDocument } from "src/features/product/product/product.schema";
@@ -29,8 +29,15 @@ export const str2bool = (val: string) => {
   return Number(val) !== 0;
 };
 
-export const toObjectId = (id: string) => new mongoose.Types.ObjectId(id);
-
+export const toObjectId = (id: string | Types.ObjectId) => {
+  try {
+    const result = new mongoose.Types.ObjectId(id);
+    return result;
+  } catch (err) {
+    console.log("To object id error:", err);
+    return null;
+  }
+};
 const deg2rad = (deg: number) => (deg * Math.PI) / 180;
 
 export const distanceCalculator = (
@@ -138,5 +145,9 @@ export const findItemByPriceId = (
   });
 
 export const escapeRegex = (userInput: string) => {
-  return userInput.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+  return userInput ? userInput.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : ""; // $& means the whole matched string
+};
+
+export const roundNumberTo1000 = (num: number) => {
+  return isNaN(Number(num)) ? null : Math.round(num / 1_000) * 1_000;
 };

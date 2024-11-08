@@ -251,10 +251,11 @@ export class OrderActionService {
       shipping_price: number;
       extra_price: number;
       user_discount: number;
+      tip: number;
     };
   }) {
     const { new_values, order_id } = data;
-    const { extra_price, shipping_price, complex_id } = new_values;
+    const { extra_price, shipping_price, complex_id, tip } = new_values;
     let { user_discount } = new_values;
 
     const theRecord = await this.model
@@ -267,17 +268,11 @@ export class OrderActionService {
       .populate("user")
       .exec();
 
+    if (!theRecord) throw new NotFoundException(messages[404]);
     if (theRecord.status > 4)
       throw new BadRequestException(
         "امکان ویرایش تنها برای سفارشات فعال وجود دارد."
       );
-
-    const items_before =
-      theRecord.extra_price +
-      theRecord.shipping_price -
-      theRecord.user_discount;
-    const items_after = extra_price + shipping_price - user_discount;
-    const difference = items_before - items_after;
 
     const maxDiscount = theRecord.complex.discount_limit
       ? theRecord.complex.discount_limit *
@@ -289,10 +284,19 @@ export class OrderActionService {
         : maxDiscount
       : user_discount;
 
-    if (!theRecord) throw new NotFoundException(messages[400]);
+    const items_before =
+      theRecord.extra_price +
+      theRecord.shipping_price +
+      (theRecord.tip || 0) -
+      theRecord.user_discount;
+    const items_after =
+      extra_price + shipping_price + (tip || 0) - user_discount;
+    const difference = items_before - items_after;
+
     theRecord.extra_price = extra_price;
     theRecord.shipping_price = shipping_price;
     theRecord.user_discount = user_discount;
+    theRecord.tip = tip;
     theRecord.total_price -= difference;
     const theOrder = await theRecord.save();
 

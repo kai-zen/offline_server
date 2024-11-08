@@ -27,6 +27,7 @@ export class OrderCreateService {
     products: { product_id: string; quantity: number; price_index: number }[];
     complex_id: string;
     cashbank_id: string;
+    tip?: number;
     user_address?: {
       address_id: string;
       name: string;
@@ -57,6 +58,7 @@ export class OrderCreateService {
       extra_price,
       delivery_time,
       navigation_link,
+      tip,
     } = data || {};
     let { shipping_price, user_discount } = data;
 
@@ -125,6 +127,7 @@ export class OrderCreateService {
       (extra_price || 0) +
       shipping_price +
       tax +
+      (tip || 0) +
       servicePrice;
 
     const maxDiscount = theComplex.discount_limit
@@ -171,6 +174,7 @@ export class OrderCreateService {
       delivery_time,
       submitted_offline: true,
       navigation_link: navigation_link || "",
+      tip: tip || 0,
     });
     const created_order = await newRecord.save();
 

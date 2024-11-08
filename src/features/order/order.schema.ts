@@ -137,6 +137,9 @@ export class Order {
   tax: number;
 
   @Prop({ default: 0 })
+  tip: number;
+
+  @Prop({ default: 0 })
   service: number;
 
   @Prop({ required: true, immutable: true })

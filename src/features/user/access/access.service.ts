@@ -108,18 +108,30 @@ export class AccessService {
     return "success";
   }
 
-  async hasAccess(user_id: string | Types.ObjectId, types?: number[]) {
+  async hasAccess(user_id: string | Types.ObjectId, types: number[] | "all") {
     const count = await this.model.countDocuments();
     if (count === 0) return true;
-    return await this.model.findOne({
-      user: user_id,
-      type: { $in: types || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
-    });
+    const filters =
+      types === "all"
+        ? { user: user_id }
+        : {
+            user: user_id,
+            type: { $in: types },
+          };
+    return await this.model.findOne(filters);
   }
 
   async findByComplexAndUser(data: { user: string }) {
     const { user } = data;
     return await this.model.findOne({ user });
+  }
+
+  async findByComplexAndUserId(data: { user_id: Types.ObjectId }) {
+    const { user_id } = data;
+    const theAccess = await this.model.findOne({
+      user: user_id,
+    });
+    return theAccess;
   }
 
   async findDeliveryGuy(data: { access_id: string; complex_id: string }) {
