@@ -26,7 +26,7 @@ import RangeModule from "./features/complex/range/range.module";
       isGlobal: true,
       envFilePath: ".env",
     }),
-    MongooseModule.forRoot("mongodb://localhost:27017/local-sofre"),
+    MongooseModule.forRoot(process.env.DB_CONNECTION_STRING),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     ScheduleModule.forRoot(),
     JwtModule.registerAsync({

@@ -13,15 +13,16 @@
     "dev": "nest start --watch TZ='Asia/Tehran'",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
-    "pkg": "pkg . --out-dir build"
+    "pkg": "pkg . --output server.exe --no-bytecode"
   },
   "pkg": {
     "assets": [
       "dist/**/*",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      ".env"
     ],
     "targets": [
-      "node14-win-x64"
+      "node18-win-x64"
     ]
   },
   "dependencies": {
