@@ -8,9 +8,10 @@ import * as path from "path";
 export class BackupService {
   constructor(@InjectConnection() private readonly connection: Connection) {}
 
-  async backupDatabase(): Promise<void> {
-    const backupDir = path.join(__dirname, "backup", new Date().toISOString());
-    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+  async backupDatabase() {
+    const AdDate = new Date().toISOString().split("T")[0].split(":").join("-");
+    const backupDir = path.join(process.env.BACKUP_ROUTE, AdDate);
+    fs.mkdirSync(backupDir, { recursive: true });
 
     const collections = await this.connection.db.listCollections().toArray();
     for (const collection of collections) {

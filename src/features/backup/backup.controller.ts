@@ -6,7 +6,7 @@ export class BackupController {
   constructor(private readonly backupService: BackupService) {}
 
   @Post()
-  async triggerBackup(): Promise<string> {
+  async triggerBackup() {
     await this.backupService.backupDatabase();
     return "Database backup completed successfully.";
   }
