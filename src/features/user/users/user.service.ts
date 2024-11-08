@@ -5,7 +5,7 @@ import { UserDocument } from "./user.schema";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
-import { toObjectId } from "src/helpers/functions";
+import { escapeRegex, toObjectId } from "src/helpers/functions";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
@@ -28,13 +28,16 @@ export class UserService {
     const sortObj = {};
     if (sort) sortObj[sort] = direction === "asc" ? -1 : 1;
 
-    const filters = {
-      $or: [
-        { name: { $regex: search } },
-        { username: { $regex: search } },
-        { mobile: { $regex: search } },
-      ],
-    };
+    const cleanedSearch = search ? escapeRegex(search) : "";
+    const filters = cleanedSearch
+      ? {
+          $or: [
+            { name: { $regex: cleanedSearch } },
+            { username: { $regex: cleanedSearch } },
+            { mobile: { $regex: cleanedSearch } },
+          ],
+        }
+      : {};
     const results = await this.model
       .find(filters)
       .sort(sortObj)

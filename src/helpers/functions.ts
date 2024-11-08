@@ -136,3 +136,7 @@ export const findItemByPriceId = (
     const priceId = price_id?.toString ? price_id.toString() : price_id;
     return itemPrice === priceId;
   });
+
+export const escapeRegex = (userInput: string) => {
+  return userInput.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+};

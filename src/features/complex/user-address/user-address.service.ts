@@ -1,7 +1,7 @@
 import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { toObjectId } from "src/helpers/functions";
+import { escapeRegex, toObjectId } from "src/helpers/functions";
 import { Injectable } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
@@ -24,14 +24,20 @@ export class ComplexUserAddressService {
   async findAll(queryParams: { [props: string]: string }) {
     const { search = "", limit = "16" } = queryParams || {};
 
+    const cleanedSearch = search ? escapeRegex(search) : "";
+
     const results = await this.model
-      .find({
-        $or: [
-          { name: { $regex: search } },
-          { phone_number: { $regex: search } },
-          { description: { $regex: search } },
-        ],
-      })
+      .find(
+        cleanedSearch
+          ? {
+              $or: [
+                { name: { $regex: cleanedSearch } },
+                { phone_number: { $regex: cleanedSearch } },
+                { description: { $regex: cleanedSearch } },
+              ],
+            }
+          : {}
+      )
       .limit(parseInt(limit))
       .exec();
 

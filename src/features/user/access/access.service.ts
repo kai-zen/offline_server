@@ -3,7 +3,7 @@ import { AccessDocument } from "./access.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
-import { toObjectId } from "src/helpers/functions";
+import { escapeRegex, toObjectId } from "src/helpers/functions";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 
@@ -27,17 +27,16 @@ export class AccessService {
 
     const applyingLimit = parseInt(limit) || 12;
 
-    const filters = {
-      $and: [
-        { type: type ? parseInt(type) : { $lte: 10 } },
-        {
-          $or: [
-            { "user.mobile": { $regex: search } },
-            { "user.name": { $regex: search } },
-          ],
-        },
-      ],
-    };
+    const cleanedSearch = search ? escapeRegex(search) : "";
+
+    const filters: any[] = cleanedSearch
+      ? [
+          { type: type ? parseInt(type) : { $lte: 10 } },
+          { "user.mobile": { $regex: cleanedSearch } },
+          { "user.name": { $regex: cleanedSearch } },
+        ]
+      : [{ type: type ? parseInt(type) : { $lte: 10 } }];
+
     const aggregateQuery: PipelineStage[] = [
       {
         $lookup: {
@@ -48,7 +47,11 @@ export class AccessService {
         },
       },
       { $unwind: "$user" },
-      { $match: filters },
+      {
+        $match: {
+          $and: filters,
+        },
+      },
       {
         $facet: {
           results: [

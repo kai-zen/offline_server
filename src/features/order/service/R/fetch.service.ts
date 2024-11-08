@@ -9,7 +9,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
-import { toObjectId } from "src/helpers/functions";
+import { escapeRegex, toObjectId } from "src/helpers/functions";
 import { messages } from "src/helpers/constants";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { OrderDocument } from "../../order.schema";
@@ -89,7 +89,11 @@ export class OrderFetchService {
       filters.push({
         created_at: { $lt: new Date(to).setHours(23, 59, 59, 999) },
       });
-    if (search) filters.push({ user_phone: { $regex: search } });
+    if (search) {
+      const cleanedSearch = search ? escapeRegex(search) : "";
+      if (cleanedSearch)
+        filters.push({ user_phone: { $regex: cleanedSearch } });
+    }
     if (delivery_guy) filters.push({ delivery_guy });
 
     // if (isPending) applyingFilters.push({ status: { $in: [1, 2, 3] } });
