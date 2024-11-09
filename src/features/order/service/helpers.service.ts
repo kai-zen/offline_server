@@ -10,7 +10,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { Complex } from "src/features/complex/complex/complex.schema";
-import { toObjectId } from "src/helpers/functions";
+import { getStartAndEndOfTheDay, toObjectId } from "src/helpers/functions";
 import { InjectModel } from "@nestjs/mongoose";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
 import ProductService from "src/features/product/product/product.service";
@@ -208,14 +208,15 @@ export class OrderThirdMethodsService {
   }
 
   async factorNumber(complex_id: string) {
+    const { end, start } = getStartAndEndOfTheDay();
     const todayOrdersCount = await this.model
       .find({
         $and: [
           { complex: toObjectId(complex_id) },
           {
             created_at: {
-              $gte: new Date().setHours(0, 0, 0, 0),
-              $lte: new Date().setHours(23, 59, 59, 999),
+              $gte: start,
+              $lte: end,
             },
           },
         ],

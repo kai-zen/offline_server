@@ -151,3 +151,30 @@ export const escapeRegex = (userInput: string) => {
 export const roundNumberTo1000 = (num: number) => {
   return isNaN(Number(num)) ? null : Math.round(num / 1_000) * 1_000;
 };
+
+export const getStartAndEndOfTheDay = () => {
+  const now = new Date();
+
+  let start: Date, end: Date;
+  if (now.getHours() < 5) {
+    // If current time is before 5 AM, start from 5 AM of the previous day
+    start = new Date(now);
+    start.setDate(now.getDate() - 1);
+    start.setHours(5, 0, 0, 0);
+
+    // End at 4:59 AM of the current day
+    end = new Date(now);
+    end.setHours(4, 59, 59, 999);
+  } else {
+    // If current time is after 5 AM, start from 5 AM of the current day
+    start = new Date(now);
+    start.setHours(5, 0, 0, 0);
+
+    // End at 4:59 AM of the next day
+    end = new Date(now);
+    end.setDate(now.getDate() + 1);
+    end.setHours(4, 59, 59, 999);
+  }
+
+  return { start, end };
+};
