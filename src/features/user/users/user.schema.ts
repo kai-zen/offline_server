@@ -19,7 +19,7 @@ export class User extends Document {
   @Prop()
   username: string;
 
-  @Prop({ required: true, unique: true, length: 11 })
+  @Prop({ required: true, length: 11 })
   mobile: string;
 
   @Prop({ default: null })

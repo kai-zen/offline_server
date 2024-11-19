@@ -33,7 +33,7 @@ import { BackupModule } from "./features/backup/backup.module";
     JwtModule.registerAsync({
       global: true,
       useFactory: async () => ({
-        secret: "POKp6aK2DpGViU2wVvHYb3q00tDn5b",
+        secret: process.env.GLOBAL_SECRET,
       }),
       inject: [ConfigService],
     }),
