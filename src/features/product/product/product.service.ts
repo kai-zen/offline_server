@@ -22,7 +22,7 @@ export class ProductService {
 
   async findAll() {
     const results = await this.model
-      .find({})
+      .find({ is_archieved: false })
       .populate(
         "complex",
         "image name min_online_ordering_price packing tax service"
@@ -42,7 +42,7 @@ export class ProductService {
 
   async findComplexProducts() {
     const results = await this.model
-      .find()
+      .find({ is_archived: false })
       .populate(
         "complex",
         "image name min_online_ordering_price packing tax service"

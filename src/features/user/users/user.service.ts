@@ -100,6 +100,12 @@ export class UserService {
           const modifiedResponse = {
             ...record,
             name,
+            orders: record.complexUser?.orders?.length
+              ? record.complexUser.orders
+              : [],
+            products: record.complexUser?.products?.length
+              ? record.complexUser.products
+              : [],
             _id: objecIdId,
           };
           await this.model.updateOne(
