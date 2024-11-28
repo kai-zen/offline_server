@@ -14,7 +14,6 @@ import { messages } from "src/helpers/constants";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { OrderDocument } from "../../order.schema";
 import { productDataFormatter } from "../../helpers/functions";
-import { ShiftDocument } from "src/features/complex/shift/shift.schema";
 import { AccessService } from "src/features/user/access/access.service";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
 
@@ -146,75 +145,6 @@ export class OrderFetchService {
       .exec();
 
     return productDataFormatter(results);
-  }
-
-  async findShiftOrders(
-    shift: ShiftDocument,
-    queryParams: { [props: string]: string }
-  ) {
-    const { limit = "12", page = "1" } = queryParams || {};
-    const filters: any[] = [
-      {
-        complex: shift.complex._id,
-        cash_bank: shift.cashbank._id,
-        payed_at: { $gte: shift.start, $lte: shift.end },
-      },
-    ];
-
-    const results = await this.model
-      .find({ $and: filters })
-      .sort({ created_at: -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit))
-      .populate("products.product")
-      .populate("user")
-      .lean()
-      .exec();
-
-    const totalDocuments = await this.model
-      .find({ $and: filters })
-      .countDocuments()
-      .exec();
-    const numberOfPages = Math.ceil(totalDocuments / parseInt(limit));
-
-    return {
-      items: productDataFormatter(results),
-      numberOfPages,
-    };
-  }
-
-  async findShiftDeliveryGuysReport(shift: ShiftDocument) {
-    const deliveryGuys = await this.accessService.findDeliveryGuys(
-      shift.complex._id
-    );
-
-    const formattedData: any[] = [];
-    for await (const dg of deliveryGuys) {
-      const orders = await this.model
-        .find({
-          $and: [
-            { complex: shift.complex._id },
-            { cash_bank: shift.cashbank._id },
-            { payed_at: { $gte: shift.start, $lte: shift.end } },
-            { delivery_guy: dg._id },
-          ],
-        })
-        .lean()
-        .exec();
-
-      const total_count = orders.length;
-      const total_shipping_price = orders
-        .map((o) => o.shipping_price)
-        .reduce((accumulator, currentVal) => accumulator + currentVal, 0);
-
-      formattedData.push({
-        ...dg,
-        total_count,
-        total_shipping_price,
-      });
-    }
-
-    return formattedData;
   }
 
   async findComplexLiveOrders() {
