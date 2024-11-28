@@ -62,4 +62,12 @@ export const AccessSchema = SchemaFactory.createForClass(Access);
 //     id: 10,
 //     title: "ادمین محتوا",
 //   },
+//   {
+//    id: 11,
+//    title: "انباردار"
+//   },
+//   {
+//    id: 12,
+//    title: "پرسنل عادی"
+//  }
 // ];

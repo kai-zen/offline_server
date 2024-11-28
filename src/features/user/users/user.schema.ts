@@ -24,6 +24,9 @@ export class User extends Document {
 
   @Prop({ default: null })
   image: string | null;
+
+  @Prop({ default: null })
+  subscription_number: string;
 }
 
 export type UserDocument = HydratedDocument<User>;

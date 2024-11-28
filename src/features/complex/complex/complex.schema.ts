@@ -80,21 +80,7 @@ export class Complex {
   @Prop()
   image: string;
 
-  @Prop({
-    default: "free",
-    enum: [
-      "free",
-      "wp", // 4 (Warehouse + Presence)
-      "wps1", // 6 (Warehouse + Presence + Site)
-      "wps12", // 7
-      "wps13", // 7
-      "wps", // 9
-      "a1", // 9 (Automation)
-      "a12", // 11
-      "a13", // 11
-      "a", // 13
-    ],
-  })
+  @Prop({ default: "free" })
   active_plan: string;
 
   @Prop()
@@ -138,9 +124,6 @@ export class Complex {
 
   @Prop({ default: 0 })
   tax: number;
-
-  @Prop({ default: "" })
-  google_site_verification: string;
 
   // settings
   @Prop({ default: false })
