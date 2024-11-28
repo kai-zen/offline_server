@@ -80,7 +80,7 @@ export class ProductService {
     params: { [props: string]: string };
     days?: number;
   }) {
-    const { complex_id, days, params } = data;
+    const { days, params } = data;
     const { limit, page = "1", from, to, cash_bank } = params || {};
     const applyingLimit = parseInt(limit) || 12;
     const theComplex = await this.complexService.findTheComplex();
@@ -119,7 +119,7 @@ export class ProductService {
       filters.push({ $gt: ["$created_at", theComplex.last_orders_update] });
 
     const [queryResult] = await this.model.aggregate([
-      { $match: { complex: toObjectId(complex_id) } },
+      { $match: { is_archieved: false } },
       {
         $lookup: {
           from: "orders",
