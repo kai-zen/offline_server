@@ -52,6 +52,9 @@ export class Product {
 
   @Prop({ default: true })
   is_packable: boolean;
+
+  @Prop({ default: false })
+  is_archived: boolean;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
