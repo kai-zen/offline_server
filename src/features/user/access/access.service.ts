@@ -16,16 +16,7 @@ export class AccessService {
   ) {}
 
   async findAll(queryParams: { [props: string]: string }) {
-    const {
-      limit = "8",
-      page = "1",
-      sort,
-      direction = "asc",
-      search = "",
-      type,
-    } = queryParams || {};
-
-    const applyingLimit = parseInt(limit) || 12;
+    const { sort, direction = "asc", search = "", type } = queryParams || {};
 
     const cleanedSearch = search ? escapeRegex(search) : "";
 
@@ -52,15 +43,6 @@ export class AccessService {
           $and: filters,
         },
       },
-      {
-        $facet: {
-          results: [
-            { $skip: (parseInt(page) - 1) * applyingLimit },
-            { $limit: applyingLimit },
-          ],
-          totalDocuments: [{ $count: "count" }],
-        },
-      },
     ];
 
     const sortObj: { [properties: string]: 1 | -1 } = {};
@@ -72,12 +54,9 @@ export class AccessService {
     const [queryResult] =
       (await this.model.aggregate(aggregateQuery).exec()) || [];
     if (!queryResult) throw new NotFoundException(messages[404]);
-    const { results, totalDocuments } = queryResult;
-    const numberOfPages = Math.ceil(
-      (totalDocuments?.[0]?.count || 1) / applyingLimit
-    );
+    const { results } = queryResult;
 
-    return { items: results, numberOfPages };
+    return { items: results, numberOfPages: 1 };
   }
 
   async updateData() {
