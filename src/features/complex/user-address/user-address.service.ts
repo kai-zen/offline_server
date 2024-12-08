@@ -86,6 +86,12 @@ export class ComplexUserAddressService {
       .find({ user: toObjectId(user._id as any) })
       .exec();
 
+    const rates = user.products.map((item) => item.rates).flat(1);
+    const totalRates = rates.length || 0;
+    const totalPoints = rates.reduce(
+      (accumulator, currentVal) => accumulator + currentVal,
+      0
+    );
     return {
       addresses: results,
       user: {
@@ -94,6 +100,12 @@ export class ComplexUserAddressService {
         mobile: user.mobile,
         username: user.username,
         _id: user._id,
+        orders_quantity: user.orders?.length || 0,
+        total_rates: totalRates,
+        avg_rate:
+          Number(((totalPoints || 0) / (totalRates || 1)).toFixed(1)) || 0,
+        complex_user_name: user.name || "",
+        complex_user_id: user._id || "",
       },
     };
   }
