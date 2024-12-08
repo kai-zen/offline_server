@@ -93,29 +93,27 @@ export class ProductService {
 
     let filters: any[] = [
       { $eq: ["$products.product", "$$productId"] },
-      { $not: { $in: ["$status", [6, 7]] } },
-      { $gt: ["$payment_type", 1] },
+      { $not: { $in: ["$status", [1, 6, 7]] } },
     ];
     if (days)
       filters = [
         { $eq: ["$products.product", "$$productId"] },
-        { $lte: ["$created_at", startOfToday] },
-        { $gte: ["$created_at", nDaysAgo] },
-        { $not: { $in: ["$status", [6, 7]] } },
-        { $gt: ["$payment_type", 1] },
+        { $lte: ["$payed_at", startOfToday] },
+        { $gte: ["$payed_at", nDaysAgo] },
+        { $not: { $in: ["$status", [1, 6, 7]] } },
       ];
     else {
       filters.push({
-        $gte: ["$created_at", new Date(from)],
+        $gte: ["$payed_at", new Date(from)],
       });
       if (to)
         filters.push({
-          $lte: ["$created_at", new Date(to)],
+          $lte: ["$payed_at", new Date(to)],
         });
       if (cash_bank)
         filters.push({ $eq: ["$cash_bank", toObjectId(cash_bank)] });
     }
-    if (theComplex?.last_addresses_update)
+    if (theComplex?.last_orders_update)
       filters.push({ $gt: ["$created_at", theComplex.last_orders_update] });
 
     const [queryResult] = await this.model.aggregate([

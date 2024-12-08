@@ -128,7 +128,7 @@ export class OrderStatsService {
     return await this.model.exists({
       cash_bank: toObjectId(cashbankId),
       status: { $nin: [1, 6, 7] },
-      payment_type: 1,
+      payments: { $size: 0 },
       on_hold: false,
     });
   }
@@ -165,11 +165,15 @@ export class OrderStatsService {
     const results = await this.model
       .aggregate([
         { $match: { $and: filters } },
+        { $unwind: "$payments" },
         {
           $group: {
-            _id: "$payment_type",
+            _id: "$payments.type",
             quantity: { $sum: 1 },
-            amount: { $sum: "$total_price" },
+            total_discount: { $sum: "$user_discount" },
+            total_shipping: { $sum: "$shipping_price" },
+            total_tips: { $sum: "$tip" },
+            amount: { $sum: "$payments.amount" },
           },
         },
         { $sort: { _id: 1 } },

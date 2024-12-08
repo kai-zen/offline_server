@@ -1,13 +1,25 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from "class-validator";
 
 export class EditOrderDto {
   @IsNumber()
-  @IsOptional()
-  status?: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  @IsNotEmpty()
+  status: 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  payment_type?: 1 | 2 | 3 | 4 | 5 | 6;
+  cash_bank?: string;
+}
+
+export class EditOrderPaymentsDto {
+  @IsArray()
+  @IsOptional()
+  payments: { type: number; amount: number }[];
 
   @IsString()
   @IsOptional()

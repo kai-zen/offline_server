@@ -2,31 +2,28 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-  Scope,
   forwardRef,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { REQUEST } from "@nestjs/core";
-import { Request } from "express";
-import { escapeRegex, toObjectId } from "src/helpers/functions";
+import { toObjectId } from "src/helpers/functions";
 import { messages } from "src/helpers/constants";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { OrderDocument } from "../../order.schema";
-import { productDataFormatter } from "../../helpers/functions";
-import { AccessService } from "src/features/user/access/access.service";
+import {
+  complexOrdersFiltersHandler,
+  productDataFormatter,
+} from "../../helpers/functions";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
+import { complexOrdersArchieveGroup } from "../../helpers/aggregate-constants";
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class OrderFetchService {
   constructor(
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
-    @Inject(REQUEST)
-    private req: Request,
     @Inject(forwardRef(() => CashBankService))
     private readonly cashbankService: CashBankService,
-    private readonly accessService: AccessService,
     private readonly complexService: ComplexService
   ) {}
 
@@ -56,69 +53,70 @@ export class OrderFetchService {
     complex_id: string,
     queryParams: { [props: string]: string }
   ) {
-    const {
-      limit = "12",
-      page = "1",
-      status,
-      search,
-      payment,
-      type,
-      from,
-      to,
-      delivery_guy,
-      orderType,
-      // isPending,
-    } = queryParams || {};
+    const { limit, page = "1", ...otherParams } = queryParams || {};
+    const applyingLimit = parseInt(limit) || 12;
 
-    const filters: any[] = [{ complex: complex_id }];
-    if (status && !isNaN(Number(status)))
-      filters.push({ status: Number(status) });
-    if (payment) filters.push({ payment_type: Number(payment) });
-    if (orderType)
-      filters.push({ order_type: type === "1" ? 1 : type === "2" ? 2 : 3 });
-    if (type)
-      filters.push({
-        order_type: type === "1" ? 1 : type === "2" ? 2 : 3,
-      });
-    if (from)
-      filters.push({
-        created_at: { $gt: new Date(from).setHours(0, 0, 0, 0) },
-      });
-    if (to)
-      filters.push({
-        created_at: { $lt: new Date(to).setHours(23, 59, 59, 999) },
-      });
-    if (search) {
-      const cleanedSearch = search ? escapeRegex(search) : "";
-      if (cleanedSearch)
-        filters.push({ user_phone: { $regex: cleanedSearch } });
-    }
-    if (delivery_guy) filters.push({ delivery_guy });
+    const filters = complexOrdersFiltersHandler(otherParams);
 
-    // if (isPending) applyingFilters.push({ status: { $in: [1, 2, 3] } });
+    const [queryResult] = await this.model.aggregate([
+      { $match: { complex: toObjectId(complex_id) } },
+      {
+        $lookup: {
+          from: "complex-users",
+          foreignField: "_id",
+          localField: "complex_user",
+          as: "complex_user",
+        },
+      },
+      { $unwind: "$complex_user" },
+      {
+        $lookup: {
+          from: "users",
+          foreignField: "_id",
+          localField: "user",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      ...(filters.length ? [{ $match: { $and: filters } }] : []),
+      {
+        $lookup: {
+          from: "users",
+          foreignField: "_id",
+          localField: "submitter",
+          as: "submitter",
+        },
+      },
+      { $unwind: { path: "$submitter", preserveNullAndEmptyArrays: true } },
+      { $unwind: "$products" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "products.product",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      { $unwind: "$productDetails" },
+      {
+        $group: complexOrdersArchieveGroup,
+      },
+      { $sort: { created_at: -1 } },
+      {
+        $facet: {
+          results: [
+            { $skip: (parseInt(page) - 1) * applyingLimit },
+            { $limit: applyingLimit },
+          ],
+          totalDocuments: [{ $count: "count" }],
+        },
+      },
+    ]);
+    if (!queryResult) throw new NotFoundException(messages[404]);
+    const { results, totalDocuments } = queryResult;
+    const numberOfPages = Math.ceil(totalDocuments?.[0]?.count / applyingLimit);
 
-    const results = await this.model
-      .find({ $and: filters })
-      .sort({ created_at: -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit))
-      .populate("products.product")
-      .populate("user")
-      .populate("cash_bank", "-complex")
-      .select("-complex")
-      .lean()
-      .exec();
-
-    const totalDocuments = await this.model
-      .find({ $and: filters })
-      .countDocuments()
-      .exec();
-    const numberOfPages = Math.ceil(totalDocuments / parseInt(limit));
-
-    return {
-      items: productDataFormatter(results),
-      numberOfPages,
-    };
+    return { items: results, numberOfPages };
   }
 
   async findCashbankOrders(cash_bank: string) {

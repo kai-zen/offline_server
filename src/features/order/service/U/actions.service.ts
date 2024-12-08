@@ -38,7 +38,7 @@ export class OrderActionService {
       .populate("user")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);
-    if (theRecord.payment_type > 1)
+    if (theRecord.payments?.length)
       throw new BadRequestException("این سفارش قبلا پرداخت شده است.");
 
     const currentVal = theRecord.on_hold;
@@ -111,7 +111,9 @@ export class OrderActionService {
       theRecord.table_number = null;
 
       const packingDiff = (theComplex.packing || 0) - theRecord.packing_price;
-      const diff = packingDiff + (shipping_price || 0) - theRecord.service;
+      const shippingDiff = shipping_price - (theRecord.shipping_price || 0);
+
+      const diff = packingDiff + (shippingDiff || 0) - theRecord.service;
       theRecord.packing_price = theComplex.packing || 0;
       theRecord.service = 0;
       theRecord.shipping_price = shipping_price || 0;
@@ -185,18 +187,18 @@ export class OrderActionService {
       .exec();
 
     if (!theRecord) throw new NotFoundException("سفارش مربوطه پیدا نشد.");
-    if (theRecord.payment_type > 1)
+    if (theRecord.payments?.length)
       throw new BadRequestException(
-        "امکان ویرایش کاربر برای سفارشات پرداخت شده وجود ندارد."
+        "امکان ویرایش مشتری برای سفارشات پرداخت شده وجود ندارد."
       );
     if (theRecord.status > 4)
       throw new BadRequestException(
-        "امکان ویرایش کاربر فقط برای سفارشات فعال وجود دارد."
+        "امکان ویرایش مشتری فقط برای سفارشات فعال وجود دارد."
       );
 
     let theUser = await this.userService.findByMobile(mobile);
     if (!theUser) theUser = await this.userService.createUser(mobile);
-    if (!theUser) throw new NotFoundException("کاربر پیدا نشد!");
+    if (!theUser) throw new NotFoundException("مشتری پیدا نشد!");
 
     theRecord.user = theUser;
     theRecord.user_phone = mobile;

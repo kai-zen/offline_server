@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { UserDocument } from "src/features/user/users/user.schema";
 import { UserService } from "src/features/user/users/user.service";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { p2e, toObjectId } from "src/helpers/functions";
 import { OrderDocument } from "../../order.schema";
 import { OrderThirdMethodsService } from "../helpers.service";
@@ -22,7 +22,6 @@ export class OrderCreateService {
 
   async createByEmployee(data: {
     order_type: 1 | 2 | 3;
-    payment_type: 1 | 2 | 3 | 4 | 5 | 6 | 7;
     description: string;
     products: { product_id: string; quantity: number; price_index: number }[];
     complex_id: string;
@@ -47,7 +46,6 @@ export class OrderCreateService {
   }) {
     const {
       order_type,
-      payment_type,
       user_address,
       user_phone,
       products,
@@ -93,14 +91,6 @@ export class OrderCreateService {
           })
         : null;
 
-    if (payment_type !== 1 && !cashbank_id)
-      throw new BadRequestException("صندوق انتخاب نشده است.");
-
-    if (payment_type === 2)
-      throw new BadRequestException(
-        "امکان انتخاب شیوه پرداخت درگاه وجود ندارد."
-      );
-
     // calculate different prices
     if (typeof shipping_price !== "number")
       shipping_price = Boolean(!user_address?.description || table_number)
@@ -141,7 +131,6 @@ export class OrderCreateService {
 
     const newRecord = new this.model({
       order_type,
-      payment_type,
       description,
       user: theUser?._id || null,
       user_address: user_address
@@ -152,6 +141,7 @@ export class OrderCreateService {
               : null,
           }
         : null,
+      payments: [],
       user_phone,
       products: productsFullData,
       shipping_price,
@@ -168,7 +158,7 @@ export class OrderCreateService {
       extra_price: extra_price || 0,
       tax,
       service: servicePrice,
-      cash_bank: payment_type === 1 ? null : toObjectId(cashbank_id) || null,
+      cash_bank: cashbank_id ? toObjectId(cashbank_id) : null,
       created_at: new Date(),
       status: 2,
       delivery_time,

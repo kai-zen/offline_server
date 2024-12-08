@@ -67,13 +67,22 @@ export class OrderProductItem {
   diff?: number;
 }
 
+@Schema({ versionKey: false, _id: false })
+export class OrderPaymentItem {
+  @Prop({ required: true })
+  type: number;
+
+  @Prop({ required: true })
+  amount: number;
+}
+
 @Schema({ versionKey: false })
 export class Order {
   @Prop({ required: true, max: 50 })
   order_type: 1 | 2 | 3; // سایت - تلفنی - حضوری
 
-  @Prop({ default: 1 })
-  payment_type: 1 | 2 | 3 | 4 | 5 | 6 | 7; // pending - gateway - pos - cash - card - debt - other
+  @Prop([{ type: OrderPaymentItem, default: [] }])
+  payments: OrderPaymentItem[];
 
   @Prop({ default: "" })
   description: string;

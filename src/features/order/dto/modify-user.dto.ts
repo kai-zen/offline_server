@@ -6,7 +6,7 @@ export class ChangeOrderUserDto {
   complex_id: string;
 
   @IsString()
-  @IsNotEmpty({ message: "موبایل کاربر تعیین نشده است." })
+  @IsNotEmpty({ message: "موبایل مشتری تعیین نشده است." })
   mobile: string;
 
   @IsString()

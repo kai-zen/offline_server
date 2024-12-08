@@ -20,7 +20,7 @@ export class CreateComplexUserAddressDto {
   details: string;
 
   @IsString()
-  @IsNotEmpty({ message: "کاربر تعیین نشده است." })
+  @IsNotEmpty({ message: "مشتری تعیین نشده است." })
   user_id: string;
 
   @IsString()

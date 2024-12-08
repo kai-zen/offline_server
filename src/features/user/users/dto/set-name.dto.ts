@@ -6,10 +6,10 @@ export class SetNameDto {
   complex_id: string;
 
   @IsString()
-  @IsNotEmpty({ message: "نام کاربر تعیین نشده است." })
+  @IsNotEmpty({ message: "نام مشتری تعیین نشده است." })
   name: string;
 
   @IsString()
-  @IsNotEmpty({ message: "کاربر تعیین نشده است." })
+  @IsNotEmpty({ message: "مشتری تعیین نشده است." })
   id: string;
 }

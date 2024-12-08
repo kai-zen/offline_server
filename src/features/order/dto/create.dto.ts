@@ -13,10 +13,6 @@ export class CreateOrderDto {
   @IsOptional()
   order_type: 1 | 2; // سایت - تلفنی - حضوری
 
-  @IsNumber()
-  @IsOptional()
-  payment_type: 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
   @IsString()
   description: string;
 
