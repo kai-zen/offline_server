@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { UserDocument } from "./user.schema";
 import { lastValueFrom } from "rxjs";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { escapeRegex, toObjectId } from "src/helpers/functions";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
@@ -19,14 +19,15 @@ export class UserService {
   async findAll(queryParams: { [props: string]: string }) {
     const {
       search = "",
-      limit = "12",
+      limit,
       page = "1",
       sort,
       direction = "asc",
     } = queryParams || {};
 
+    const applyingLimit = parseInt(limit) || 16;
     const sortObj = {};
-    if (sort) sortObj[sort] = direction === "asc" ? -1 : 1;
+    sortObj[sort || "orders_count"] = direction === "asc" ? -1 : 1;
 
     const cleanedSearch = search ? escapeRegex(search) : "";
     const filters = cleanedSearch
@@ -38,23 +39,25 @@ export class UserService {
           ],
         }
       : {};
-    const results = await this.model
-      .find(filters)
-      .sort(sortObj)
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit))
-      .exec();
+    const [queryResult] = await this.model.aggregate([
+      { $match: filters },
+      { $addFields: { orders_count: { $size: "$orders" } } },
+      { $sort: sortObj },
+      {
+        $facet: {
+          results: [
+            { $skip: (parseInt(page) - 1) * applyingLimit },
+            { $limit: applyingLimit },
+          ],
+          totalDocuments: [{ $count: "count" }],
+        },
+      },
+    ]);
+    if (!queryResult) throw new NotFoundException(messages[404]);
+    const { results, totalDocuments } = queryResult;
+    const numberOfPages = Math.ceil(totalDocuments?.[0]?.count / applyingLimit);
 
-    const totalDocuments = await this.model
-      .find(filters)
-      .countDocuments()
-      .exec();
-    const numberOfPages = Math.ceil(totalDocuments / parseInt(limit));
-
-    return {
-      items: results,
-      numberOfPages,
-    };
+    return { items: results, numberOfPages };
   }
 
   async findById(id: string | Types.ObjectId) {
