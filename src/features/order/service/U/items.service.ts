@@ -23,8 +23,9 @@ export class OrderEditItemsService {
     products: { product_id: string; quantity: number; price_index: number }[];
     complex_id: string;
     order_id: string;
+    description: string;
   }) {
-    const { products, complex_id, order_id } = data || {};
+    const { products, complex_id, order_id, description } = data || {};
 
     const theRecord = await this.model
       .findOne({
@@ -111,10 +112,16 @@ export class OrderEditItemsService {
       console.log(err);
     }
 
+    const hasDescChanged = theRecord.description !== description && description;
+    if (hasDescChanged) theRecord.description = description || "";
+    const socketMessage = hasDescChanged
+      ? `موارد و توضیحات فاکتور ${theRecord.factor_number} اصلاح شد.`
+      : `موارد فاکتور ${theRecord.factor_number} اصلاح شد.`;
+
     // websocket
     await this.eventsGateway.changeOrder({
       order: { ...copy, products: combined } as OrderDocument,
-      message: `موارد فاکتور ${theRecord.factor_number} اصلاح شد.`,
+      message: socketMessage,
     });
     return edited_order;
   }

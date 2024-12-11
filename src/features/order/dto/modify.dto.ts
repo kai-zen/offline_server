@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsArray } from "class-validator";
+import { IsNotEmpty, IsString, IsArray, IsOptional } from "class-validator";
 
 export class ModifyOrderItemsDto {
   @IsArray()
@@ -6,6 +6,10 @@ export class ModifyOrderItemsDto {
     message: "محصولی انتخاب نشده است.",
   })
   products: { product_id: string; quantity: number; price_index: number }[];
+
+  @IsString()
+  @IsOptional()
+  description: string;
 
   @IsString()
   @IsNotEmpty({
