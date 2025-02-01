@@ -25,6 +25,7 @@ export class AccessService {
           { type: type ? parseInt(type) : { $lte: 10 } },
           { "user.mobile": { $regex: cleanedSearch } },
           { "user.name": { $regex: cleanedSearch } },
+          { is_active: true },
         ]
       : [{ type: type ? parseInt(type) : { $lte: 10 } }];
 
@@ -92,25 +93,13 @@ export class AccessService {
     if (count === 0) return true;
     const filters =
       types === "all"
-        ? { user: user_id }
+        ? { user: user_id, is_active: true }
         : {
             user: user_id,
             type: { $in: types },
+            is_active: true,
           };
     return await this.model.findOne(filters);
-  }
-
-  async findByComplexAndUser(data: { user: string }) {
-    const { user } = data;
-    return await this.model.findOne({ user });
-  }
-
-  async findByComplexAndUserId(data: { user_id: Types.ObjectId }) {
-    const { user_id } = data;
-    const theAccess = await this.model.findOne({
-      user: user_id,
-    });
-    return theAccess;
   }
 
   async findDeliveryGuy(data: { access_id: string; complex_id: string }) {
@@ -120,12 +109,9 @@ export class AccessService {
         { complex: toObjectId(complex_id) },
         { _id: toObjectId(access_id) },
         { type: 9 },
+        { is_active: true },
       ],
     });
     return theAccess;
-  }
-
-  async findDeliveryGuys(complex: Types.ObjectId) {
-    return await this.model.find({ complex, type: 9 });
   }
 }

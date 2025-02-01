@@ -44,11 +44,11 @@ export const complexOrdersFiltersHandler = (params: {
     });
   if (from)
     filters.push({
-      created_at: { $gt: new Date(from).setHours(0, 0, 0, 0) },
+      created_at: { $gt: new Date(new Date(from).setHours(0, 0, 0, 0)) },
     });
   if (to)
     filters.push({
-      created_at: { $lt: new Date(to).setHours(23, 59, 59, 999) },
+      created_at: { $lt: new Date(new Date(to).setHours(23, 59, 59, 999)) },
     });
   if (search) {
     const cleanedSearch = escapeRegex(search);

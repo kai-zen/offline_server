@@ -5,7 +5,7 @@ import { UserDocument } from "./user.schema";
 import { lastValueFrom } from "rxjs";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
-import { escapeRegex, toObjectId } from "src/helpers/functions";
+import { escapeRegex, isValidDate, toObjectId } from "src/helpers/functions";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
@@ -73,11 +73,19 @@ export class UserService {
     return await newRecord.save();
   }
 
-  async setName(data: { id: string; name: string }) {
-    const { name, id } = data;
+  async setName(data: {
+    id: string;
+    name: string;
+    gender: 0 | 1 | 2;
+    birthday: string | null;
+  }) {
+    const { name, id, gender, birthday } = data;
     const theRecord = await this.model.findById(id);
     if (theRecord) {
       theRecord.name = name;
+      if (gender && [0, 1, 2].includes(gender)) theRecord.gender = gender;
+      if (typeof birthday === "string" && isValidDate(birthday))
+        theRecord.birthday = new Date(birthday);
       return await theRecord.save();
     }
   }

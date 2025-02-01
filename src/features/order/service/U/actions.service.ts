@@ -166,6 +166,26 @@ export class OrderActionService {
     return theOrder;
   }
 
+  async changePeopleCount(
+    order_id: string | Types.ObjectId,
+    peopleCount: number | null
+  ) {
+    const theRecord = await this.model
+      .findById(order_id)
+      .populate("products.product")
+      .populate("complex")
+      .populate("user")
+      .exec();
+    if (!theRecord) throw new NotFoundException(messages[404]);
+    theRecord.people_count = Number(peopleCount);
+    const theOrder = await theRecord.save();
+    // websocket
+    await this.eventsGateway.changeOrder({
+      order: theOrder,
+    });
+    return theOrder;
+  }
+
   async modifyUser(data: {
     mobile: string;
     order_id: string;

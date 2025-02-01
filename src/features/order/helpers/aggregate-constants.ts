@@ -31,4 +31,5 @@ export const complexOrdersArchieveGroup = {
   created_at: { $first: "$created_at" },
   delivery_guy: { $first: "$delivery_guy" },
   delivery_time: { $first: "$delivery_time" },
+  people_count: { $first: "$people_count" },
 };

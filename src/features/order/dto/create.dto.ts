@@ -40,6 +40,10 @@ export class CreateOrderDto {
   @IsOptional()
   table_number: string;
 
+  @IsNumber()
+  @IsOptional()
+  people_count: number;
+
   @IsString()
   @IsOptional()
   cashbank_id: string;

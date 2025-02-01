@@ -37,7 +37,7 @@ export class OrderEditPaymentAndStatusService {
       .findById(id)
       .populate("products.product")
       .populate("user")
-      .populate("complex_user", "name")
+      .populate("complex_user", "name subscription_number")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);
     if (theRecord.status > 4)
@@ -63,7 +63,7 @@ export class OrderEditPaymentAndStatusService {
     const oldStatus = theRecord.status;
     theRecord.status = status;
 
-    if (oldStatus > 1 && [6, 7].includes(status))
+    if ([6, 7].includes(status))
       socketMessage = `فاکتور ${theRecord.factor_number} لغو شد.`;
     if (oldStatus === 1 && status === 2) {
       // تایید سفارش
@@ -119,14 +119,17 @@ export class OrderEditPaymentAndStatusService {
       .populate("products.product")
       .populate("submitter")
       .populate("user")
-      .populate("complex_user", "name")
+      .populate("complex_user", "name subscription_number")
       .populate("complex")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);
 
     const filteredPayments =
       (payments || []).filter(
-        (p) => !isNaN(p.amount) && !isNaN(p.type) && p.amount !== 0
+        (p) =>
+          typeof p.amount === "number" &&
+          p.amount !== 0 &&
+          [1, 2, 3, 4, 5, 6, 7].includes(p.type)
       ) || [];
 
     if (!filteredPayments?.length)

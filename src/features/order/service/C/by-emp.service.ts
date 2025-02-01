@@ -43,6 +43,7 @@ export class OrderCreateService {
     user_phone?: string;
     table_number?: string;
     navigation_link?: string;
+    people_count?: number;
   }) {
     const {
       order_type,
@@ -56,6 +57,7 @@ export class OrderCreateService {
       extra_price,
       delivery_time,
       navigation_link,
+      people_count,
       tip,
     } = data || {};
     let { shipping_price, user_discount } = data;
@@ -165,6 +167,7 @@ export class OrderCreateService {
       submitted_offline: true,
       navigation_link: navigation_link || "",
       tip: tip || 0,
+      people_count: typeof people_count === "number" ? people_count : null,
     });
     const created_order = await newRecord.save();
 

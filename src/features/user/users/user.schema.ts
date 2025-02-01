@@ -62,6 +62,9 @@ export class User extends Document {
 
   @Prop([{ type: ComplexUserOrder }])
   orders: ComplexUserOrder[];
+
+  @Prop({ default: 0 })
+  gender: 0 | 1 | 2;
 }
 
 export type UserDocument = HydratedDocument<User>;

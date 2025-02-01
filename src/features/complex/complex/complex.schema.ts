@@ -69,10 +69,46 @@ class Settings {
   callable_waiters: boolean;
 }
 
+@Schema({ versionKey: false })
+class AccessSchema {
+  @Prop({ default: false })
+  sale: boolean;
+
+  @Prop({ default: false })
+  subscription: boolean;
+
+  @Prop({ default: false })
+  customers_club: boolean;
+
+  @Prop({ default: false })
+  warehousing: boolean;
+
+  @Prop({ default: false })
+  presence: boolean;
+
+  @Prop({ default: false })
+  website: boolean;
+
+  @Prop({ default: false })
+  saloon: boolean;
+
+  @Prop({ default: false })
+  delivery: boolean;
+
+  @Prop({ default: false })
+  caller_id: boolean;
+
+  @Prop({ default: false })
+  local_server: boolean;
+}
+
 @Schema(schemaConfig)
 export class Complex {
   @Prop({ required: true, max: 50 })
   name: string;
+
+  @Prop({ type: AccessSchema })
+  access: AccessSchema;
 
   @Prop({ required: true, min: 10, max: 250 })
   description: string;

@@ -62,22 +62,13 @@ export class OrderFetchService {
       { $match: { complex: toObjectId(complex_id) } },
       {
         $lookup: {
-          from: "complex-users",
-          foreignField: "_id",
-          localField: "complex_user",
-          as: "complex_user",
-        },
-      },
-      { $unwind: "$complex_user" },
-      {
-        $lookup: {
           from: "users",
           foreignField: "_id",
           localField: "user",
           as: "user",
         },
       },
-      { $unwind: "$user" },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
       ...(filters.length ? [{ $match: { $and: filters } }] : []),
       {
         $lookup: {

@@ -46,6 +46,20 @@ export class OrderPutController {
     });
   }
 
+  @Put("/modify-people-count/:id/:count")
+  @AccessLevel([1, 2, 3, 4])
+  @UseGuards(HasAccessGuard)
+  async modifyPeopleCount(
+    @Param("id") recordId: string,
+    @Param("count") count: string
+  ) {
+    const countNumber = Number(count);
+    return await this.actionService.changePeopleCount(
+      recordId,
+      countNumber || null
+    );
+  }
+
   @Put("/edit-delivery/:id")
   @AccessLevel([1, 2, 3, 4, 7])
   async editDelivery(

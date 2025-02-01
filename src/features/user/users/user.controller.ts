@@ -17,14 +17,16 @@ export class UserController {
     return await this.service.findAll(queryParams);
   }
 
-  @Get("/user/is-running") isServerRunning() {
+  @Get("/user/is-running")
+  isServerRunning() {
     return {
       is_connected: true,
       local_server_version: 2,
     };
   }
 
-  @Get("/complex-users/is-running") isServerRunning2() {
+  @Get("/complex-users/is-running")
+  isServerRunning2() {
     return {
       is_connected: true,
     };
@@ -57,7 +59,7 @@ export class UserController {
 
   @Put("/complex-users/set-name")
   @AccessLevel([1, 2, 3, 4, 5])
-  async setName(@Body() body: SetNameDto) {
+  async setNameAndGender(@Body() body: SetNameDto) {
     return await this.service.setName(body);
   }
 

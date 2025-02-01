@@ -139,6 +139,9 @@ export class Order {
   status: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   // ثبت - آماده‌سازی - ارسال|آماده تحویل - سرو - تحویل شد - رد - لغو
 
+  @Prop({ default: null, type: Number })
+  people_count: number;
+
   @Prop({ required: true })
   factor_number: number;
 

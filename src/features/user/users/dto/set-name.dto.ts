@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class SetNameDto {
   @IsString()
@@ -8,6 +8,14 @@ export class SetNameDto {
   @IsString()
   @IsNotEmpty({ message: "نام مشتری تعیین نشده است." })
   name: string;
+
+  @IsNumber()
+  @IsOptional()
+  gender: 0 | 1 | 2;
+
+  @IsString()
+  @IsOptional()
+  birthday: string | null;
 
   @IsString()
   @IsNotEmpty({ message: "مشتری تعیین نشده است." })

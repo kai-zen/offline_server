@@ -14,6 +14,9 @@ export class Access {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "complex" })
   complex: ComplexDocument;
 
+  @Prop({ default: true })
+  is_active: boolean;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "user" })
   user: UserDocument;
 }
