@@ -10,7 +10,7 @@ export class AreaController {
     return await this.service.findAll();
   }
 
-  @Get("/:complexId")
+  @Get("/:complexId") // *
   async findByComplex() {
     return await this.service.findAll();
   }

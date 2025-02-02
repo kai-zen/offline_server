@@ -12,7 +12,6 @@ export class CashBankService {
   constructor(
     @InjectModel("cash-bank")
     private readonly model: Model<CashBank>,
-
     private readonly httpService: HttpService
   ) {}
 
@@ -21,11 +20,7 @@ export class CashBankService {
   }
 
   async findByComplex() {
-    return await this.model.find().select("-complex").exec();
-  }
-
-  async findOneByComplex() {
-    return await this.model.findOne().exec();
+    return await this.model.find().exec();
   }
 
   async findById(id: string) {

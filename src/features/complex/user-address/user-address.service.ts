@@ -48,32 +48,6 @@ export class ComplexUserAddressService {
     return await this.model.find({ user: toObjectId(user_id) }).exec();
   }
 
-  async findByUserWithShppingPrices(complexId: string, user_id: string) {
-    const results = await this.model
-      .find({ user: toObjectId(user_id), complex: toObjectId(complexId) })
-      .select("-user")
-      .lean()
-      .exec();
-
-    const addressesWithShippingPrice = [];
-    for await (const address of results) {
-      const { latitude, longitude } = address || {};
-      const theRange =
-        latitude && longitude
-          ? await this.rangeService.findCorrespondingRange({
-              latitude,
-              longitude,
-            })
-          : null;
-      addressesWithShippingPrice.push({
-        ...address,
-        shipping: theRange ? theRange.price || 0 : "not in range",
-      });
-    }
-
-    return addressesWithShippingPrice;
-  }
-
   async findById(id: string) {
     return await this.model.findById(id).exec();
   }

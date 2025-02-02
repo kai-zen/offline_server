@@ -5,7 +5,7 @@ import { Controller, Get, Put, Query } from "@nestjs/common";
 export class AccessController {
   constructor(private service: AccessService) {}
 
-  @Get("/:complexId")
+  @Get("/:complexId") // *
   async findAll(@Query() queryParams: { [props: string]: string }) {
     const results = await this.service.findAll({
       ...queryParams,

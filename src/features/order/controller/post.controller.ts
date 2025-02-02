@@ -14,20 +14,20 @@ export class OrderPostController {
     private readonly orderOtherCreateService: OrderOtherCreateService
   ) {}
 
-  @Post("/upload")
+  @Post("/upload") // *
   async uploadOrders() {
     await this.orderOtherCreateService.uploadOrders();
   }
 
   // this route is for create order by complex employee
-  @Post("/employee")
+  @Post("/employee") // *
   @AccessLevel([1, 2, 3, 4, 5, 7, 8])
   @UseGuards(HasAccessGuard)
   async createOrderByEmployee(@Body() body: CreateOrderDto) {
     return await this.createService.createByEmployee(body);
   }
 
-  @Post("/print/:complexId")
+  @Post("/print/:complexId") // *
   async printReceipt(@Body() body: any) {
     return await this.actionService.printReceipt(body);
   }

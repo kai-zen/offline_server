@@ -5,7 +5,7 @@ import { BackupService } from "./backup.service";
 export class BackupController {
   constructor(private readonly backupService: BackupService) {}
 
-  @Post()
+  @Post() // *
   async triggerBackup() {
     await this.backupService.backupDatabase();
     return "Database backup completed successfully.";

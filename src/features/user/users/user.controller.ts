@@ -1,7 +1,16 @@
 import { AccessLevel } from "src/helpers/decorators";
 import { UserService } from "./user.service";
-import { Body, Controller, Get, Param, Put, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Put,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { SetNameDto } from "./dto/set-name.dto";
+import { HasAccessGuard } from "src/guards/access.guard";
 
 @Controller()
 export class UserController {
@@ -25,24 +34,12 @@ export class UserController {
     };
   }
 
-  @Get("/complex-users/is-running")
-  isServerRunning2() {
-    return {
-      is_connected: true,
-    };
-  }
-
-  @Get("/user/:complexId")
-  async findAllByComplex(@Query() queryParams: { [props: string]: string }) {
-    return await this.service.findAll(queryParams);
-  }
-
-  @Get("/complex-users/:complexId")
+  @Get("/complex-users/:complexId") // *
   async findAllByComplex2(@Query() queryParams: { [props: string]: string }) {
     return await this.service.findAll(queryParams);
   }
 
-  @Get("/user/:id")
+  @Get("/user/:id") // *
   async findById(@Param("id") complexId: string) {
     return await this.service.findById(complexId);
   }
@@ -57,13 +54,14 @@ export class UserController {
     return await this.service.updateData();
   }
 
-  @Put("/complex-users/set-name")
+  @Put("/complex-users/set-name") // *
   @AccessLevel([1, 2, 3, 4, 5])
+  @UseGuards(HasAccessGuard)
   async setNameAndGender(@Body() body: SetNameDto) {
     return await this.service.setName(body);
   }
 
-  @Put("/complex-users")
+  @Put("/complex-users") // *
   async updateData2() {
     return await this.service.updateData();
   }

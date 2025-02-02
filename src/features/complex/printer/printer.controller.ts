@@ -22,12 +22,12 @@ export class PrinterController {
     return await this.service.findAll();
   }
 
-  @Get("/:complexId")
+  @Get("/:complexId") // *
   async findByComplex() {
     return await this.service.findAll();
   }
 
-  @Post("/:complexId")
+  @Post("/:complexId") // *
   @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
   async create(
@@ -42,7 +42,7 @@ export class PrinterController {
     return await this.service.updateData();
   }
 
-  @Put("/:complexId/:id")
+  @Put("/:complexId/:id") // *
   @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
   async editName(
@@ -57,7 +57,7 @@ export class PrinterController {
     });
   }
 
-  @Delete("/:complexId/:id")
+  @Delete("/:complexId/:id") // *
   @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
   async deleteRecord(@Param("id") recordId: string) {

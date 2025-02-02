@@ -19,6 +19,7 @@ export class AreaService {
     return await this.model.find().exec();
   }
 
+  // used in order creation method
   async findRelatedArea(data: { complex_id: string; table_number: number }) {
     const { complex_id, table_number } = data;
     const theArea = await this.model

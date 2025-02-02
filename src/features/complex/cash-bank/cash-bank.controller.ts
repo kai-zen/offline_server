@@ -10,7 +10,7 @@ export class CashBankController {
     return await this.service.findAll();
   }
 
-  @Get("/:complexId")
+  @Get("/:complexId") // *
   async findBranchRanges() {
     return await this.service.findByComplex();
   }
@@ -19,18 +19,4 @@ export class CashBankController {
   async updateData() {
     return await this.service.updateData();
   }
-
-  // @Put("/close/:complexId/:id")
-  // async closeCashbank(
-  //   @Param("id") recordId: string,
-  //   @Param("complexId") complexId: string,
-  //   @Req() req: Request
-  // ) {
-  //   const token = req.headers.authorization;
-  //   return await this.service.closeCashBank({
-  //     complex_id: complexId,
-  //     id: recordId,
-  //     token,
-  //   });
-  // }
 }

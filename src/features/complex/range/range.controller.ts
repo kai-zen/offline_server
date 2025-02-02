@@ -21,7 +21,7 @@ export class RangeController {
     return await this.service.findAll();
   }
 
-  @Get("/:complexId/price")
+  @Get("/:complexId/price") // *
   async shippingPriceCalculator(
     @Query() queryParams: { [props: string]: string }
   ) {
