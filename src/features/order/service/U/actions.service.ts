@@ -193,9 +193,6 @@ export class OrderActionService {
   }) {
     const { complex_id, order_id, mobile } = data;
 
-    if (mobile?.length !== 11 || !mobile.startsWith("09"))
-      throw new BadRequestException("شماره همراه وارد شده اشتباه است.");
-
     const theRecord = await this.model
       .findOne({
         complex: toObjectId(complex_id),
@@ -207,20 +204,18 @@ export class OrderActionService {
       .exec();
 
     if (!theRecord) throw new NotFoundException("سفارش مربوطه پیدا نشد.");
-    if (theRecord.payments?.length)
-      throw new BadRequestException(
-        "امکان ویرایش مشتری برای سفارشات پرداخت شده وجود ندارد."
-      );
     if (theRecord.status > 4)
       throw new BadRequestException(
         "امکان ویرایش مشتری فقط برای سفارشات فعال وجود دارد."
       );
 
-    let theUser = await this.userService.findByMobile(mobile);
-    if (!theUser) theUser = await this.userService.createUser(mobile);
-    if (!theUser) throw new NotFoundException("مشتری پیدا نشد!");
-
-    theRecord.user = theUser;
+    const isMobileNumber = mobile?.length === 11 && mobile.startsWith("09");
+    if (isMobileNumber) {
+      let theUser = await this.userService.findByMobile(mobile);
+      if (!theUser) theUser = await this.userService.createUser(mobile);
+      if (!theUser) throw new NotFoundException("مشتری پیدا نشد!");
+      theRecord.user = theUser;
+    }
     theRecord.user_phone = mobile;
 
     const theOrder = await theRecord.save();

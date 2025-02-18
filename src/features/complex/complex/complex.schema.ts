@@ -116,9 +116,6 @@ export class Complex {
   @Prop()
   image: string;
 
-  @Prop({ default: "free" })
-  active_plan: string;
-
   @Prop()
   expiration_date: Date;
 
