@@ -1,4 +1,4 @@
-import mongoose, { HydratedDocument, Document } from "mongoose";
+import mongoose, { HydratedDocument, Document, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { schemaConfig } from "src/helpers/constants";
 import { ProductDocument } from "src/features/product/product/product.schema";
@@ -33,29 +33,14 @@ class ComplexUserOrder {
 
 @Schema(schemaConfig)
 export class User extends Document {
-  @Prop({ default: "" })
-  name: string;
-
-  @Prop()
-  birthday: Date;
-
-  @Prop({
-    trim: true,
-    lowercase: true,
-  })
-  email: string;
-
-  @Prop()
-  username: string;
-
-  @Prop({ required: true, length: 11 })
+  @Prop({ required: true, length: 11, unique: true })
   mobile: string;
 
-  @Prop({ default: null })
-  image: string | null;
+  @Prop({ default: null, type: Types.ObjectId })
+  complex_user_id: Types.ObjectId | null;
 
-  @Prop({ default: null })
-  subscription_number: string;
+  @Prop()
+  name: string;
 
   @Prop([{ type: ComplexUserProduct }])
   products: ComplexUserProduct[];
@@ -63,8 +48,17 @@ export class User extends Document {
   @Prop([{ type: ComplexUserOrder }])
   orders: ComplexUserOrder[];
 
+  @Prop()
+  birthday: Date;
+
+  @Prop({ default: null })
+  subscription_number: string;
+
   @Prop({ default: 0 })
   gender: 0 | 1 | 2;
+
+  @Prop({ default: null, type: Date })
+  last_visit: Date;
 }
 
 export type UserDocument = HydratedDocument<User>;

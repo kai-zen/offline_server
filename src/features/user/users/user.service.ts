@@ -90,6 +90,32 @@ export class UserService {
     }
   }
 
+  userDataFormatter(record: any) {
+    const name = record.complexUser?.name || record.name || "";
+    const objecIdId = toObjectId(record._id);
+    const modifiedResponse = {
+      _id: objecIdId,
+      mobile: record.mobile,
+      complex_user_id: record.complexUser?._id
+        ? toObjectId(record.complexUser._id)
+        : null,
+      name,
+      orders: record.complexUser?.orders?.length
+        ? record.complexUser.orders
+        : [],
+      products: record.complexUser?.products?.length
+        ? record.complexUser.products
+        : [],
+      birthday: record.birthday || record.complexUser.birthday || null,
+      gender: record.gender || record.complexUser.gender || 0,
+      subscription_number: record.complexUser?.subscription_number || null,
+      last_visit: record.complexUser?.last_visit
+        ? new Date(record.complexUser.last_visit)
+        : null,
+    };
+    return modifiedResponse;
+  }
+
   async updateData() {
     const theComplex = await this.complexService.findTheComplex();
     if (!theComplex) return;
@@ -106,21 +132,9 @@ export class UserService {
       );
       if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
-          const name = record.complexUser?.name || record.name || "";
-          const objecIdId = toObjectId(record._id);
-          const modifiedResponse = {
-            ...record,
-            name,
-            orders: record.complexUser?.orders?.length
-              ? record.complexUser.orders
-              : [],
-            products: record.complexUser?.products?.length
-              ? record.complexUser.products
-              : [],
-            _id: objecIdId,
-          };
+          const modifiedResponse = this.userDataFormatter(record);
           await this.model.updateOne(
-            { _id: objecIdId },
+            { _id: modifiedResponse._id },
             { $set: modifiedResponse },
             { upsert: true }
           );
@@ -143,15 +157,9 @@ export class UserService {
       );
       if (res?.data?.length > 0) {
         for await (const record of res.data) {
-          const name = record.complexUser?.name || record.name || "";
-          const objecIdId = toObjectId(record._id);
-          const modifiedResponse = {
-            ...record,
-            name,
-            _id: objecIdId,
-          };
+          const modifiedResponse = this.userDataFormatter(record);
           await this.model.updateOne(
-            { _id: objecIdId },
+            { _id: modifiedResponse._id },
             { $set: modifiedResponse },
             { upsert: true }
           );
