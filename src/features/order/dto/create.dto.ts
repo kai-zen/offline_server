@@ -5,7 +5,6 @@ import {
   IsObject,
   IsOptional,
   IsArray,
-  IsBoolean,
 } from "class-validator";
 
 export class CreateOrderDto {
@@ -47,9 +46,6 @@ export class CreateOrderDto {
   @IsString()
   @IsOptional()
   cashbank_id: string;
-
-  @IsBoolean()
-  needs_pack: boolean;
 
   @IsNumber()
   @IsOptional()

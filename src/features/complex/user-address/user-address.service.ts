@@ -74,12 +74,17 @@ export class ComplexUserAddressService {
         mobile: user.mobile,
         username: user.username,
         _id: user._id,
+
         orders_quantity: user.orders?.length || 0,
         total_rates: totalRates,
         avg_rate:
           Number(((totalPoints || 0) / (totalRates || 1)).toFixed(1)) || 0,
         complex_user_name: user.name || "",
-        complex_user_id: user._id || "",
+        complex_user_id: user.complex_user_id || "",
+        birthday: user.birthday || null,
+        gender: user.gender || 0,
+        subscription_number: user.subscription_number || null,
+        last_visit: user.last_visit || null,
       },
     };
   }

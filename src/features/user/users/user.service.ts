@@ -95,6 +95,8 @@ export class UserService {
     const objecIdId = toObjectId(record._id);
     const modifiedResponse = {
       _id: objecIdId,
+      image: record.image,
+      username: record.username,
       mobile: record.mobile,
       complex_user_id: record.complexUser?._id
         ? toObjectId(record.complexUser._id)

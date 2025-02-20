@@ -37,7 +37,6 @@ export class OrderEditPaymentAndStatusService {
       .findById(id)
       .populate("products.product")
       .populate("user")
-      .populate("complex_user", "name subscription_number")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);
     if (theRecord.status > 4)
@@ -119,7 +118,6 @@ export class OrderEditPaymentAndStatusService {
       .populate("products.product")
       .populate("submitter")
       .populate("user")
-      .populate("complex_user", "name subscription_number")
       .populate("complex")
       .exec();
     if (!theRecord) throw new NotFoundException(messages[404]);

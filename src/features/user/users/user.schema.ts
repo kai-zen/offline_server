@@ -59,6 +59,12 @@ export class User extends Document {
 
   @Prop({ default: null, type: Date })
   last_visit: Date;
+
+  @Prop()
+  username: string;
+
+  @Prop({ default: null })
+  image: string | null;
 }
 
 export type UserDocument = HydratedDocument<User>;
