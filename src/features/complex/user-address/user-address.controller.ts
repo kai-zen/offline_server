@@ -34,7 +34,7 @@ export class ComplexUserAddressController {
   }
 
   @Post() // *
-  @AccessLevel([1, 2, 4, 5, 7])
+  @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
   async create(@Body() body: CreateComplexUserAddressDto) {
     return await this.service.create(body);
@@ -46,7 +46,7 @@ export class ComplexUserAddressController {
   }
 
   @Put("/:id") // *
-  @AccessLevel([1, 2, 4, 5, 7])
+  @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
   async editItem(
     @Param("id") recordId: string,
@@ -56,7 +56,7 @@ export class ComplexUserAddressController {
   }
 
   @Delete("/:complexId/:id") // *
-  @AccessLevel([1, 2, 4, 5, 7])
+  @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
   async deleteItem(@Param("id") recordId: string) {
     return await this.service.deleteOne(recordId);
