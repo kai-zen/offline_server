@@ -16,18 +16,18 @@ export class AccessService {
   ) {}
 
   async findAll(queryParams: { [props: string]: string }) {
-    const { sort, direction = "asc", search = "", type } = queryParams || {};
-
+    const { search = "", type } = queryParams || {};
     const cleanedSearch = search ? escapeRegex(search) : "";
 
-    const filters: any[] = cleanedSearch
-      ? [
-          { type: type ? parseInt(type) : { $lte: 10 } },
+    const filters: any[] = [];
+    if (type) filters.push({ type: parseInt(type) });
+    if (cleanedSearch)
+      filters.push({
+        $or: [
           { "user.mobile": { $regex: cleanedSearch } },
           { "user.name": { $regex: cleanedSearch } },
-          { is_active: true },
-        ]
-      : [{ type: type ? parseInt(type) : { $lte: 10 } }];
+        ],
+      });
 
     const aggregateQuery: PipelineStage[] = [
       {
@@ -39,18 +39,13 @@ export class AccessService {
         },
       },
       { $unwind: "$user" },
-      {
+    ];
+    if (filters.length)
+      aggregateQuery.push({
         $match: {
           $and: filters,
         },
-      },
-    ];
-
-    const sortObj: { [properties: string]: 1 | -1 } = {};
-    if (sort) {
-      sortObj[sort] = direction === "asc" ? -1 : 1;
-      aggregateQuery.push({ $sort: sortObj });
-    }
+      });
 
     const [queryResult] =
       (await this.model.aggregate(aggregateQuery).exec()) || [];
