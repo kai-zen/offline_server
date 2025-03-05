@@ -6,7 +6,7 @@ export class SetNameDto {
   complex_id: string;
 
   @IsString()
-  @IsNotEmpty({ message: "نام مشتری تعیین نشده است." })
+  @IsOptional()
   name: string;
 
   @IsNumber()

@@ -82,7 +82,7 @@ export class UserService {
     const { name, id, gender, birthday } = data;
     const theRecord = await this.model.findById(id);
     if (theRecord) {
-      theRecord.name = name;
+      theRecord.name = name || "";
       if (gender && [0, 1, 2].includes(gender)) theRecord.gender = gender;
       if (typeof birthday === "string" && isValidDate(birthday))
         theRecord.birthday = new Date(birthday);
