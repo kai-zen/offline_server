@@ -51,12 +51,23 @@ export class OrderEditPaymentAndStatusService {
       if (!theCashBank)
         throw new NotFoundException("صندوق مورد نظر شما وجود ندارد.");
     }
-    if (!theRecord.cash_bank && status === 5) {
-      if (!theCashBank)
+
+    if (status === 5) {
+      const totalPayments = (theRecord.payments || [])
+        .map((p) => p.amount)
+        .reduce((accumulator, currentVal) => accumulator + currentVal, 0);
+      if (theRecord.total_price !== totalPayments)
         throw new BadRequestException(
-          "انتخاب صندوق برای تحویل سفارش الزامی است."
+          "برای تحویل سفارش باید مجموع پرداختی ها با مبلغ فاکتور برابر باشد."
         );
-      else theRecord.cash_bank = theCashBank;
+
+      if (!theRecord.cash_bank) {
+        if (!theCashBank)
+          throw new BadRequestException(
+            "انتخاب صندوق برای تحویل سفارش الزامی است."
+          );
+        else theRecord.cash_bank = theCashBank;
+      }
     }
 
     const oldStatus = theRecord.status;
@@ -77,7 +88,6 @@ export class OrderEditPaymentAndStatusService {
       socketMessage = "created";
     }
 
-    const complex_id = theRecord.complex._id.toString();
     const theOrder = await theRecord.save();
 
     // websocket
@@ -87,21 +97,7 @@ export class OrderEditPaymentAndStatusService {
         message: socketMessage,
       });
 
-    if (status === 5) {
-      await this.orderIsDoneHandler({ order: theOrder, complex_id });
-    }
     return "success";
-  }
-
-  async orderIsDoneHandler(data: { order: OrderDocument; complex_id: string }) {
-    const { order } = data;
-    const totalPayments = (order.payments || [])
-      .map((p) => p.amount)
-      .reduce((accumulator, currentVal) => accumulator + currentVal, 0);
-    if (order.total_price !== totalPayments)
-      throw new BadRequestException(
-        "برای تحویل سفارش باید مجموع پرداختی ها با مبلغ فاکتور برابر باشد."
-      );
   }
 
   async editPayment(data: {
