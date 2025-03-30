@@ -55,4 +55,8 @@ export class EventsGateway {
   receiptPrinter(@MessageBody() body: { printer: any; receipt: any[] }) {
     return body;
   }
+  @SubscribeMessage("heartbeat")
+  handleHeartbeat() {
+    this.server.to("local-orders-channel").emit("heartbeat_ack");
+  }
 }
