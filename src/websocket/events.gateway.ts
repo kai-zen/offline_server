@@ -4,7 +4,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { OrderDocument } from "src/features/order/order.schema";
 
 @WebSocketGateway({ cors: { origin: "*" } })
@@ -13,6 +13,13 @@ export class EventsGateway {
 
   @WebSocketServer()
   server: Server;
+
+  onModuleInit() {
+    if (this.server?.sockets?.sockets)
+      this.server.sockets.sockets.forEach((socket: Socket) => {
+        socket.disconnect(true);
+      });
+  }
 
   async handleConnection() {
     this.server.on("connection", async (socket) => {

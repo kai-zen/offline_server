@@ -4,7 +4,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { schemaConfig } from "src/helpers/constants";
 import { ProductFolderDocument } from "../folders/folder.schema";
 
-@Schema(schemaConfig)
+@Schema({ versionKey: false })
 class ProductPriceSchema {
   @Prop({ required: true })
   price: number;
@@ -13,7 +13,7 @@ class ProductPriceSchema {
   title: string;
 }
 
-@Schema({ versionKey: false })
+@Schema(schemaConfig)
 export class Product {
   @Prop({ required: true })
   name: string;

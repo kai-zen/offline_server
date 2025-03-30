@@ -8,7 +8,6 @@ import { lastValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
-import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class ProductService {
@@ -16,8 +15,7 @@ export class ProductService {
     @InjectModel("product")
     private readonly model: Model<ProductDocument>,
     private readonly discountService: DiscountService,
-    private readonly httpService: HttpService,
-    private readonly complexService: ComplexService
+    private readonly httpService: HttpService
   ) {}
 
   async findAll() {
