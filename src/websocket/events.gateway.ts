@@ -57,6 +57,6 @@ export class EventsGateway {
   }
   @SubscribeMessage("heartbeat")
   handleHeartbeat() {
-    this.server.to("local-orders-channel").emit("heartbeat_ack");
+    this.server.to("local-orders-channel").emit("heartbeat-ack");
   }
 }
