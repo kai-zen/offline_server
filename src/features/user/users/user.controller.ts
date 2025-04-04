@@ -30,7 +30,7 @@ export class UserController {
   isServerRunning() {
     return {
       is_connected: true,
-      local_server_version: 2,
+      local_server_version: 3,
     };
   }
 
