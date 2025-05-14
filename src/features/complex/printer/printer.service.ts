@@ -30,27 +30,25 @@ export class PrinterService {
         }
       )
     );
-
-    for await (const record of res.data) {
-      const areas =
-        (record.areas || []).map((a) => toObjectId(a?._id || a)) || [];
-      const folders =
-        (record.folders || []).map((f) => toObjectId(f?._id || f)) || [];
-
-      const modifiedResponse = {
-        ...record,
-        folders,
-        areas,
-        _id: toObjectId(record._id),
-        complex: toObjectId(record.complex),
-      };
-      await this.model.updateOne(
-        { _id: modifiedResponse._id },
-        { $set: modifiedResponse },
-        { upsert: true }
-      );
+    if (res?.data) {
+      await this.model.deleteMany({});
+      const populated = res.data.map((record) => {
+        const areas =
+          (record.areas || []).map((a) => toObjectId(a?._id || a)) || [];
+        const folders =
+          (record.folders || []).map((f) => toObjectId(f?._id || f)) || [];
+        const modifiedResponse = {
+          ...record,
+          folders,
+          areas,
+          _id: toObjectId(record._id),
+          complex: toObjectId(record.complex),
+        };
+        return modifiedResponse;
+      });
+      await this.model.insertMany(populated);
+      return "success";
     }
-    return "success";
   }
 
   async create(
