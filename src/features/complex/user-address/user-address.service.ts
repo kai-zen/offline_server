@@ -8,7 +8,6 @@ import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { ComplexService } from "../complex/comlex.service";
-import { RangeService } from "../range/range.service";
 
 @Injectable()
 export class ComplexUserAddressService {
@@ -16,7 +15,6 @@ export class ComplexUserAddressService {
     @InjectModel("complex-user-address")
     private readonly model: Model<ComplexUserAddress>,
     private readonly userService: UserService,
-    private readonly rangeService: RangeService,
     private readonly httpService: HttpService,
     private readonly complexService: ComplexService
   ) {}

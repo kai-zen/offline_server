@@ -28,7 +28,6 @@ export class OrderCreateService {
     cashbank_id: string;
     tip?: number;
     user_address?: {
-      address_id: string;
       name: string;
       description: string;
       details: string;
@@ -135,14 +134,7 @@ export class OrderCreateService {
       order_type,
       description,
       user: theUser?._id || null,
-      user_address: user_address
-        ? {
-            ...user_address,
-            address_id: user_address?.address_id
-              ? toObjectId(user_address.address_id)
-              : null,
-          }
-        : null,
+      user_address: user_address || null,
       payments: [],
       user_phone,
       products: productsFullData,

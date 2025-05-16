@@ -10,7 +10,6 @@ export class EditAddressDto {
   @IsObject()
   @IsOptional()
   address: {
-    address_id: string;
     name: string;
     description: string;
     latitude: number;

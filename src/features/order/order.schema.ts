@@ -6,17 +6,9 @@ import { UserDocument } from "src/features/user/users/user.schema";
 import { AccessDocument } from "src/features/user/access/access.schema";
 import { CashBankDocument } from "src/features/complex/cash-bank/cash-bank.schema";
 import { AreaDocument } from "src/features/complex/area/area.schema";
-import { ComplexUserAddressDocument } from "src/features/complex/user-address/user-address.schema";
 
 @Schema({ versionKey: false })
 export class OrderAddress {
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "complex-user-address",
-    default: null,
-  })
-  address_id?: ComplexUserAddressDocument;
-
   @Prop()
   name: string;
 

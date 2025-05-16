@@ -56,7 +56,6 @@ export class OrderActionService {
     order_id: string;
     complex_id: string;
     address?: {
-      address_id: string;
       name: string;
       description: string;
       latitude: number;
@@ -100,14 +99,7 @@ export class OrderActionService {
         socketMessage = `فاکتور ${theRecord.factor_number} از میز ${theRecord.table_number} تبدیل به یک سفارش ارسالی شد.`;
       else if (!theRecord.user_address?.description)
         socketMessage = `فاکتور ${theRecord.factor_number} از بیرون‌بر تبدیل به ارسالی شد.`;
-      theRecord.user_address = {
-        ...address,
-        address_id: address
-          ? address?.address_id
-            ? (toObjectId(address.address_id) as any)
-            : null
-          : null,
-      };
+      theRecord.user_address = address;
       theRecord.table_number = null;
 
       const packingDiff = (theComplex.packing || 0) - theRecord.packing_price;
