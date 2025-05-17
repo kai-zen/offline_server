@@ -167,12 +167,27 @@ export class ComplexUserAddressService {
       );
       if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
+          const theUserId = record.user?._id || record.user;
+          const theRecordId = toObjectId(record._id);
           const modifiedResponse = {
             ...record,
-            _id: toObjectId(record._id),
+            user:
+              typeof record.user === "object"
+                ? { ...record.user, _id: toObjectId(record.user?._id) }
+                : typeof record.user === "string"
+                  ? toObjectId(record.user)
+                  : record.user,
+            _id: theRecordId,
           };
+          await this.model.deleteOne({
+            description: record.description,
+            user: toObjectId(theUserId),
+            name: record.name,
+            _id: { $ne: theRecordId },
+          });
+
           await this.model.updateOne(
-            { _id: modifiedResponse._id },
+            { _id: theRecordId },
             { $set: modifiedResponse },
             { upsert: true }
           );
