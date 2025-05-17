@@ -117,6 +117,9 @@ export class Complex {
   image: string;
 
   @Prop()
+  print_image: string;
+
+  @Prop()
   expiration_date: Date;
 
   @Prop({ default: 0 })

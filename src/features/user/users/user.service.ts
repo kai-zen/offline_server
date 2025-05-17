@@ -81,6 +81,7 @@ export class UserService {
   }) {
     const { name, id, gender, birthday } = data;
     const theRecord = await this.model.findById(id);
+    if (!theRecord) throw new NotFoundException(messages[404]);
     if (theRecord) {
       theRecord.name = name || "";
       if (gender && [0, 1, 2].includes(gender)) theRecord.gender = gender;

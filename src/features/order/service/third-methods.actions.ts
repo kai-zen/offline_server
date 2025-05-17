@@ -52,14 +52,15 @@ export class OrderThirdMethodsService {
     for await (const product of products) {
       const { product_id, quantity, price_index } = product || {};
       const fullData = await this.productService.findById(product_id);
-      if (fullData && fullData.prices[price_index])
+      const thePrice = fullData.prices?.[price_index];
+      if (fullData && thePrice)
         productsFullData.push({
           product: fullData,
           quantity: quantity || 1,
           price: {
-            amount: fullData.prices[price_index].price,
-            title: fullData.prices[price_index].title, // @ts-ignore
-            price_id: fullData.prices[price_index]._id,
+            amount: thePrice.price,
+            title: thePrice.title, // @ts-ignore
+            price_id: thePrice._id,
           },
           added_later: Boolean(added_later),
         });

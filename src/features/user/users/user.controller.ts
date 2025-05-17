@@ -12,6 +12,7 @@ import {
 import { SetNameDto } from "./dto/set-name.dto";
 import { HasAccessGuard } from "src/guards/access.guard";
 
+export const local_server_version = 4;
 @Controller()
 export class UserController {
   constructor(private service: UserService) {}
@@ -30,7 +31,7 @@ export class UserController {
   isServerRunning() {
     return {
       is_connected: true,
-      local_server_version: 3,
+      local_server_version,
     };
   }
 
