@@ -4,6 +4,7 @@ import {
   IsLatitude,
   IsLongitude,
   IsOptional,
+  IsBoolean,
 } from "class-validator";
 
 export class CreateComplexUserAddressDto {
@@ -42,4 +43,8 @@ export class CreateComplexUserAddressDto {
   })
   @IsOptional()
   longitude: number;
+
+  @IsBoolean()
+  @IsNotEmpty({ message: "وضعیت بارگزاری مشخص نشده است" })
+  needs_upload: boolean;
 }

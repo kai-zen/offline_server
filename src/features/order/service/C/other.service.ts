@@ -7,6 +7,9 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { HttpService } from "@nestjs/axios";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
+import { UserService } from "src/features/user/users/user.service";
+import { PrinterService } from "src/features/complex/printer/printer.service";
+import { ComplexUserAddressService } from "src/features/complex/user-address/user-address.service";
 
 @Injectable()
 export class OrderOtherCreateService {
@@ -14,6 +17,9 @@ export class OrderOtherCreateService {
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
     private readonly complexService: ComplexService,
+    private readonly userService: UserService,
+    private readonly complexUserAddressService: ComplexUserAddressService,
+    private readonly printerService: PrinterService,
     private readonly httpService: HttpService
   ) {}
 
@@ -42,6 +48,9 @@ export class OrderOtherCreateService {
         )
       );
       await this.complexService.updatedOrders();
+      await this.printerService.uploadNeededs();
+      await this.complexUserAddressService.uploadNeededs();
+      await this.userService.uploadNeededs();
     } catch (err) {
       console.log(err.response.data);
       return err.response.data;

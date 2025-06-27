@@ -52,7 +52,7 @@ export class ComplexUserAddressService {
 
   async findByMobile(mobile: string) {
     let user = await this.userService.findByMobile(mobile);
-    if (!user) user = await this.userService.createUser(mobile);
+    if (!user) user = await this.userService.createUser(mobile, true);
 
     const results = await this.model
       .find({ user: toObjectId(user._id as any) })
@@ -87,6 +87,38 @@ export class ComplexUserAddressService {
     };
   }
 
+  async uploadNeededs() {
+    const records = await this.model.find({ needs_upload: true });
+    const deleteds = await this.model.find({ needs_delete: true });
+
+    const hasUpdates = Boolean(records && records.length > 0);
+    const hasDeletes = Boolean(deleteds && deleteds.length > 0);
+    if (hasUpdates || hasDeletes) {
+      try {
+        await lastValueFrom(
+          this.httpService.post(
+            `${sofreBaseUrl}/complex-user-address/upload_offline`,
+            {
+              complex_id: process.env.COMPLEX_ID,
+              addresses: hasUpdates ? records : [],
+              deletes: hasDeletes
+                ? deleteds.map((record) =>
+                    record._id.toString ? record._id.toString() : record._id
+                  )
+                : [],
+            },
+            { headers: { "api-key": process.env.SECRET } }
+          )
+        );
+        await this.model.updateMany({}, { $set: { needs_upload: false } });
+      } catch (err) {
+        console.log(err.response.data);
+        return err.response.data;
+      }
+      return "success";
+    }
+  }
+
   async create(data: {
     name: string;
     description: string;
@@ -96,6 +128,7 @@ export class ComplexUserAddressService {
     complex_id: string;
     user_id: string;
     phone_number: string;
+    needs_upload: boolean;
   }) {
     const {
       name,
@@ -105,6 +138,7 @@ export class ComplexUserAddressService {
       user_id,
       details,
       phone_number,
+      needs_upload,
     } = data || {};
 
     const newRecord = new this.model({
@@ -115,6 +149,7 @@ export class ComplexUserAddressService {
       longitude,
       details,
       phone_number,
+      needs_upload: Boolean(needs_upload),
     });
     return await newRecord.save();
   }
@@ -128,10 +163,18 @@ export class ComplexUserAddressService {
       latitude: number;
       longitude: number;
       phone_number: string;
+      needs_upload: boolean;
     }
   ) {
-    const { name, description, latitude, longitude, details, phone_number } =
-      newData || {};
+    const {
+      name,
+      description,
+      latitude,
+      longitude,
+      details,
+      phone_number,
+      needs_upload,
+    } = newData || {};
 
     const theRecord = await this.model.findById(id);
     if (!theRecord) return;
@@ -142,12 +185,26 @@ export class ComplexUserAddressService {
     theRecord.latitude = latitude;
     theRecord.longitude = longitude;
     theRecord.phone_number = phone_number;
+    theRecord.needs_upload = Boolean(needs_upload);
 
     return await theRecord.save();
   }
 
-  async deleteOne(id: string) {
-    await this.model.deleteOne({ _id: id });
+  async deleteOne(id: string, needs_upload_delete: boolean) {
+    const theRecord = await this.model.findOne({
+      _id: toObjectId(id),
+    });
+    if (!theRecord) return;
+
+    if (needs_upload_delete) {
+      theRecord.needs_delete = true;
+      await theRecord.save();
+    } else {
+      await this.model.deleteOne({
+        _id: toObjectId(id),
+      });
+    }
+
     return "success";
   }
 
@@ -178,6 +235,7 @@ export class ComplexUserAddressService {
                   ? toObjectId(record.user)
                   : record.user,
             _id: theRecordId,
+            needs_upload: false,
           };
           await this.model.deleteOne({
             description: record.description,
@@ -213,6 +271,7 @@ export class ComplexUserAddressService {
           const modifiedResponse = {
             ...record,
             _id: toObjectId(record._id),
+            needs_upload: false,
           };
           await this.model.updateOne(
             { _id: modifiedResponse._id },

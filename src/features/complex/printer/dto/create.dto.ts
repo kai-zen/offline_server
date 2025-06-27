@@ -71,4 +71,8 @@ export class CreatePrinterDto {
   @ValidateNested()
   @Type(() => SettingsOptions)
   settings_options: SettingsOptions | null;
+
+  @IsBoolean()
+  @IsNotEmpty({ message: "وضعیت بارگزاری مشخص نشده است" })
+  needs_upload: boolean;
 }

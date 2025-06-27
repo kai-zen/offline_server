@@ -16,7 +16,11 @@ export class PrinterService {
   ) {}
 
   async findAll() {
-    return await this.model.find().populate("folders").populate("areas").exec();
+    return await this.model
+      .find({ needs_delete: { $ne: true } })
+      .populate("folders")
+      .populate("areas")
+      .exec();
   }
 
   async updateData() {
@@ -51,6 +55,40 @@ export class PrinterService {
     }
   }
 
+  async uploadNeededs() {
+    const records = await this.model.find({ needs_upload: true });
+    const deleteds = await this.model.find({ needs_delete: true });
+
+    const hasUpdates = Boolean(records && records.length > 0);
+    const hasDeletes = Boolean(deleteds && deleteds.length > 0);
+    if (hasUpdates || hasDeletes) {
+      try {
+        await lastValueFrom(
+          this.httpService.post(
+            `${sofreBaseUrl}/printer/upload_offline`,
+            {
+              complex_id: process.env.COMPLEX_ID,
+              printers: hasUpdates ? records : [],
+              deletes: hasDeletes
+                ? deleteds.map((record) =>
+                    record._id.toString ? record._id.toString() : record._id
+                  )
+                : [],
+            },
+            { headers: { "api-key": process.env.SECRET } }
+          )
+        );
+        if (hasUpdates)
+          await this.model.updateMany({}, { $set: { needs_upload: false } });
+        if (hasDeletes) await this.model.deleteMany({ needs_delete: true });
+      } catch (err) {
+        console.log(err.response.data);
+        return err.response.data;
+      }
+      return "success";
+    }
+  }
+
   async create(
     complex_id: string,
     data: {
@@ -64,6 +102,7 @@ export class PrinterService {
       is_common: boolean;
       custom_margin: string;
       settings_options: PrinterSettingsDataType | null;
+      needs_upload: boolean;
     }
   ) {
     const {
@@ -77,6 +116,7 @@ export class PrinterService {
       areas,
       custom_margin,
       settings_options,
+      needs_upload,
     } = data || {};
 
     const objectIdFolders = Boolean(folders && folders.length > 0)
@@ -97,6 +137,7 @@ export class PrinterService {
       complex: toObjectId(complex_id),
       custom_margin: custom_margin || null,
       settings_options: settings_options || null,
+      needs_upload: Boolean(needs_upload),
     });
     const createResult = await newRecord.save();
     return createResult;
@@ -116,6 +157,7 @@ export class PrinterService {
       is_common: boolean;
       custom_margin: string;
       settings_options: PrinterSettingsDataType | null;
+      needs_upload: boolean;
     };
   }) {
     const { id, body, complex_id } = data || {};
@@ -130,6 +172,7 @@ export class PrinterService {
       areas,
       custom_margin,
       settings_options,
+      needs_upload,
     } = body || {};
     const objectIdFolders = Boolean(folders && folders.length > 0)
       ? folders.map((f) => toObjectId(f))
@@ -154,19 +197,26 @@ export class PrinterService {
     theRecord.title = title;
     theRecord.custom_margin = custom_margin || null;
     theRecord.settings_options = settings_options || null;
+    theRecord.needs_upload = Boolean(needs_upload);
 
     return await theRecord.save();
   }
 
-  async deleteOne(id: string) {
+  async deleteOne(id: string, needs_upload_delete: boolean) {
     const theRecord = await this.model.findOne({
       _id: toObjectId(id),
     });
     if (!theRecord) return;
 
-    await this.model.deleteOne({
-      _id: toObjectId(id),
-    });
+    if (needs_upload_delete) {
+      theRecord.needs_delete = true;
+      await theRecord.save();
+    } else {
+      await this.model.deleteOne({
+        _id: toObjectId(id),
+      });
+    }
+
     return "success";
   }
 }

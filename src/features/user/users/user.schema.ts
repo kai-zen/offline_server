@@ -65,6 +65,9 @@ export class User extends Document {
 
   @Prop({ default: null })
   image: string | null;
+
+  @Prop({ default: false })
+  needs_upload: boolean;
 }
 
 export type UserDocument = HydratedDocument<User>;

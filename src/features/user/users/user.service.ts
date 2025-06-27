@@ -68,9 +68,35 @@ export class UserService {
     return await this.model.findOne({ mobile });
   }
 
-  async createUser(mobile: string) {
-    const newRecord = new this.model({ mobile });
+  async createUser(mobile: string, needs_upload: boolean) {
+    const newRecord = new this.model({
+      mobile,
+      needs_upload: Boolean(needs_upload),
+    });
     return await newRecord.save();
+  }
+
+  async uploadNeededs() {
+    const records = await this.model.find({ needs_upload: true });
+    if (records && records.length > 0) {
+      try {
+        await lastValueFrom(
+          this.httpService.post(
+            `${sofreBaseUrl}/complex-users/upload_offline`,
+            {
+              complex_id: process.env.COMPLEX_ID,
+              users: records,
+            },
+            { headers: { "api-key": process.env.SECRET } }
+          )
+        );
+        await this.model.updateMany({}, { $set: { needs_upload: false } });
+      } catch (err) {
+        console.log(err.response.data);
+        return err.response.data;
+      }
+      return "success";
+    }
   }
 
   async setName(data: {
@@ -78,8 +104,9 @@ export class UserService {
     name: string;
     gender: 0 | 1 | 2;
     birthday: string | null;
+    needs_upload: boolean;
   }) {
-    const { name, id, gender, birthday } = data;
+    const { name, id, gender, birthday, needs_upload } = data;
     const theRecord = await this.model.findById(id);
     if (!theRecord) throw new NotFoundException(messages[404]);
     if (theRecord) {
@@ -87,6 +114,7 @@ export class UserService {
       if (gender && [0, 1, 2].includes(gender)) theRecord.gender = gender;
       if (typeof birthday === "string" && isValidDate(birthday))
         theRecord.birthday = new Date(birthday);
+      theRecord.needs_upload = Boolean(needs_upload);
       return await theRecord.save();
     }
   }

@@ -89,6 +89,12 @@ export class Printer {
     required: true,
   })
   complex: ComplexDocument;
+
+  @Prop({ default: false })
+  needs_upload: boolean;
+
+  @Prop({ default: false })
+  needs_delete: boolean;
 }
 
 export type PrinterDocument = HydratedDocument<Printer>;

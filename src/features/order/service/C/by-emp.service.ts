@@ -68,7 +68,8 @@ export class OrderCreateService {
       user_phone?.startsWith("09")
     ) {
       theUser = await this.userService.findByMobile(user_phone);
-      if (!theUser) theUser = await this.userService.createUser(user_phone);
+      if (!theUser)
+        theUser = await this.userService.createUser(user_phone, true);
     }
 
     // validate complex activation and workhours

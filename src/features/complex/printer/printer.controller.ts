@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { PrinterService } from "./printer.service";
@@ -60,8 +61,12 @@ export class PrinterController {
   @Delete("/:complexId/:id") // *
   @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
-  async deleteRecord(@Param("id") recordId: string) {
-    await this.service.deleteOne(recordId);
+  async deleteRecord(
+    @Param("id") recordId: string,
+    @Query() queryParams: { [props: string]: string }
+  ) {
+    const needs_upload_delete = queryParams.needs_delete === "true";
+    await this.service.deleteOne(recordId, needs_upload_delete);
     return "success";
   }
 }

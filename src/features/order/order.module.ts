@@ -23,6 +23,7 @@ import AreaModule from "../complex/area/area.module";
 import ComplexModule from "../complex/complex/complex.module";
 import { OrderOtherCreateService } from "./service/C/other.service";
 import RangeModule from "../complex/range/range.module";
+import PrinterModule from "../complex/printer/printer.module";
 
 const Order = MongooseModule.forFeature([
   { name: "order", schema: OrderSchema },
@@ -40,6 +41,7 @@ const Order = MongooseModule.forFeature([
     ComplexUserAddressModule,
     ComplexModule,
     AreaModule,
+    PrinterModule,
     forwardRef(() => CashBankModule),
     HttpModule,
   ],

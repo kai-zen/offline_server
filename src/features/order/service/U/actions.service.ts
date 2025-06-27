@@ -204,7 +204,7 @@ export class OrderActionService {
     const isMobileNumber = mobile?.length === 11 && mobile.startsWith("09");
     if (isMobileNumber) {
       let theUser = await this.userService.findByMobile(mobile);
-      if (!theUser) theUser = await this.userService.createUser(mobile);
+      if (!theUser) theUser = await this.userService.createUser(mobile, true);
       if (!theUser) throw new NotFoundException("مشتری پیدا نشد!");
       theRecord.user = theUser;
     }

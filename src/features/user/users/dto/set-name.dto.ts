@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from "class-validator";
 
 export class SetNameDto {
   @IsString()
@@ -20,4 +26,8 @@ export class SetNameDto {
   @IsString()
   @IsNotEmpty({ message: "مشتری تعیین نشده است." })
   id: string;
+
+  @IsBoolean()
+  @IsNotEmpty({ message: "وضعیت بارگزاری مشخص نشده است" })
+  needs_upload: boolean;
 }

@@ -27,6 +27,12 @@ export class ComplexUserAddress {
 
   @Prop({ required: true })
   phone_number: string;
+
+  @Prop({ default: false })
+  needs_upload: boolean;
+
+  @Prop({ default: false })
+  needs_delete: boolean;
 }
 
 export type ComplexUserAddressDocument = HydratedDocument<ComplexUserAddress>;

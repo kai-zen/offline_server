@@ -58,7 +58,11 @@ export class ComplexUserAddressController {
   @Delete("/:complexId/:id") // *
   @AccessLevel([1, 2, 3, 4])
   @UseGuards(HasAccessGuard)
-  async deleteItem(@Param("id") recordId: string) {
-    return await this.service.deleteOne(recordId);
+  async deleteItem(
+    @Param("id") recordId: string,
+    @Query() queryParams: { [props: string]: string }
+  ) {
+    const needs_upload_delete = queryParams.needs_delete === "true";
+    return await this.service.deleteOne(recordId, needs_upload_delete);
   }
 }
