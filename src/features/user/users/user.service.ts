@@ -42,10 +42,10 @@ export class UserService {
     const [queryResult] = await this.model.aggregate([
       { $match: filters },
       { $addFields: { orders_count: { $size: "$orders" } } },
-      { $sort: sortObj },
       {
         $facet: {
           results: [
+            { $sort: sortObj },
             { $skip: (parseInt(page) - 1) * applyingLimit },
             { $limit: applyingLimit },
           ],

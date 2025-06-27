@@ -60,6 +60,9 @@ class Settings {
   required_delivery_guy: boolean;
 
   @Prop({ default: false })
+  hide_stock_from_site: boolean;
+
+  @Prop({ default: false })
   typable_table_number: boolean;
 
   @Prop({ default: false })

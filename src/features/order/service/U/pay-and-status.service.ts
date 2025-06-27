@@ -32,7 +32,7 @@ export class OrderEditPaymentAndStatusService {
     const { body, id } = data;
     const { status, cash_bank } = body || {};
 
-    if (!status) throw new BadRequestException(messages[400]);
+    if (!status || status == 1) throw new BadRequestException(messages[400]);
     const theRecord = await this.model
       .findById(id)
       .populate("products.product")
@@ -70,28 +70,14 @@ export class OrderEditPaymentAndStatusService {
       }
     }
 
-    const oldStatus = theRecord.status;
     theRecord.status = status;
-
     if ([6, 7].includes(status))
       socketMessage = `فاکتور ${theRecord.factor_number} لغو شد.`;
-    if (oldStatus === 1 && status === 2) {
-      // تایید سفارش
-      if (!theCashBank)
-        throw new BadRequestException(
-          "انتخاب صندوق برای تایید سفارش الزامی است."
-        );
-      if ((theRecord.payments?.[0] || {}).type === 2) {
-        theRecord.payed_at = new Date();
-        if (!theRecord.cash_bank) theRecord.cash_bank = theCashBank;
-      }
-      socketMessage = "created";
-    }
 
     const theOrder = await theRecord.save();
 
     // websocket
-    if (theOrder.status > 1 || oldStatus > 1 || theOrder.table_number)
+    if (theOrder.table_number)
       await this.eventsGateway.changeOrder({
         order: theOrder,
         message: socketMessage,

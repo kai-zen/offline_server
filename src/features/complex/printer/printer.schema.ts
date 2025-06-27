@@ -5,6 +5,40 @@ import { schemaConfig } from "src/helpers/constants";
 import { AreaDocument } from "../area/area.schema";
 import { ProductFolderDocument } from "src/features/product/folders/folder.schema";
 
+export interface PrinterSettingsDataType {
+  show_logo: boolean;
+  show_site_qr: boolean;
+  show_user_address: boolean;
+  show_complex_address: boolean;
+  show_complex_phone: boolean;
+  show_complex_site: boolean;
+  show_shipping_type: boolean;
+}
+
+@Schema({ versionKey: false })
+class SettingsOptions {
+  @Prop({ default: false })
+  show_logo: boolean;
+
+  @Prop({ default: true })
+  show_site_qr: boolean;
+
+  @Prop({ default: false })
+  show_user_address: boolean;
+
+  @Prop({ default: false })
+  show_complex_address: boolean;
+
+  @Prop({ default: false })
+  show_complex_phone: boolean;
+
+  @Prop({ default: false })
+  show_complex_site: boolean;
+
+  @Prop({ default: false })
+  show_shipping_type: boolean;
+}
+
 @Schema(schemaConfig)
 export class Printer {
   @Prop({ required: true })
@@ -15,6 +49,12 @@ export class Printer {
 
   @Prop({ required: true })
   paper_width: string;
+
+  @Prop({ type: String, default: null })
+  custom_margin: string;
+
+  @Prop({ type: SettingsOptions, default: null })
+  settings_options: SettingsOptions | null;
 
   @Prop({ required: true })
   factor_type: number;

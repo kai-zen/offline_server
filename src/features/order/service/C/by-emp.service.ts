@@ -161,14 +161,14 @@ export class OrderCreateService {
       tip: tip || 0,
       people_count: typeof people_count === "number" ? people_count : null,
     });
-    const created_order = await newRecord.save();
 
     // websocket
-    const completedData = await this.model.populate(created_order, [
+    const completedData = await this.model.populate(newRecord, [
       { path: "user", select: "name mobile" },
     ]);
     await this.eventsGateway.addOrder(completedData);
 
+    const created_order = await newRecord.save();
     return created_order;
   }
 }

@@ -5,7 +5,7 @@ import { toObjectId } from "src/helpers/functions";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
-import { PrinterDocument } from "./printer.schema";
+import { PrinterDocument, PrinterSettingsDataType } from "./printer.schema";
 
 @Injectable()
 export class PrinterService {
@@ -62,6 +62,8 @@ export class PrinterService {
       areas: string[];
       types: number[];
       is_common: boolean;
+      custom_margin: string;
+      settings_options: PrinterSettingsDataType | null;
     }
   ) {
     const {
@@ -73,6 +75,8 @@ export class PrinterService {
       title,
       types,
       areas,
+      custom_margin,
+      settings_options,
     } = data || {};
 
     const objectIdFolders = Boolean(folders && folders.length > 0)
@@ -91,6 +95,8 @@ export class PrinterService {
       is_common,
       paper_width,
       complex: toObjectId(complex_id),
+      custom_margin: custom_margin || null,
+      settings_options: settings_options || null,
     });
     const createResult = await newRecord.save();
     return createResult;
@@ -108,6 +114,8 @@ export class PrinterService {
       areas: string[];
       types: number[];
       is_common: boolean;
+      custom_margin: string;
+      settings_options: PrinterSettingsDataType | null;
     };
   }) {
     const { id, body, complex_id } = data || {};
@@ -120,6 +128,8 @@ export class PrinterService {
       types,
       title,
       areas,
+      custom_margin,
+      settings_options,
     } = body || {};
     const objectIdFolders = Boolean(folders && folders.length > 0)
       ? folders.map((f) => toObjectId(f))
@@ -142,6 +152,8 @@ export class PrinterService {
     theRecord.paper_width = paper_width;
     theRecord.types = types || [1, 2, 3];
     theRecord.title = title;
+    theRecord.custom_margin = custom_margin || null;
+    theRecord.settings_options = settings_options || null;
 
     return await theRecord.save();
   }

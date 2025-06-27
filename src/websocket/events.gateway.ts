@@ -3,22 +3,28 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayInit,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { OrderDocument } from "src/features/order/order.schema";
 
 @WebSocketGateway({ cors: { origin: "*" } })
-export class EventsGateway {
-  constructor() {}
-
+export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer()
   server: Server;
+
+  constructor() {}
 
   onModuleInit() {
     if (this.server?.sockets?.sockets)
       this.server.sockets.sockets.forEach((socket: Socket) => {
         socket.disconnect(true);
       });
+  }
+
+  afterInit() {
+    this.server.sockets.setMaxListeners(100);
   }
 
   async handleConnection() {
@@ -38,11 +44,15 @@ export class EventsGateway {
     this.server.to("local-orders-channel").emit("print-receipt", data);
   }
 
-  async changeOrder(data: { order: OrderDocument; message?: string }) {
-    const { order, message } = data;
+  async changeOrder(data: {
+    order: OrderDocument;
+    message?: string;
+    is_update?: boolean;
+  }) {
+    const { order, message, is_update } = data;
     this.server.to("local-orders-channel").emit("local-live-orders", {
       ...(order.toObject ? order.toObject() : order),
-      is_update: true,
+      is_update: typeof is_update === "boolean" ? is_update : true,
       message,
     });
   }

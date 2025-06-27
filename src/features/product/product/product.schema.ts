@@ -48,6 +48,9 @@ export class Product {
   complex: ComplexDocument;
 
   @Prop({ default: false })
+  is_deleted: boolean;
+
+  @Prop({ default: false })
   has_shipping: boolean; // equals to unable to pack
 
   @Prop({ default: true })
@@ -55,6 +58,9 @@ export class Product {
 
   @Prop({ default: false })
   is_archived: boolean;
+
+  @Prop({ default: 1 })
+  row: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

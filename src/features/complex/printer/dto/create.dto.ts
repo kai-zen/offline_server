@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import {
   IsString,
   IsNumber,
@@ -5,7 +6,31 @@ import {
   IsArray,
   IsNotEmpty,
   IsOptional,
+  ValidateNested,
 } from "class-validator";
+
+class SettingsOptions {
+  @IsBoolean()
+  show_logo: boolean;
+
+  @IsBoolean()
+  show_site_qr: boolean;
+
+  @IsBoolean()
+  show_user_address: boolean;
+
+  @IsBoolean()
+  show_complex_address: boolean;
+
+  @IsBoolean()
+  show_complex_phone: boolean;
+
+  @IsBoolean()
+  show_complex_site: boolean;
+
+  @IsBoolean()
+  show_shipping_type: boolean;
+}
 
 export class CreatePrinterDto {
   @IsString({ message: "نام باید یک رشته باشد" })
@@ -19,6 +44,10 @@ export class CreatePrinterDto {
   @IsString({ message: "عرض کاغذ باید یک رشته باشد" })
   @IsNotEmpty({ message: "وارد کردن عرض کاغذ الزامیست." })
   paper_width: string;
+
+  @IsString({ message: "فواصل کاغذ باید یک رشته باشد" })
+  @IsOptional()
+  custom_margin: string;
 
   @IsNumber({}, { message: "نوع فاکتور باید یک عدد باشد" })
   @IsNotEmpty({ message: "عرض کاغذ تعیین نشده است." })
@@ -35,6 +64,11 @@ export class CreatePrinterDto {
   @IsArray({ message: "انواع باید یک آرایه از اعداد باشد" })
   types: number[];
 
-  @IsBoolean({ message: "وضعیت مشترک باید یک مقدار منطقی باشد" })
+  @IsBoolean()
   is_common: boolean;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SettingsOptions)
+  settings_options: SettingsOptions | null;
 }
