@@ -77,22 +77,34 @@ export class UserService {
   }
 
   async uploadNeededs() {
-    const records = await this.model.find({ needs_upload: true });
+    const records = await this.model.find({ needs_upload: true }).lean().exec();
     if (records && records.length > 0) {
       try {
+        const formattedRecords = records.map((rec) => {
+          const userId = rec.complex_user_id.toString
+            ? rec.complex_user_id.toString()
+            : rec.complex_user_id;
+          return {
+            mobile: rec.mobile,
+            gender: rec.gender,
+            name: rec.name,
+            birthday: rec.birthday,
+            complex_user_id: userId || null,
+          };
+        });
         await lastValueFrom(
-          this.httpService.post(
-            `${sofreBaseUrl}/complex-users/upload_offline`,
+          this.httpService.put(
+            `${sofreBaseUrl}/complex-users/upload_offline/${process.env.COMPLEX_ID}`,
             {
               complex_id: process.env.COMPLEX_ID,
-              users: records,
+              users: formattedRecords,
             },
             { headers: { "api-key": process.env.SECRET } }
           )
         );
         await this.model.updateMany({}, { $set: { needs_upload: false } });
       } catch (err) {
-        console.log(err.response.data);
+        console.log("api error:", err.response.data);
         return err.response.data;
       }
       return "success";

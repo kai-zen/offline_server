@@ -33,8 +33,9 @@ export class ComplexUserAddressService {
                 { phone_number: { $regex: cleanedSearch } },
                 { description: { $regex: cleanedSearch } },
               ],
+              needs_delete: { $ne: true },
             }
-          : {}
+          : { needs_delete: { $ne: true } }
       )
       .limit(parseInt(limit))
       .exec();
@@ -43,7 +44,9 @@ export class ComplexUserAddressService {
   }
 
   async findByUser(user_id: string) {
-    return await this.model.find({ user: toObjectId(user_id) }).exec();
+    return await this.model
+      .find({ user: toObjectId(user_id), needs_delete: { $ne: true } })
+      .exec();
   }
 
   async findById(id: string) {
@@ -55,7 +58,7 @@ export class ComplexUserAddressService {
     if (!user) user = await this.userService.createUser(mobile, true);
 
     const results = await this.model
-      .find({ user: toObjectId(user._id as any) })
+      .find({ user: toObjectId(user._id as any), needs_delete: { $ne: true } })
       .exec();
 
     const rates = user.products.map((item) => item.rates).flat(1);
@@ -88,16 +91,19 @@ export class ComplexUserAddressService {
   }
 
   async uploadNeededs() {
-    const records = await this.model.find({ needs_upload: true });
-    const deleteds = await this.model.find({ needs_delete: true });
+    const records = await this.model.find({ needs_upload: true }).lean().exec();
+    const deleteds = await this.model
+      .find({ needs_delete: true })
+      .lean()
+      .exec();
 
     const hasUpdates = Boolean(records && records.length > 0);
     const hasDeletes = Boolean(deleteds && deleteds.length > 0);
     if (hasUpdates || hasDeletes) {
       try {
         await lastValueFrom(
-          this.httpService.post(
-            `${sofreBaseUrl}/complex-user-address/upload_offline`,
+          this.httpService.put(
+            `${sofreBaseUrl}/complex-user-address/upload_offline/${process.env.COMPLEX_ID}`,
             {
               complex_id: process.env.COMPLEX_ID,
               addresses: hasUpdates ? records : [],

@@ -27,11 +27,7 @@ export class PrinterService {
     const res = await lastValueFrom(
       this.httpService.get(
         `${sofreBaseUrl}/printer/localdb/${process.env.COMPLEX_ID}`,
-        {
-          headers: {
-            "api-key": process.env.SECRET,
-          },
-        }
+        { headers: { "api-key": process.env.SECRET } }
       )
     );
     if (res?.data) {
@@ -56,16 +52,19 @@ export class PrinterService {
   }
 
   async uploadNeededs() {
-    const records = await this.model.find({ needs_upload: true });
-    const deleteds = await this.model.find({ needs_delete: true });
+    const records = await this.model.find({ needs_upload: true }).lean().exec();
+    const deleteds = await this.model
+      .find({ needs_delete: true })
+      .lean()
+      .exec();
 
     const hasUpdates = Boolean(records && records.length > 0);
     const hasDeletes = Boolean(deleteds && deleteds.length > 0);
     if (hasUpdates || hasDeletes) {
       try {
         await lastValueFrom(
-          this.httpService.post(
-            `${sofreBaseUrl}/printer/upload_offline`,
+          this.httpService.put(
+            `${sofreBaseUrl}/printer/upload_offline/${process.env.COMPLEX_ID}`,
             {
               complex_id: process.env.COMPLEX_ID,
               printers: hasUpdates ? records : [],
