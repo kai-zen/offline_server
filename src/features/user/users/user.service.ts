@@ -177,7 +177,7 @@ export class UserService {
         for await (const record of res.data) {
           const modifiedResponse = this.userDataFormatter(record);
           await this.model.updateOne(
-            { _id: modifiedResponse._id },
+            { mobile: modifiedResponse.mobile },
             { $set: modifiedResponse },
             { upsert: true }
           );
@@ -202,7 +202,7 @@ export class UserService {
         for await (const record of res.data) {
           const modifiedResponse = this.userDataFormatter(record);
           await this.model.updateOne(
-            { _id: modifiedResponse._id },
+            { mobile: modifiedResponse.mobile },
             { $set: modifiedResponse },
             { upsert: true }
           );
