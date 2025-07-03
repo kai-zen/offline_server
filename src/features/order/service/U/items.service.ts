@@ -3,11 +3,9 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { findItemByPriceId, toObjectId } from "src/helpers/functions";
-import { messages, sofreBaseUrl } from "src/helpers/constants";
+import { messages } from "src/helpers/constants";
 import { OrderDocument } from "../../order.schema";
 import { OrderThirdMethodsService } from "../helpers.service";
-import { lastValueFrom } from "rxjs";
-import { HttpService } from "@nestjs/axios";
 
 @Injectable()
 export class OrderEditItemsService {
@@ -15,8 +13,7 @@ export class OrderEditItemsService {
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
     private readonly eventsGateway: EventsGateway,
-    private readonly orderThirdMethods: OrderThirdMethodsService,
-    private readonly httpService: HttpService
+    private readonly orderThirdMethods: OrderThirdMethodsService
   ) {}
 
   async modifyItems(data: {
@@ -93,24 +90,6 @@ export class OrderEditItemsService {
 
     const edited_order = await theRecord.save();
     const copy = { ...edited_order.toObject() };
-
-    const differences = combined
-      .filter((cp) => cp.diff !== 0)
-      .map((cp) => ({
-        _id: cp.product._id.toString(),
-        quantity: cp.diff,
-      }));
-    try {
-      await lastValueFrom(
-        this.httpService.put(
-          `${sofreBaseUrl}/product/change-stock/${process.env.COMPLEX_ID}`,
-          { products: differences },
-          { headers: { "api-key": process.env.SECRET } }
-        )
-      );
-    } catch (err) {
-      console.log(err);
-    }
 
     const hasDescChanged = theRecord.description !== description && description;
     if (hasDescChanged) theRecord.description = description || "";
