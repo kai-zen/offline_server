@@ -72,10 +72,16 @@ export class OrderEditItemsService {
       if (afterItem)
         combined.push({
           ...item,
+          desc: afterItem.desc,
           quantity: afterItem.quantity,
           diff: afterItem.quantity - item.quantity,
         });
-      else combined.push({ ...item, quantity: 0, diff: item.quantity * -1 });
+      else
+        combined.push({
+          ...item,
+          quantity: 0,
+          diff: item.quantity * -1,
+        });
     });
 
     after.forEach((item) => {

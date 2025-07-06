@@ -50,7 +50,7 @@ export class OrderThirdMethodsService {
     for await (const product of products) {
       const { product_id, quantity, price_index, desc } = product || {};
       const fullData = await this.productService.findById(product_id);
-      if (fullData && fullData.prices[price_index])
+      if (fullData && fullData.prices?.[price_index])
         productsFullData.push({
           product: fullData,
           quantity: quantity || 1,

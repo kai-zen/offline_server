@@ -133,6 +133,7 @@ export const findItemByPriceId = (
       title: string;
       price_id: string;
     };
+    desc?: string;
   }[],
   price_id: string
 ) =>
