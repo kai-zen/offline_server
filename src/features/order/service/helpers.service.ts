@@ -16,6 +16,7 @@ import { ComplexService } from "src/features/complex/complex/comlex.service";
 import ProductService from "src/features/product/product/product.service";
 import { RangeService } from "src/features/complex/range/range.service";
 import { RangeDocument } from "src/features/complex/range/range.schema";
+import { OrderProductItemDataType } from "./C/by-emp.service";
 
 @Injectable()
 export class OrderThirdMethodsService {
@@ -35,9 +36,7 @@ export class OrderThirdMethodsService {
     return theComplex;
   }
 
-  async productDataHandler(
-    products: { product_id: string; quantity: number; price_index: number }[]
-  ) {
+  async productDataHandler(products: OrderProductItemDataType[]) {
     const productsFullData: {
       product: ProductDocument;
       quantity: number;
@@ -46,9 +45,10 @@ export class OrderThirdMethodsService {
         title: string;
         price_id: string;
       };
+      desc?: string;
     }[] = [];
     for await (const product of products) {
-      const { product_id, quantity, price_index } = product || {};
+      const { product_id, quantity, price_index, desc } = product || {};
       const fullData = await this.productService.findById(product_id);
       if (fullData && fullData.prices[price_index])
         productsFullData.push({
@@ -59,42 +59,7 @@ export class OrderThirdMethodsService {
             title: fullData.prices[price_index].title, // @ts-ignore
             price_id: fullData.prices[price_index]._id,
           },
-        });
-    }
-    return productsFullData;
-  }
-
-  async productDataHandler2(
-    products: {
-      product: string;
-      price: {
-        amount: number;
-        price_id: string;
-        title: string;
-      };
-      quantity: number;
-    }[]
-  ) {
-    const productsFullData: {
-      product: ProductDocument;
-      quantity: number;
-      price: {
-        amount: number;
-        title: string;
-        price_id: Types.ObjectId;
-      };
-    }[] = [];
-    for await (const p of products) {
-      const { quantity, price, product } = p || {};
-      const fullData = await this.productService.findById(product);
-      if (fullData)
-        productsFullData.push({
-          product: fullData,
-          quantity: quantity || 1,
-          price: {
-            ...price,
-            price_id: toObjectId(price.price_id),
-          },
+          desc,
         });
     }
     return productsFullData;

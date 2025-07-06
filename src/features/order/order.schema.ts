@@ -56,6 +56,9 @@ export class OrderProductItem {
   quantity: number;
 
   @Prop()
+  desc?: string;
+
+  @Prop()
   diff?: number;
 }
 

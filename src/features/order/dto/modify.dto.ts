@@ -1,11 +1,12 @@
 import { IsNotEmpty, IsString, IsArray, IsOptional } from "class-validator";
+import { OrderProductItemDataType } from "../service/C/by-emp.service";
 
 export class ModifyOrderItemsDto {
   @IsArray()
   @IsNotEmpty({
     message: "محصولی انتخاب نشده است.",
   })
-  products: { product_id: string; quantity: number; price_index: number }[];
+  products: OrderProductItemDataType[];
 
   @IsString()
   @IsOptional()

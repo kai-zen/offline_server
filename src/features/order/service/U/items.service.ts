@@ -6,6 +6,7 @@ import { findItemByPriceId, toObjectId } from "src/helpers/functions";
 import { messages } from "src/helpers/constants";
 import { OrderDocument } from "../../order.schema";
 import { OrderThirdMethodsService } from "../helpers.service";
+import { OrderProductItemDataType } from "../C/by-emp.service";
 
 @Injectable()
 export class OrderEditItemsService {
@@ -17,7 +18,7 @@ export class OrderEditItemsService {
   ) {}
 
   async modifyItems(data: {
-    products: { product_id: string; quantity: number; price_index: number }[];
+    products: OrderProductItemDataType[];
     complex_id: string;
     order_id: string;
     description: string;

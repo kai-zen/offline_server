@@ -1,4 +1,4 @@
-import mongoose, { HydratedDocument } from "mongoose";
+import mongoose, { HydratedDocument, Types } from "mongoose";
 import { ComplexDocument } from "src/features/complex/complex/complex.schema";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { schemaConfig } from "src/helpers/constants";
@@ -13,6 +13,19 @@ class ProductPriceSchema {
   title: string;
 }
 
+@Schema({ versionKey: false })
+class ProductDependecySchema {
+  @Prop({
+    required: true,
+    type: Types.ObjectId,
+    ref: "product",
+  })
+  product: ProductDocument | Types.ObjectId;
+
+  @Prop({ required: true, default: 1 })
+  amount: number;
+}
+
 @Schema(schemaConfig)
 export class Product {
   @Prop({ required: true })
@@ -23,6 +36,9 @@ export class Product {
 
   @Prop([{ type: ProductPriceSchema }])
   prices: ProductPriceSchema[];
+
+  @Prop([{ type: ProductDependecySchema }])
+  dependencies: ProductDependecySchema[];
 
   @Prop({ default: 0 })
   packing: number;

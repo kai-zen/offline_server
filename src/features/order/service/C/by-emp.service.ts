@@ -9,6 +9,13 @@ import { OrderDocument } from "../../order.schema";
 import { OrderThirdMethodsService } from "../helpers.service";
 import { AreaService } from "src/features/complex/area/area.service";
 
+export interface OrderProductItemDataType {
+  product_id: string;
+  quantity: number;
+  price_index: number;
+  desc?: string;
+}
+
 @Injectable()
 export class OrderCreateService {
   constructor(
@@ -23,7 +30,7 @@ export class OrderCreateService {
   async createByEmployee(data: {
     order_type: 1 | 2 | 3;
     description: string;
-    products: { product_id: string; quantity: number; price_index: number }[];
+    products: OrderProductItemDataType[];
     complex_id: string;
     cashbank_id: string;
     tip?: number;
