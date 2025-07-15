@@ -26,6 +26,7 @@ export class ProductService {
         "image name min_online_ordering_price packing tax service"
       )
       .populate("folder")
+      .populate("dependencies.product")
       .lean()
       .exec();
 
@@ -45,6 +46,7 @@ export class ProductService {
         "complex",
         "image name min_online_ordering_price packing tax service"
       )
+      .populate("dependencies.product")
       .populate("folder")
       .lean()
       .exec();
@@ -63,6 +65,7 @@ export class ProductService {
       .findById(id)
       .populate("folder")
       .populate("complex")
+      .populate("dependencies.product")
       .exec();
   }
 

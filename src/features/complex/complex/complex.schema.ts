@@ -28,15 +28,6 @@ export class ComplexAddress {
 }
 
 @Schema({ versionKey: false })
-class CashbackSchema {
-  @Prop({ required: true, min: 0, max: 50 })
-  percent: number;
-
-  @Prop({ default: null })
-  limit: number;
-}
-
-@Schema({ versionKey: false })
 class Settings {
   @Prop({ default: false })
   has_reserve: boolean;
@@ -151,12 +142,6 @@ export class Complex {
 
   @Prop({ default: 0 })
   service: number;
-
-  @Prop({ type: CashbackSchema, default: null })
-  cashback: {
-    percent: number;
-    limit: number;
-  } | null;
 
   @Prop({ default: null, min: 5, max: 95 })
   discount_limit: number;
