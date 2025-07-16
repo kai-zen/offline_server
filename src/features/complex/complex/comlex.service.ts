@@ -46,13 +46,6 @@ export class ComplexService {
     return await theRecord.save();
   }
 
-  async updatedOrders() {
-    const theRecord = await this.model.findOne({}).exec();
-    if (!theRecord) throw new NotFoundException(messages[404]);
-    theRecord.last_orders_update = new Date();
-    return await theRecord.save();
-  }
-
   async findTheComplex() {
     return await this.model.findOne({}).exec();
   }

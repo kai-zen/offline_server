@@ -172,15 +172,18 @@ export class Order {
   @Prop({ default: false })
   on_hold: boolean;
 
-  @Prop({ default: true })
-  submitted_offline: boolean;
-
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: "complex",
     required: true,
   })
   complex: ComplexDocument;
+
+  @Prop({ default: true })
+  submitted_offline: boolean;
+
+  @Prop({ default: false })
+  is_uploaded: boolean;
 }
 
 export type OrderDocument = HydratedDocument<Order>;
