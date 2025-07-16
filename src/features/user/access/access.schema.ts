@@ -1,23 +1,26 @@
-import mongoose, { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { ComplexDocument } from "src/features/complex/complex/complex.schema";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "../users/user.schema";
 
-@Schema({ versionKey: false })
+@Schema({ versionKey: false, _id: false })
 export class Access {
   @Prop({ required: true })
   type: number;
 
+  @Prop({ required: true, type: Types.ObjectId, ref: "complex" })
+  _id: Types.ObjectId;
+
   @Prop({ default: "" })
   name: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "complex" })
+  @Prop({ type: Types.ObjectId, ref: "complex" })
   complex: ComplexDocument;
 
   @Prop({ default: true })
   is_active: boolean;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "user" })
+  @Prop({ type: Types.ObjectId, ref: "user" })
   user: UserDocument;
 }
 
