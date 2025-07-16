@@ -20,7 +20,6 @@ import { OrderEditItemsService } from "./service/U/items.service";
 import { OrderCreateService } from "./service/C/by-emp.service";
 import { OrderThirdMethodsService } from "./service/helpers.service";
 import AreaModule from "../complex/area/area.module";
-import ComplexModule from "../complex/complex/complex.module";
 import { OrderOtherCreateService } from "./service/C/other.service";
 import RangeModule from "../complex/range/range.module";
 import PrinterModule from "../complex/printer/printer.module";
@@ -39,7 +38,6 @@ const Order = MongooseModule.forFeature([
     DiscountModule,
     AccessModule,
     ComplexUserAddressModule,
-    ComplexModule,
     AreaModule,
     PrinterModule,
     forwardRef(() => CashBankModule),

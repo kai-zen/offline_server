@@ -1,6 +1,6 @@
 import { AccessLevel } from "src/helpers/decorators";
 import { HasAccessGuard } from "src/guards/access.guard";
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Param, Post, UseGuards } from "@nestjs/common";
 import { OrderCreateService } from "../service/C/by-emp.service";
 import { OrderActionService } from "../service/U/actions.service";
 import { CreateOrderDto } from "../dto/create.dto";
@@ -16,7 +16,12 @@ export class OrderPostController {
 
   @Post("/upload") // *
   async uploadOrders() {
-    await this.orderOtherCreateService.uploadOrders();
+    return await this.orderOtherCreateService.uploadOrders();
+  }
+
+  @Post("/upload/:orderId") // *
+  async uploadSingleOrder(@Param("id") orderId: string) {
+    return await this.orderOtherCreateService.uploadSingleOrder(orderId);
   }
 
   // this route is for create order by complex employee

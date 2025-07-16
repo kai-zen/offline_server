@@ -7,7 +7,6 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { OrderDocument } from "../../order.schema";
 import { productDataFormatter } from "../../helpers/functions";
-import { ComplexService } from "src/features/complex/complex/comlex.service";
 import { CashBankService } from "src/features/complex/cash-bank/cash-bank.service";
 import { messages } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
@@ -17,7 +16,6 @@ export class OrderFetchService {
   constructor(
     @InjectModel("order")
     private readonly model: Model<OrderDocument>,
-    private readonly complexService: ComplexService,
     private readonly cashbankService: CashBankService
   ) {}
 
@@ -70,13 +68,8 @@ export class OrderFetchService {
   }
 
   async findComplexLiveOrders() {
-    const theComplex = await this.complexService.findTheComplex();
-    const filters: any[] = [{ status: { $lt: 5 } }];
-    if (theComplex?.last_orders_update)
-      filters.push({ created_at: { $gt: theComplex.last_orders_update } });
-
     const results = await this.model
-      .find({ $and: filters })
+      .find({ is_uploaded: false, status: { $lt: 5 } })
       .sort({ created_at: -1 })
       .populate("products.product")
       .populate("delivery_guy")

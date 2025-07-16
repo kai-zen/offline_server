@@ -1,15 +1,23 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { Model } from "mongoose";
 import { OrderDocument } from "../../order.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { lastValueFrom } from "rxjs";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { HttpService } from "@nestjs/axios";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { UserService } from "src/features/user/users/user.service";
 import { PrinterService } from "src/features/complex/printer/printer.service";
 import { ComplexUserAddressService } from "src/features/complex/user-address/user-address.service";
 import { toObjectId } from "src/helpers/functions";
+
+const uploadOrdersNetworkError =
+  "خطا حین آپلود سفارشات آفلاین رخ داد، اتصال اینترنت خود را بررسی کنید.";
 
 @Injectable()
 export class OrderOtherCreateService {
@@ -29,6 +37,34 @@ export class OrderOtherCreateService {
         status: { $lt: 6 },
       })
       .exec();
+  }
+
+  async uploadSingleOrder(order_id: string) {
+    const theRecord = await this.model.findById(order_id);
+    if (!theRecord) throw new NotFoundException(messages[404]);
+    else if (theRecord.is_uploaded)
+      throw new BadRequestException("سفارش شما قبلا بارگذاری شده است.");
+    else {
+      try {
+        const res = await lastValueFrom(
+          this.httpService.post(
+            `${sofreBaseUrl}/orders/offline`,
+            {
+              complex_id: process.env.COMPLEX_ID,
+              orders: [theRecord],
+            },
+            { headers: { "api-key": process.env.SECRET } }
+          )
+        );
+        if (!res?.data?.failed) {
+          theRecord.is_uploaded = true;
+          return await theRecord.save();
+        } else throw new ForbiddenException(uploadOrdersNetworkError);
+      } catch (err) {
+        console.log("Upload orders error:", err.response?.data);
+        throw new ForbiddenException(uploadOrdersNetworkError);
+      }
+    }
   }
 
   async updatedOrders(failedIds: string[]) {
@@ -62,7 +98,13 @@ export class OrderOtherCreateService {
   }
 
   async uploadOrders() {
-    const newOrders = await this.newOrders();
+    const newOrders = await this.model
+      .find({
+        is_uploaded: false,
+        status: { $lt: 6 },
+      })
+      .exec();
+
     let result = {
       success: 0,
       failed: 0,
@@ -100,9 +142,7 @@ export class OrderOtherCreateService {
       await this.updatedOrders(failedIds);
     } catch (err) {
       console.log("Upload orders error:", err.response?.data);
-      throw new ForbiddenException(
-        "خطا حین آپلود سفارشات آفلاین رخ داد، اتصال اینترنت خود را بررسی کنید."
-      );
+      throw new ForbiddenException(uploadOrdersNetworkError);
     }
 
     // upload other data
