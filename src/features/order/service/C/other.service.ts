@@ -78,7 +78,7 @@ export class OrderOtherCreateService {
           const foundedIndex = failedIds.findIndex((failedId) =>
             notUploadedOrder?._id?.equals(toObjectId(failedId))
           );
-          if (foundedIndex !== -1) {
+          if (foundedIndex === -1) {
             notUploadedOrder.is_uploaded = true;
             await notUploadedOrder.save();
           }

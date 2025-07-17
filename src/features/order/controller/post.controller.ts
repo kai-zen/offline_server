@@ -20,7 +20,7 @@ export class OrderPostController {
   }
 
   @Post("/upload/:orderId") // *
-  async uploadSingleOrder(@Param("id") orderId: string) {
+  async uploadSingleOrder(@Param("orderId") orderId: string) {
     return await this.orderOtherCreateService.uploadSingleOrder(orderId);
   }
 
