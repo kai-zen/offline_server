@@ -76,13 +76,10 @@ export class OrderEditPaymentAndStatusService {
 
     const theOrder = await theRecord.save();
 
-    // websocket
-    if (theOrder.table_number)
-      await this.eventsGateway.changeOrder({
-        order: theOrder,
-        message: socketMessage,
-      });
-
+    await this.eventsGateway.changeOrder({
+      order: theOrder,
+      message: socketMessage,
+    });
     return "success";
   }
 

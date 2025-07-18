@@ -59,6 +59,14 @@ export class ComplexService {
     return await theRecord.save();
   }
 
+  async getLastUpdates() {
+    const theRecord = await this.model.findOne({}).exec();
+    return {
+      addresses: theRecord.last_addresses_update || "first time",
+      users: theRecord.last_users_update || "first time",
+    };
+  }
+
   async findTheComplex() {
     return await this.model.findOne({}).exec();
   }
