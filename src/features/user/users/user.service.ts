@@ -132,7 +132,8 @@ export class UserService {
   }
 
   userDataFormatter(record: any) {
-    if (!record?._id || !record?.user?._id) return null;
+    if (!record?._id || !record?.user?._id || !record?.user?.mobile)
+      return null;
     const name = record.name || record.user?.name || "";
     const objecIdId = toObjectId(record.user._id);
     const complexUserId = toObjectId(record._id);
@@ -140,7 +141,7 @@ export class UserService {
     const modifiedResponse = {
       _id: objecIdId,
       image: record.image,
-      mobile: record.mobile,
+      mobile: record.user.mobile,
       complex_user_id: complexUserId,
       name,
       orders: record.orders?.length ? record.orders : [],
