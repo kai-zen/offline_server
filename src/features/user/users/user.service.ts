@@ -132,80 +132,58 @@ export class UserService {
   }
 
   userDataFormatter(record: any) {
-    const name = record.complexUser?.name || record.name || "";
-    const objecIdId = toObjectId(record._id);
+    if (!record?._id || !record?.user?._id) return null;
+    const name = record.name || record.user?.name || "";
+    const objecIdId = toObjectId(record.user._id);
+    const complexUserId = toObjectId(record._id);
+
     const modifiedResponse = {
       _id: objecIdId,
       image: record.image,
-      username: record.username,
       mobile: record.mobile,
-      complex_user_id: record.complexUser?._id
-        ? toObjectId(record.complexUser._id)
-        : null,
+      complex_user_id: complexUserId,
       name,
-      orders: record.complexUser?.orders?.length
-        ? record.complexUser.orders
-        : [],
-      products: record.complexUser?.products?.length
-        ? record.complexUser.products
-        : [],
-      birthday: record.birthday || record.complexUser.birthday || null,
-      gender: record.gender || record.complexUser.gender || 0,
-      subscription_number: record.complexUser?.subscription_number || null,
-      last_visit: record.complexUser?.last_visit
-        ? new Date(record.complexUser.last_visit)
-        : null,
+      orders: record.orders?.length ? record.orders : [],
+      products: record.products?.length ? record.products : [],
+      birthday: record.birthday || record.user?.birthday || null,
+      gender: record.gender || 0,
+      subscription_number: record?.subscription_number || null,
+      last_visit: record.last_visit ? new Date(record.last_visit) : null,
     };
     return modifiedResponse;
   }
 
   async updateData() {
     const theComplex = await this.complexService.findTheComplex();
-    if (!theComplex) return;
-    const timeNumber = theComplex.last_users_update
+    const timeNumber = theComplex?.last_users_update
       ? new Date(theComplex.last_users_update).getTime()
       : null;
 
-    if (timeNumber) {
-      const res = await lastValueFrom(
-        this.httpService.get(
-          `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
-          { headers: { "api-key": process.env.SECRET } }
-        )
-      );
-      if (res.data && res.data.length > 0) {
-        for await (const record of res.data) {
-          const modifiedResponse = this.userDataFormatter(record);
-          await this.model.updateOne(
-            { mobile: modifiedResponse.mobile },
-            { $set: modifiedResponse },
-            { upsert: true }
-          );
-        }
-        await this.complexService.updatedUsers();
-        return "success";
-      }
-    } else await this.updateForFirstTime();
-  }
+    const apiRouteMaker = (pageNumber: string | number) => {
+      const staticPart = `${sofreBaseUrl}/complex-users/localdb/${process.env.COMPLEX_ID}/${pageNumber}`;
+      return timeNumber
+        ? `${staticPart}?last_update=${timeNumber}`
+        : staticPart;
+    };
 
-  async updateForFirstTime() {
     let hasMore = true;
     let page = 1;
     while (hasMore) {
       const res = await lastValueFrom(
-        this.httpService.get(
-          `${sofreBaseUrl}/user/localdb/${process.env.COMPLEX_ID}/${page}`,
-          { headers: { "api-key": process.env.SECRET } }
-        )
+        this.httpService.get(apiRouteMaker(page), {
+          headers: { "api-key": process.env.SECRET },
+        })
       );
-      if (res?.data?.length > 0) {
+      if (res.data && res.data.length > 0) {
         for await (const record of res.data) {
           const modifiedResponse = this.userDataFormatter(record);
-          await this.model.updateOne(
-            { mobile: modifiedResponse.mobile },
-            { $set: modifiedResponse },
-            { upsert: true }
-          );
+          if (modifiedResponse) {
+            await this.model.updateOne(
+              { mobile: modifiedResponse.mobile },
+              { $set: modifiedResponse },
+              { upsert: true }
+            );
+          }
         }
         ++page;
       } else hasMore = false;
