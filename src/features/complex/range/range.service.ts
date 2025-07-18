@@ -1,5 +1,5 @@
 import { toObjectId } from "src/helpers/functions";
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
@@ -38,26 +38,33 @@ export class RangeService {
   }
 
   async updateData() {
-    await this.regionService.updateDB();
-
-    const res = await lastValueFrom(
-      this.httpService.get(
-        `${sofreBaseUrl}/range/localdb/${process.env.COMPLEX_ID}`,
-        { headers: { "api-key": process.env.SECRET } }
-      )
-    );
-    for await (const record of res.data) {
-      const modifiedResponse = {
-        ...record,
-        _id: toObjectId(record._id),
-        complex: toObjectId(record.complex),
-      };
-      await this.model.updateOne(
-        { _id: modifiedResponse._id },
-        { $set: modifiedResponse },
-        { upsert: true }
+    try {
+      await this.regionService.updateDB();
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/range/localdb/${process.env.COMPLEX_ID}`,
+          { headers: { "api-key": process.env.SECRET } }
+        )
+      );
+      for await (const record of res.data) {
+        const modifiedResponse = {
+          ...record,
+          _id: toObjectId(record._id),
+          complex: toObjectId(record.complex),
+        };
+        await this.model.updateOne(
+          { _id: modifiedResponse._id },
+          { $set: modifiedResponse },
+          { upsert: true }
+        );
+      }
+      return "success";
+    } catch (err) {
+      console.log("Update ranges error:", err);
+      return "failed";
+      throw new BadRequestException(
+        "ذخیره آفلاین پرینترها با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );
     }
-    return "success";
   }
 }

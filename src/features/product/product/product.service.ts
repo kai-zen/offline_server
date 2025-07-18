@@ -2,7 +2,11 @@ import { DiscountService } from "../discount/discount.service";
 import { InjectModel } from "@nestjs/mongoose";
 import { FilterQuery, Model } from "mongoose";
 import { ProductDocument } from "./product.schema";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { addDiscountToProducts } from "./helpers/functions";
 import { lastValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
@@ -150,33 +154,41 @@ export class ProductService {
   }
 
   async updateData() {
-    const res = await lastValueFrom(
-      this.httpService.get(
-        `${sofreBaseUrl}/product/localdb/${process.env.COMPLEX_ID}`,
-        {
-          headers: {
-            "api-key": process.env.SECRET,
-          },
-        }
-      )
-    );
+    try {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/product/localdb/${process.env.COMPLEX_ID}`,
+          {
+            headers: {
+              "api-key": process.env.SECRET,
+            },
+          }
+        )
+      );
 
-    for await (const record of res.data) {
-      const pricesObjectIds = record.prices.map((p) => ({
-        ...p,
-        _id: toObjectId(p._id),
-      }));
-      const modifiedResponse = {
-        ...record,
-        prices: pricesObjectIds,
-        folder: toObjectId(record.folder),
-        _id: toObjectId(record._id),
-        complex: toObjectId(record.complex),
-      };
-      await this.model.updateOne(
-        { _id: modifiedResponse._id },
-        { $set: modifiedResponse },
-        { upsert: true }
+      for await (const record of res.data) {
+        const pricesObjectIds = record.prices.map((p) => ({
+          ...p,
+          _id: toObjectId(p._id),
+        }));
+        const modifiedResponse = {
+          ...record,
+          prices: pricesObjectIds,
+          folder: toObjectId(record.folder),
+          _id: toObjectId(record._id),
+          complex: toObjectId(record.complex),
+        };
+        await this.model.updateOne(
+          { _id: modifiedResponse._id },
+          { $set: modifiedResponse },
+          { upsert: true }
+        );
+      }
+    } catch (err) {
+      console.log("Update products error:", err);
+      return "failed";
+      throw new BadRequestException(
+        "ذخیره آفلاین محصولات با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );
     }
   }

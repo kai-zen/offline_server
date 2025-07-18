@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CashBank } from "./cash-bank.schema";
@@ -47,9 +47,13 @@ export class CashBankService {
           { upsert: true }
         );
       }
+      return "success";
     } catch (err) {
-      console.log(err, "cash-bank/localdb");
+      console.log("Update cashbank error:", err);
+      return "failed";
+      throw new BadRequestException(
+        "ذخیره آفلاین صندوق‌ها با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
+      );
     }
-    return "success";
   }
 }

@@ -33,29 +33,37 @@ export class AreaService {
   }
 
   async updateData() {
-    const res = await lastValueFrom(
-      this.httpService.get(
-        `${sofreBaseUrl}/area/localdb/${process.env.COMPLEX_ID}`,
-        {
-          headers: {
-            "api-key": process.env.SECRET,
-          },
-        }
-      )
-    );
+    try {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/area/localdb/${process.env.COMPLEX_ID}`,
+          {
+            headers: {
+              "api-key": process.env.SECRET,
+            },
+          }
+        )
+      );
 
-    for await (const record of res.data) {
-      const modifiedResponse = {
-        ...record,
-        _id: toObjectId(record._id),
-        complex: toObjectId(record.complex),
-      };
-      await this.model.updateOne(
-        { _id: modifiedResponse._id },
-        { $set: modifiedResponse },
-        { upsert: true }
+      for await (const record of res.data) {
+        const modifiedResponse = {
+          ...record,
+          _id: toObjectId(record._id),
+          complex: toObjectId(record.complex),
+        };
+        await this.model.updateOne(
+          { _id: modifiedResponse._id },
+          { $set: modifiedResponse },
+          { upsert: true }
+        );
+      }
+      return "success";
+    } catch (err) {
+      console.log("Update area error:", err);
+      return "failed";
+      throw new BadRequestException(
+        "ذخیره آفلاین محوطه‌ها با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );
     }
-    return "success";
   }
 }

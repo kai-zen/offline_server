@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { UserDocument } from "./user.schema";
@@ -168,28 +172,42 @@ export class UserService {
     };
 
     let hasMore = true;
+    let hasError = false;
     let page = 1;
     while (hasMore) {
-      const res = await lastValueFrom(
-        this.httpService.get(apiRouteMaker(page), {
-          headers: { "api-key": process.env.SECRET },
-        })
-      );
-      if (res.data && res.data.length > 0) {
-        for await (const record of res.data) {
-          const modifiedResponse = this.userDataFormatter(record);
-          if (modifiedResponse) {
-            await this.model.updateOne(
-              { mobile: modifiedResponse.mobile },
-              { $set: modifiedResponse },
-              { upsert: true }
-            );
+      try {
+        const res = await lastValueFrom(
+          this.httpService.get(apiRouteMaker(page), {
+            headers: { "api-key": process.env.SECRET },
+          })
+        );
+        if (res.data && res.data.length > 0) {
+          for await (const record of res.data) {
+            const modifiedResponse = this.userDataFormatter(record);
+            if (modifiedResponse) {
+              await this.model.updateOne(
+                { mobile: modifiedResponse.mobile },
+                { $set: modifiedResponse },
+                { upsert: true }
+              );
+            }
           }
-        }
-        ++page;
-      } else hasMore = false;
+          ++page;
+        } else hasMore = false;
+      } catch (err) {
+        hasMore = false;
+        hasError = true;
+      }
     }
-    await this.complexService.updatedUsers();
-    return "success";
+
+    if (!hasError) {
+      await this.complexService.updatedUsers();
+      return "success";
+    } else {
+      return "failed";
+      throw new BadRequestException(
+        `خطایی در به‌روزرسانی صفحه ${page} از کاربران رخ داد.`
+      );
+    }
   }
 }

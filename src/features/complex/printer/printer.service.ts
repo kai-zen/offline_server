@@ -2,7 +2,11 @@ import { InjectModel } from "@nestjs/mongoose";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { toObjectId } from "src/helpers/functions";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { PrinterDocument, PrinterSettingsDataType } from "./printer.schema";
@@ -24,30 +28,38 @@ export class PrinterService {
   }
 
   async updateData() {
-    const res = await lastValueFrom(
-      this.httpService.get(
-        `${sofreBaseUrl}/printer/localdb/${process.env.COMPLEX_ID}`,
-        { headers: { "api-key": process.env.SECRET } }
-      )
-    );
-    if (res?.data) {
-      await this.model.deleteMany({});
-      const populated = res.data.map((record) => {
-        const areas =
-          (record.areas || []).map((a) => toObjectId(a?._id || a)) || [];
-        const folders =
-          (record.folders || []).map((f) => toObjectId(f?._id || f)) || [];
-        const modifiedResponse = {
-          ...record,
-          folders,
-          areas,
-          _id: toObjectId(record._id),
-          complex: toObjectId(record.complex),
-        };
-        return modifiedResponse;
-      });
-      await this.model.insertMany(populated);
-      return "success";
+    try {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/printer/localdb/${process.env.COMPLEX_ID}`,
+          { headers: { "api-key": process.env.SECRET } }
+        )
+      );
+      if (res?.data) {
+        await this.model.deleteMany({});
+        const populated = res.data.map((record) => {
+          const areas =
+            (record.areas || []).map((a) => toObjectId(a?._id || a)) || [];
+          const folders =
+            (record.folders || []).map((f) => toObjectId(f?._id || f)) || [];
+          const modifiedResponse = {
+            ...record,
+            folders,
+            areas,
+            _id: toObjectId(record._id),
+            complex: toObjectId(record.complex),
+          };
+          return modifiedResponse;
+        });
+        await this.model.insertMany(populated);
+        return "success";
+      }
+    } catch (err) {
+      console.log("Update printers error:", err);
+      return "failed";
+      throw new BadRequestException(
+        "ذخیره آفلاین پرینترها با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
+      );
     }
   }
 
@@ -81,8 +93,8 @@ export class PrinterService {
           await this.model.updateMany({}, { $set: { needs_upload: false } });
         if (hasDeletes) await this.model.deleteMany({ needs_delete: true });
       } catch (err) {
-        console.log(err.response.data);
-        return err.response.data;
+        console.log("Error uploading printers", err.response.data);
+        return err.response?.data;
       }
       return "success";
     }

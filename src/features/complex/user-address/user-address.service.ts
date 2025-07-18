@@ -2,7 +2,7 @@ import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { escapeRegex, toObjectId } from "src/helpers/functions";
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
@@ -222,42 +222,49 @@ export class ComplexUserAddressService {
       : null;
 
     if (timeNumber) {
-      const res = await lastValueFrom(
-        this.httpService.get(
-          `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
-          { headers: { "api-key": process.env.SECRET } }
-        )
-      );
-      if (res.data && res.data.length > 0) {
-        for await (const record of res.data) {
-          const theUserId = record.user?._id || record.user;
-          const theRecordId = toObjectId(record._id);
-          const modifiedResponse = {
-            ...record,
-            user:
-              typeof record.user === "object"
-                ? { ...record.user, _id: toObjectId(record.user?._id) }
-                : typeof record.user === "string"
-                  ? toObjectId(record.user)
-                  : record.user,
-            _id: theRecordId,
-            needs_upload: false,
-          };
-          await this.model.deleteOne({
-            description: record.description,
-            user: toObjectId(theUserId),
-            name: record.name,
-            _id: { $ne: theRecordId },
-          });
+      try {
+        const res = await lastValueFrom(
+          this.httpService.get(
+            `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
+            { headers: { "api-key": process.env.SECRET } }
+          )
+        );
+        if (res.data && res.data.length > 0) {
+          for await (const record of res.data) {
+            const theUserId = record.user?._id || record.user;
+            const theRecordId = toObjectId(record._id);
+            const modifiedResponse = {
+              ...record,
+              user:
+                typeof record.user === "object"
+                  ? { ...record.user, _id: toObjectId(record.user?._id) }
+                  : typeof record.user === "string"
+                    ? toObjectId(record.user)
+                    : record.user,
+              _id: theRecordId,
+              needs_upload: false,
+            };
+            await this.model.deleteOne({
+              description: record.description,
+              user: toObjectId(theUserId),
+              name: record.name,
+              _id: { $ne: theRecordId },
+            });
 
-          await this.model.updateOne(
-            { _id: theRecordId },
-            { $set: modifiedResponse },
-            { upsert: true }
-          );
+            await this.model.updateOne(
+              { _id: theRecordId },
+              { $set: modifiedResponse },
+              { upsert: true }
+            );
+          }
+          await this.complexService.updatedAddress();
+          return "success";
         }
-        await this.complexService.updatedAddress();
-        return "success";
+      } catch (err) {
+        console.log("Update addresses error:", err);
+        throw new BadRequestException(
+          "ذخیره آفلاین آخرین تغییرات آدرس‌های مشتریان با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
+        );
       }
     } else return await this.updateForFirstTime();
   }
@@ -265,30 +272,38 @@ export class ComplexUserAddressService {
   async updateForFirstTime() {
     let hasMore = true;
     let page = 1;
-    while (hasMore) {
-      const res = await lastValueFrom(
-        this.httpService.get(
-          `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`,
-          { headers: { "api-key": process.env.SECRET } }
-        )
+    try {
+      while (hasMore) {
+        const res = await lastValueFrom(
+          this.httpService.get(
+            `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`,
+            { headers: { "api-key": process.env.SECRET } }
+          )
+        );
+        if (res.data && res.data.length > 0) {
+          for await (const record of res.data) {
+            const modifiedResponse = {
+              ...record,
+              _id: toObjectId(record._id),
+              needs_upload: false,
+            };
+            await this.model.updateOne(
+              { _id: modifiedResponse._id },
+              { $set: modifiedResponse },
+              { upsert: true }
+            );
+          }
+          ++page;
+        } else hasMore = false;
+      }
+      await this.complexService.updatedAddress();
+      return "success";
+    } catch (err) {
+      console.log("Update addresses for first time error:", err);
+      return "failed";
+      throw new BadRequestException(
+        "ذخیره آفلاین آدرس‌های مشتریان با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );
-      if (res.data && res.data.length > 0) {
-        for await (const record of res.data) {
-          const modifiedResponse = {
-            ...record,
-            _id: toObjectId(record._id),
-            needs_upload: false,
-          };
-          await this.model.updateOne(
-            { _id: modifiedResponse._id },
-            { $set: modifiedResponse },
-            { upsert: true }
-          );
-        }
-        ++page;
-      } else hasMore = false;
     }
-    await this.complexService.updatedAddress();
-    return "success";
   }
 }

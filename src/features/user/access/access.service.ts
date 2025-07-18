@@ -1,7 +1,11 @@
 import { Model, PipelineStage, Types } from "mongoose";
 import { AccessDocument } from "./access.schema";
 import { InjectModel } from "@nestjs/mongoose";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { escapeRegex, toObjectId } from "src/helpers/functions";
 import { HttpService } from "@nestjs/axios";
@@ -56,31 +60,39 @@ export class AccessService {
   }
 
   async updateData() {
-    const res = await lastValueFrom(
-      this.httpService.get(
-        `${sofreBaseUrl}/access/localdb/${process.env.COMPLEX_ID}`,
-        {
-          headers: {
-            "api-key": process.env.SECRET,
-          },
-        }
-      )
-    );
+    try {
+      const res = await lastValueFrom(
+        this.httpService.get(
+          `${sofreBaseUrl}/access/localdb/${process.env.COMPLEX_ID}`,
+          {
+            headers: {
+              "api-key": process.env.SECRET,
+            },
+          }
+        )
+      );
 
-    for await (const record of res.data) {
-      const modifiedResponse = {
-        ...record,
-        _id: toObjectId(record._id),
-        user: toObjectId(record.user),
-        complex: toObjectId(record.complex),
-      };
-      await this.model.updateOne(
-        { _id: modifiedResponse._id },
-        { $set: modifiedResponse },
-        { upsert: true }
+      for await (const record of res.data) {
+        const modifiedResponse = {
+          ...record,
+          _id: toObjectId(record._id),
+          user: toObjectId(record.user),
+          complex: toObjectId(record.complex),
+        };
+        await this.model.updateOne(
+          { _id: modifiedResponse._id },
+          { $set: modifiedResponse },
+          { upsert: true }
+        );
+      }
+      return "success";
+    } catch (err) {
+      console.log("Update accesses error:", err);
+      return "failed";
+      throw new BadRequestException(
+        "ذخیره آفلاین دسترسی‌های پرسنل با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );
     }
-    return "success";
   }
 
   async hasAccess(user_id: string | Types.ObjectId, types: number[] | "all") {
