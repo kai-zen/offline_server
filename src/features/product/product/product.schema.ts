@@ -1,4 +1,4 @@
-import mongoose, { HydratedDocument, Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { ComplexDocument } from "src/features/complex/complex/complex.schema";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { schemaConfig } from "src/helpers/constants";
@@ -45,7 +45,7 @@ export class Product {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: "product-folder",
   })
   folder: ProductFolderDocument;
@@ -57,7 +57,7 @@ export class Product {
   primary_image_index: number;
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: "complex",
     required: true,
   })
@@ -74,6 +74,12 @@ export class Product {
 
   @Prop({ default: false })
   is_archived: boolean;
+
+  @Prop({ default: false })
+  has_warehousing_relation: boolean;
+
+  @Prop({ type: [Number], default: null })
+  days_limit: number[] | null;
 
   @Prop({ default: 1 })
   row: number;
