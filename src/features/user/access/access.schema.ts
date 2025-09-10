@@ -2,6 +2,12 @@ import { HydratedDocument, Types } from "mongoose";
 import { ComplexDocument } from "src/features/complex/complex/complex.schema";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "../users/user.schema";
+import { DeliveryTimeDT } from "src/helpers/types";
+
+export type WorkhoursTimeDT =
+  | []
+  | [DeliveryTimeDT]
+  | [DeliveryTimeDT, DeliveryTimeDT];
 
 @Schema({ versionKey: false, _id: false })
 export class Access {
@@ -19,6 +25,9 @@ export class Access {
 
   @Prop({ default: true })
   is_active: boolean;
+
+  @Prop({ type: Array, default: [] })
+  delivery_time: DeliveryTimeDT[];
 
   @Prop({ type: Types.ObjectId, ref: "user" })
   user: UserDocument;

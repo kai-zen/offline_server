@@ -17,3 +17,8 @@ export interface OrderFullProductDataType {
     price_id: string;
   };
 }
+
+export type DeliveryTimeDT = {
+  start: number;
+  end: number;
+};

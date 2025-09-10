@@ -2,6 +2,20 @@ import mongoose, { HydratedDocument } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "src/features/user/users/user.schema";
 import { schemaConfig } from "src/helpers/constants";
+import { DeliveryTimeDT } from "src/helpers/types";
+
+export const ComplexCategories = [
+  "رستوران ایرانی",
+  "کافه رستوران",
+  "کترینگ",
+  "فست فود",
+  "طباخی",
+  "کافه و کافی‌شاپ",
+  "آش و حلیم",
+  "نانوایی و شیرینی پزی",
+  "آبمیوه و بستنی",
+  "خشکبار",
+];
 
 @Schema({ versionKey: false })
 export class PointSchema {
@@ -101,6 +115,9 @@ export class Complex {
   @Prop({ required: true, max: 50 })
   name: string;
 
+  @Prop({ type: String, default: ComplexCategories[0] })
+  category: string;
+
   @Prop({ type: AccessSchema })
   access: AccessSchema;
 
@@ -156,25 +173,8 @@ export class Complex {
   @Prop({ type: Settings, default: null })
   settings: Settings;
 
-  @Prop({ default: [] })
-  delivery_time:
-    | []
-    | [
-        {
-          start: number;
-          end: number;
-        },
-      ]
-    | [
-        {
-          start: number;
-          end: number;
-        },
-        {
-          start: number;
-          end: number;
-        },
-      ];
+  @Prop({ type: Array, default: [] })
+  delivery_time: DeliveryTimeDT[];
 
   @Prop()
   api_key: string;

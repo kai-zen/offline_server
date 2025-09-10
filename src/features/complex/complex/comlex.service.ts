@@ -38,7 +38,6 @@ export class ComplexService {
       return "success";
     } catch (err) {
       console.log("Update complex error:", err);
-      return "failed";
       throw new BadRequestException(
         "ذخیره آفلاین مشخصات مجموعه با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );

@@ -16,11 +16,11 @@ export class CashBankService {
   ) {}
 
   async findAll() {
-    return await this.model.find().exec();
+    return await this.model.find({}).exec();
   }
 
   async findByComplex() {
-    return await this.model.find().exec();
+    return await this.model.find({}).exec();
   }
 
   async findById(id: string) {

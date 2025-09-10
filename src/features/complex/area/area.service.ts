@@ -16,7 +16,7 @@ export class AreaService {
   ) {}
 
   async findAll() {
-    return await this.model.find().exec();
+    return await this.model.find({}).exec();
   }
 
   // used in order creation method
@@ -24,7 +24,7 @@ export class AreaService {
     const { complex_id, table_number } = data;
     const theArea = await this.model
       .findOne({
-        complex: complex_id,
+        complex: toObjectId(complex_id),
         tables: { $elemMatch: { $eq: Number(table_number) } },
       })
       .exec();

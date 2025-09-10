@@ -58,7 +58,7 @@ export class ComplexUserAddressService {
     if (!user) user = await this.userService.createUser(mobile, true);
 
     const results = await this.model
-      .find({ user: toObjectId(user._id as any), needs_delete: { $ne: true } })
+      .find({ user: toObjectId(user._id), needs_delete: { $ne: true } })
       .exec();
 
     const rates = user.products.map((item) => item.rates).flat(1);

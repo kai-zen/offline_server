@@ -59,7 +59,7 @@ export class UserController {
   @AccessLevel([1, 2, 3, 4, 5])
   @UseGuards(HasAccessGuard)
   async setNameAndGender(@Body() body: SetNameDto) {
-    return await this.service.setName(body);
+    return await this.service.setName({ ...body, user_id: body.id });
   }
 
   @Put("/complex-users") // *

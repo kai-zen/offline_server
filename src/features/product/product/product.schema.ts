@@ -83,6 +83,9 @@ export class Product {
 
   @Prop({ default: 1 })
   row: number;
+
+  @Prop({ default: null })
+  cost: number | null;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

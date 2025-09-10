@@ -22,7 +22,7 @@ export class OrderFetchService {
   async findAll(queryParams: { [props: string]: string }) {
     const { limit = "12", page = "1" } = queryParams || {};
     const results = await this.model
-      .find()
+      .find({})
       .sort({ created_at: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit))
@@ -32,7 +32,7 @@ export class OrderFetchService {
       .lean()
       .exec();
 
-    const totalDocuments = await this.model.find().countDocuments().exec();
+    const totalDocuments = await this.model.countDocuments({});
     const numberOfPages = Math.ceil(totalDocuments / parseInt(limit));
 
     return {
@@ -47,8 +47,8 @@ export class OrderFetchService {
 
     const filters: any[] = [
       {
-        complex: complex_id,
-        cash_bank: cash_bank,
+        complex: toObjectId(complex_id),
+        cash_bank: toObjectId(cash_bank),
         payed_at: { $gte: new Date(theCashbank.last_print) },
       },
     ];

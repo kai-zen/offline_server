@@ -21,6 +21,10 @@ export class SetNameDto {
 
   @IsString()
   @IsOptional()
+  mobile: string | null;
+
+  @IsString()
+  @IsOptional()
   birthday: string | null;
 
   @IsString()

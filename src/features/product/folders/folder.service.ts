@@ -16,7 +16,7 @@ export class ProductFolderService {
   ) {}
 
   async findAll() {
-    return await this.model.find().exec();
+    return await this.model.find({}).exec();
   }
 
   async updateData() {

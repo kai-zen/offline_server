@@ -18,7 +18,7 @@ export class RangeService {
   ) {}
 
   async findAll() {
-    return await this.model.find().exec();
+    return await this.model.find({}).exec();
   }
 
   async findCorrespondingRange(data: { latitude: number; longitude: number }) {
@@ -31,7 +31,7 @@ export class RangeService {
     if (!theRegion) return null;
     return await this.model
       .findOne({
-        regions: { $elemMatch: { $eq: theRegion._id } },
+        regions: { $elemMatch: { $eq: toObjectId(theRegion._id) } },
         is_active: true,
       })
       .exec();

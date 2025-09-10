@@ -73,6 +73,8 @@ export class UserService {
   }
 
   async createUser(mobile: string, needs_upload: boolean) {
+    const theRecord = await this.model.findOne({ mobile });
+    if (theRecord) return theRecord;
     const newRecord = new this.model({
       mobile,
       needs_upload: Boolean(needs_upload),
@@ -108,7 +110,7 @@ export class UserService {
         );
         await this.model.updateMany({}, { $set: { needs_upload: false } });
       } catch (err) {
-        console.log("api error:", err.response.data);
+        console.log("Update user api error:", err.response.data);
         return err.response.data;
       }
       return "success";
@@ -116,14 +118,21 @@ export class UserService {
   }
 
   async setName(data: {
-    id: string;
+    user_id: string | Types.ObjectId;
     name: string;
     gender: 0 | 1 | 2;
     birthday: string | null;
     needs_upload: boolean;
+    mobile?: string;
   }) {
-    const { name, id, gender, birthday, needs_upload } = data;
-    const theRecord = await this.model.findById(id);
+    const { name, user_id, gender, birthday, needs_upload, mobile } = data;
+    let theRecord = user_id
+      ? await this.model.findOne({
+          _id: toObjectId(user_id),
+        })
+      : null;
+    if (mobile && !theRecord) theRecord = await this.model.findOne({ mobile });
+
     if (!theRecord) throw new NotFoundException(messages[404]);
     if (theRecord) {
       theRecord.name = name || "";
@@ -183,13 +192,17 @@ export class UserService {
         );
         if (res.data && res.data.length > 0) {
           for await (const record of res.data) {
-            const modifiedResponse = this.userDataFormatter(record);
-            if (modifiedResponse) {
-              await this.model.updateOne(
-                { mobile: modifiedResponse.mobile },
-                { $set: modifiedResponse },
-                { upsert: true }
-              );
+            try {
+              const modifiedResponse = this.userDataFormatter(record);
+              if (modifiedResponse) {
+                await this.model.updateOne(
+                  { mobile: modifiedResponse.mobile },
+                  { $set: modifiedResponse },
+                  { upsert: true }
+                );
+              }
+            } catch (err) {
+              console.log("Update user error:", { cause: err });
             }
           }
           ++page;
@@ -204,7 +217,6 @@ export class UserService {
       await this.complexService.updatedUsers();
       return "success";
     } else {
-      return "failed";
       throw new BadRequestException(
         `خطایی در به‌روزرسانی صفحه ${page} از کاربران رخ داد.`
       );

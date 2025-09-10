@@ -16,7 +16,7 @@ export class RegionService {
   ) {}
 
   async findAll() {
-    return await this.model.find().exec();
+    return await this.model.find({}).exec();
   }
 
   async findRegionByCoordinates(coords: { lat: number; lng: number }) {
