@@ -166,6 +166,12 @@ export class Complex {
   @Prop({ default: 0 })
   tax: number;
 
+  @Prop({ default: 500 })
+  first_receipt: number;
+
+  @Prop({ default: "" })
+  backup_route: string;
+
   // settings
   @Prop({ default: false })
   is_active: boolean;

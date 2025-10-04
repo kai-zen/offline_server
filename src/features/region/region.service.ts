@@ -1,18 +1,24 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { toObjectId } from "src/helpers/functions";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { RegionDocument } from "./region.schema";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class RegionService {
   constructor(
     @InjectModel("region")
     private readonly model: Model<RegionDocument>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -37,12 +43,17 @@ export class RegionService {
 
   async updateDB() {
     try {
+      const complex = await this.complexService.findTheComplex();
+      if (!complex) throw new NotFoundException(messages[404]);
       const currentCount = await this.model.countDocuments();
       if (currentCount > 1) return;
       const res = await lastValueFrom(
-        this.httpService.get(`${sofreBaseUrl}/region/${process.env.CITY_ID}`, {
-          headers: { "api-key": process.env.SECRET },
-        })
+        this.httpService.get(
+          `${sofreBaseUrl}/region/${complex._id.toString()}`,
+          {
+            headers: { "api-key": complex.api_key },
+          }
+        )
       );
       for await (const record of res.data) {
         const modifiedResponse = {

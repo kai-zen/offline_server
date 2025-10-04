@@ -21,19 +21,22 @@ import RegionModule from "./features/region/region.module";
 import RangeModule from "./features/complex/range/range.module";
 import { BackupModule } from "./features/backup/backup.module";
 
+export const GLOBAL_SECRET = "POKp6aK2DpGViU2wVvHYb3q00tDn5b";
+const DB_CONNECTION_STRING = "mongodb://localhost:27017/local-sofre";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",
     }),
-    MongooseModule.forRoot(process.env.DB_CONNECTION_STRING),
+    MongooseModule.forRoot(DB_CONNECTION_STRING),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     ScheduleModule.forRoot(),
     JwtModule.registerAsync({
       global: true,
       useFactory: async () => ({
-        secret: process.env.GLOBAL_SECRET,
+        secret: GLOBAL_SECRET,
       }),
       inject: [ConfigService],
     }),

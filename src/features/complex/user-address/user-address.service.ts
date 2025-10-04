@@ -2,11 +2,15 @@ import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { escapeRegex, toObjectId } from "src/helpers/functions";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { ComplexService } from "../complex/comlex.service";
 
 @Injectable()
@@ -91,6 +95,8 @@ export class ComplexUserAddressService {
   }
 
   async uploadNeededs() {
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     const records = await this.model.find({ needs_upload: true }).lean().exec();
     const deleteds = await this.model
       .find({ needs_delete: true })
@@ -103,9 +109,9 @@ export class ComplexUserAddressService {
       try {
         await lastValueFrom(
           this.httpService.put(
-            `${sofreBaseUrl}/complex-user-address/upload_offline/${process.env.COMPLEX_ID}`,
+            `${sofreBaseUrl}/complex-user-address/upload_offline/${complex._id.toString()}`,
             {
-              complex_id: process.env.COMPLEX_ID,
+              complex_id: complex._id.toString(),
               addresses: hasUpdates ? records : [],
               deletes: hasDeletes
                 ? deleteds.map((record) =>
@@ -113,7 +119,7 @@ export class ComplexUserAddressService {
                   )
                 : [],
             },
-            { headers: { "api-key": process.env.SECRET } }
+            { headers: { "api-key": complex.api_key } }
           )
         );
         await this.model.updateMany({}, { $set: { needs_upload: false } });
@@ -215,18 +221,19 @@ export class ComplexUserAddressService {
   }
 
   async updateData() {
-    const theComplex = await this.complexService.findTheComplex();
-    if (!theComplex) return;
-    const timeNumber = theComplex.last_addresses_update
-      ? new Date(theComplex.last_addresses_update).getTime()
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
+
+    const timeNumber = complex.last_addresses_update
+      ? new Date(complex.last_addresses_update).getTime()
       : null;
 
     if (timeNumber) {
       try {
         const res = await lastValueFrom(
           this.httpService.get(
-            `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}?last_update=${timeNumber}`,
-            { headers: { "api-key": process.env.SECRET } }
+            `${sofreBaseUrl}/complex-user-address/localdb/${complex._id.toString()}?last_update=${timeNumber}`,
+            { headers: { "api-key": complex.api_key } }
           )
         );
         if (res.data && res.data.length > 0) {
@@ -272,12 +279,14 @@ export class ComplexUserAddressService {
   async updateForFirstTime() {
     let hasMore = true;
     let page = 1;
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     try {
       while (hasMore) {
         const res = await lastValueFrom(
           this.httpService.get(
-            `${sofreBaseUrl}/complex-user-address/localdb/${process.env.COMPLEX_ID}/${page}`,
-            { headers: { "api-key": process.env.SECRET } }
+            `${sofreBaseUrl}/complex-user-address/localdb/${complex._id.toString()}/${page}`,
+            { headers: { "api-key": complex.api_key } }
           )
         );
         if (res.data && res.data.length > 0) {

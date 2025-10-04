@@ -85,6 +85,8 @@ export class UserService {
   async uploadNeededs() {
     const records = await this.model.find({ needs_upload: true }).lean().exec();
     if (records && records.length > 0) {
+      const complex = await this.complexService.findTheComplex();
+      if (!complex) throw new NotFoundException(messages[404]);
       try {
         const formattedRecords = records.map((rec) => {
           const userId = rec.complex_user_id.toString
@@ -100,12 +102,12 @@ export class UserService {
         });
         await lastValueFrom(
           this.httpService.put(
-            `${sofreBaseUrl}/complex-users/upload_offline/${process.env.COMPLEX_ID}`,
+            `${sofreBaseUrl}/complex-users/upload_offline/${complex._id.toString()}`,
             {
-              complex_id: process.env.COMPLEX_ID,
+              complex_id: complex._id.toString(),
               users: formattedRecords,
             },
-            { headers: { "api-key": process.env.SECRET } }
+            { headers: { "api-key": complex.api_key } }
           )
         );
         await this.model.updateMany({}, { $set: { needs_upload: false } });
@@ -168,13 +170,14 @@ export class UserService {
   }
 
   async updateData() {
-    const theComplex = await this.complexService.findTheComplex();
-    const timeNumber = theComplex?.last_users_update
-      ? new Date(theComplex.last_users_update).getTime()
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
+    const timeNumber = complex?.last_users_update
+      ? new Date(complex.last_users_update).getTime()
       : null;
 
     const apiRouteMaker = (pageNumber: string | number) => {
-      const staticPart = `${sofreBaseUrl}/complex-users/localdb/${process.env.COMPLEX_ID}/${pageNumber}`;
+      const staticPart = `${sofreBaseUrl}/complex-users/localdb/${complex._id.toString()}/${pageNumber}`;
       return timeNumber
         ? `${staticPart}?last_update=${timeNumber}`
         : staticPart;
@@ -187,7 +190,7 @@ export class UserService {
       try {
         const res = await lastValueFrom(
           this.httpService.get(apiRouteMaker(page), {
-            headers: { "api-key": process.env.SECRET },
+            headers: { "api-key": complex.api_key },
           })
         );
         if (res.data && res.data.length > 0) {

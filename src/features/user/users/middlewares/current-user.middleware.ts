@@ -4,6 +4,7 @@ import { UserDocument } from "../user.schema";
 import { UserService } from "../user.service";
 import { ForbiddenException, Injectable, NestMiddleware } from "@nestjs/common";
 import { messages } from "src/helpers/constants";
+import { GLOBAL_SECRET } from "src/app.module";
 
 declare global {
   namespace Express {
@@ -26,7 +27,7 @@ export class CurrentUserMiddleware implements NestMiddleware {
     if (type === "Bearer") {
       try {
         const tokenData = await this.jwtService.verifyAsync(token, {
-          secret: process.env.GLOBAL_SECRET,
+          secret: GLOBAL_SECRET,
         });
         const user = await this.userService.findById(tokenData._id);
         if (user) req.currentUser = user;

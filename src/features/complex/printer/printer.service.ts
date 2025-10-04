@@ -10,13 +10,15 @@ import {
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { PrinterDocument, PrinterSettingsDataType } from "./printer.schema";
+import { ComplexService } from "../complex/comlex.service";
 
 @Injectable()
 export class PrinterService {
   constructor(
     @InjectModel("printer")
     private readonly model: Model<PrinterDocument>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -28,11 +30,13 @@ export class PrinterService {
   }
 
   async updateData() {
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     try {
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/printer/localdb/${process.env.COMPLEX_ID}`,
-          { headers: { "api-key": process.env.SECRET } }
+          `${sofreBaseUrl}/printer/localdb/${complex._id.toString()}`,
+          { headers: { "api-key": complex.api_key } }
         )
       );
       if (res?.data) {
@@ -55,8 +59,6 @@ export class PrinterService {
         return "success";
       }
     } catch (err) {
-      console.log("Update printers error:", err);
-      return "failed";
       throw new BadRequestException(
         "ذخیره آفلاین پرینترها با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );
@@ -64,6 +66,8 @@ export class PrinterService {
   }
 
   async uploadNeededs() {
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     const records = await this.model.find({ needs_upload: true }).lean().exec();
     const deleteds = await this.model
       .find({ needs_delete: true })
@@ -76,9 +80,9 @@ export class PrinterService {
       try {
         await lastValueFrom(
           this.httpService.put(
-            `${sofreBaseUrl}/printer/upload_offline/${process.env.COMPLEX_ID}`,
+            `${sofreBaseUrl}/printer/upload_offline/${complex._id.toString()}`,
             {
-              complex_id: process.env.COMPLEX_ID,
+              complex_id: complex._id.toString(),
               printers: hasUpdates ? records : [],
               deletes: hasDeletes
                 ? deleteds.map((record) =>
@@ -86,7 +90,7 @@ export class PrinterService {
                   )
                 : [],
             },
-            { headers: { "api-key": process.env.SECRET } }
+            { headers: { "api-key": complex.api_key } }
           )
         );
         if (hasUpdates)

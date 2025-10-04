@@ -10,13 +10,15 @@ import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { escapeRegex, toObjectId } from "src/helpers/functions";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class AccessService {
   constructor(
     @InjectModel("access")
     private readonly model: Model<AccessDocument>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll(queryParams: { [props: string]: string }) {
@@ -61,12 +63,14 @@ export class AccessService {
 
   async updateData() {
     try {
+      const complex = await this.complexService.findTheComplex();
+      if (!complex) throw new NotFoundException(messages[404]);
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/access/localdb/${process.env.COMPLEX_ID}`,
+          `${sofreBaseUrl}/access/localdb/${complex._id.toString()}`,
           {
             headers: {
-              "api-key": process.env.SECRET,
+              "api-key": complex.api_key,
             },
           }
         )

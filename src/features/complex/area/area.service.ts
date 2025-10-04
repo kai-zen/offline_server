@@ -1,18 +1,24 @@
 import { toObjectId } from "../../../helpers/functions";
 import { InjectModel } from "@nestjs/mongoose";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { AreaDocument } from "./area.schema";
+import { ComplexService } from "../complex/comlex.service";
 
 @Injectable()
 export class AreaService {
   constructor(
     @InjectModel("area")
     private readonly model: Model<AreaDocument>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -33,13 +39,15 @@ export class AreaService {
   }
 
   async updateData() {
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     try {
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/area/localdb/${process.env.COMPLEX_ID}`,
+          `${sofreBaseUrl}/area/localdb/${complex._id.toString()}`,
           {
             headers: {
-              "api-key": process.env.SECRET,
+              "api-key": complex.api_key,
             },
           }
         )

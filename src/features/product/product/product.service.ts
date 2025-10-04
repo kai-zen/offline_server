@@ -12,6 +12,7 @@ import { lastValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class ProductService {
@@ -19,7 +20,8 @@ export class ProductService {
     @InjectModel("product")
     private readonly model: Model<ProductDocument>,
     private readonly discountService: DiscountService,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -155,12 +157,14 @@ export class ProductService {
 
   async updateData() {
     try {
+      const complex = await this.complexService.findTheComplex();
+      if (!complex) throw new NotFoundException(messages[404]);
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/product/localdb/${process.env.COMPLEX_ID}`,
+          `${sofreBaseUrl}/product/localdb/${complex._id.toString()}`,
           {
             headers: {
-              "api-key": process.env.SECRET,
+              "api-key": complex.api_key,
             },
           }
         )

@@ -1,12 +1,17 @@
 import { toObjectId } from "src/helpers/functions";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { Range } from "./range.schema";
 import { RegionService } from "src/features/region/region.service";
+import { ComplexService } from "../complex/comlex.service";
 
 @Injectable()
 export class RangeService {
@@ -14,7 +19,8 @@ export class RangeService {
     @InjectModel("range")
     private readonly model: Model<Range>,
     private readonly regionService: RegionService,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -38,12 +44,14 @@ export class RangeService {
   }
 
   async updateData() {
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     try {
       await this.regionService.updateDB();
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/range/localdb/${process.env.COMPLEX_ID}`,
-          { headers: { "api-key": process.env.SECRET } }
+          `${sofreBaseUrl}/range/localdb/${complex._id.toString()}`,
+          { headers: { "api-key": complex.api_key } }
         )
       );
       for await (const record of res.data) {

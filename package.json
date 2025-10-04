@@ -13,17 +13,7 @@
     "dev": "nest start --watch TZ='Asia/Tehran'",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
-    "pkg": "pkg . --output server.exe --no-bytecode"
-  },
-  "pkg": {
-    "assets": [
-      "dist/**/*",
-      "node_modules/**/*",
-      ".env"
-    ],
-    "targets": [
-      "node18-win-x64"
-    ]
+    "binary": "ncc build dist/main.js -o binary-output --minify"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -63,6 +53,7 @@
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "@vercel/ncc": "^0.38.4",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

@@ -15,6 +15,7 @@ import { UserService } from "src/features/user/users/user.service";
 import { PrinterService } from "src/features/complex/printer/printer.service";
 import { ComplexUserAddressService } from "src/features/complex/user-address/user-address.service";
 import { toObjectId } from "src/helpers/functions";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 const uploadOrdersNetworkError =
   "خطا حین آپلود سفارشات آفلاین رخ داد، اتصال اینترنت خود را بررسی کنید.";
@@ -27,7 +28,8 @@ export class OrderOtherCreateService {
     private readonly userService: UserService,
     private readonly complexUserAddressService: ComplexUserAddressService,
     private readonly printerService: PrinterService,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async newOrders() {
@@ -44,16 +46,19 @@ export class OrderOtherCreateService {
     if (!theRecord) throw new NotFoundException(messages[404]);
     else if (theRecord.is_uploaded)
       throw new BadRequestException("سفارش شما قبلا بارگذاری شده است.");
+
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     else {
       try {
         const res = await lastValueFrom(
           this.httpService.post(
             `${sofreBaseUrl}/orders/offline`,
             {
-              complex_id: process.env.COMPLEX_ID,
+              complex_id: complex._id.toString(),
               orders: [theRecord],
             },
-            { headers: { "api-key": process.env.SECRET } }
+            { headers: { "api-key": complex.api_key } }
           )
         );
         if (!res?.data?.failed) {
@@ -113,15 +118,17 @@ export class OrderOtherCreateService {
       uploaded_users: false,
       uploaded_addresses: false,
     };
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     try {
       const res = await lastValueFrom(
         this.httpService.post(
           `${sofreBaseUrl}/orders/offline`,
           {
-            complex_id: process.env.COMPLEX_ID,
+            complex_id: complex._id.toString(),
             orders: newOrders,
           },
-          { headers: { "api-key": process.env.SECRET } }
+          { headers: { "api-key": complex.api_key } }
         )
       );
       const uploadData: {

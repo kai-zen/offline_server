@@ -9,6 +9,7 @@ import {
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { messages, sofreBaseUrl } from "src/helpers/constants";
+import { toObjectId } from "src/helpers/functions";
 
 @Injectable()
 export class ComplexService {
@@ -18,20 +19,24 @@ export class ComplexService {
     private readonly httpService: HttpService
   ) {}
 
-  async updateData() {
+  async updateData(data?: { complexId: string; token: string }) {
+    const { complexId, token } = data;
+
+    const theComplex = await this.model.findById(complexId);
+    const theComplexId = theComplex?._id?.toString() || complexId;
+
+    const headers = theComplex.api_key
+      ? { "api-key": theComplex.api_key }
+      : { authorization: `Bearer ${token}` };
     try {
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/complex/localdb/${process.env.COMPLEX_ID}`,
-          {
-            headers: {
-              "api-key": process.env.SECRET,
-            },
-          }
+          `${sofreBaseUrl}/complex/localdb/${theComplexId}`,
+          { headers }
         )
       );
       await this.model.updateOne(
-        { _id: process.env.COMPLEX_ID },
+        { _id: toObjectId(theComplexId) },
         { $set: res.data },
         { upsert: true }
       );

@@ -1,18 +1,24 @@
 import { DiscountDocument } from "./discount.schema";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { toObjectId } from "src/helpers/functions";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class DiscountService {
   constructor(
     @InjectModel("discount")
     private readonly model: Model<DiscountDocument>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -24,13 +30,15 @@ export class DiscountService {
   }
 
   async updateData() {
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     try {
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/discount/localdb/${process.env.COMPLEX_ID}`,
+          `${sofreBaseUrl}/discount/localdb/${complex._id.toString()}`,
           {
             headers: {
-              "api-key": process.env.SECRET,
+              "api-key": complex.api_key,
             },
           }
         )
@@ -58,8 +66,6 @@ export class DiscountService {
       }
       return "success";
     } catch (err) {
-      console.log("Update discounts error:", err);
-      return "failed";
       throw new BadRequestException(
         "ذخیره آفلاین تخفیفات با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );

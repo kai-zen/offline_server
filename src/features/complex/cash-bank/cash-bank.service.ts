@@ -1,18 +1,24 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CashBank } from "./cash-bank.schema";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { toObjectId } from "src/helpers/functions";
+import { ComplexService } from "../complex/comlex.service";
 
 @Injectable()
 export class CashBankService {
   constructor(
     @InjectModel("cash-bank")
     private readonly model: Model<CashBank>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -28,11 +34,13 @@ export class CashBankService {
   }
 
   async updateData() {
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
     try {
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/cash-bank/localdb/${process.env.COMPLEX_ID}`,
-          { headers: { "api-key": process.env.SECRET } }
+          `${sofreBaseUrl}/cash-bank/localdb/${complex._id.toString()}`,
+          { headers: { "api-key": complex.api_key } }
         )
       );
       for await (const record of res.data || []) {
@@ -49,8 +57,6 @@ export class CashBankService {
       }
       return "success";
     } catch (err) {
-      console.log("Update cashbank error:", err);
-      return "failed";
       throw new BadRequestException(
         "ذخیره آفلاین صندوق‌ها با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );

@@ -1,18 +1,24 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { sofreBaseUrl } from "src/helpers/constants";
+import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { ProductFolderDocument } from "./folder.schema";
 import { toObjectId } from "src/helpers/functions";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
+import { ComplexService } from "src/features/complex/complex/comlex.service";
 
 @Injectable()
 export class ProductFolderService {
   constructor(
     @InjectModel("product-folder")
     private readonly model: Model<ProductFolderDocument>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly complexService: ComplexService
   ) {}
 
   async findAll() {
@@ -21,12 +27,14 @@ export class ProductFolderService {
 
   async updateData() {
     try {
+      const complex = await this.complexService.findTheComplex();
+      if (!complex) throw new NotFoundException(messages[404]);
       const res = await lastValueFrom(
         this.httpService.get(
-          `${sofreBaseUrl}/product-folder/localdb/${process.env.COMPLEX_ID}`,
+          `${sofreBaseUrl}/product-folder/localdb/${complex._id.toString()}`,
           {
             headers: {
-              "api-key": process.env.SECRET,
+              "api-key": complex.api_key,
             },
           }
         )

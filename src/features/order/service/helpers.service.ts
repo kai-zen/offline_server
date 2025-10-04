@@ -17,6 +17,7 @@ import ProductService from "src/features/product/product/product.service";
 import { RangeService } from "src/features/complex/range/range.service";
 import { RangeDocument } from "src/features/complex/range/range.schema";
 import { OrderProductItemDataType } from "./C/by-emp.service";
+import { messages } from "src/helpers/constants";
 
 @Injectable()
 export class OrderThirdMethodsService {
@@ -174,6 +175,14 @@ export class OrderThirdMethodsService {
 
   async factorNumber(complex_id: string) {
     const { end, start } = getStartAndEndOfTheDay();
+    const complex = await this.complexService.findTheComplex();
+    if (!complex) throw new NotFoundException(messages[404]);
+    const firstNumber = Boolean(
+      complex.first_receipt && !isNaN(Number(complex.first_receipt))
+    )
+      ? complex.first_receipt
+      : 500;
+
     const todayOrdersCount = await this.model
       .find({
         $and: [
@@ -187,6 +196,6 @@ export class OrderThirdMethodsService {
         ],
       })
       .countDocuments();
-    return todayOrdersCount + Number(process.env.FIRST_RECEIPT || 500);
+    return todayOrdersCount + Number(firstNumber || 500);
   }
 }
