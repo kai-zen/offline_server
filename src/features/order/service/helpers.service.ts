@@ -178,9 +178,9 @@ export class OrderThirdMethodsService {
     const complex = await this.complexService.findTheComplex();
     if (!complex) throw new NotFoundException(messages[404]);
     const firstNumber = Boolean(
-      complex.first_receipt && !isNaN(Number(complex.first_receipt))
+      complex?.first_receipt && !isNaN(Number(complex?.first_receipt))
     )
-      ? complex.first_receipt
+      ? complex?.first_receipt || 500
       : 500;
 
     const todayOrdersCount = await this.model

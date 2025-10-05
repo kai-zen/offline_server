@@ -19,13 +19,13 @@ export class ComplexService {
     private readonly httpService: HttpService
   ) {}
 
-  async updateData(data?: { complexId: string; token: string }) {
-    const { complexId, token } = data;
+  async updateData(data: { complex_id: string; token: string }) {
+    const { complex_id, token } = data;
 
-    const theComplex = await this.model.findById(complexId);
-    const theComplexId = theComplex?._id?.toString() || complexId;
+    const theComplex = await this.model.findById(complex_id);
+    const theComplexId = theComplex?._id?.toString() || complex_id;
 
-    const headers = theComplex.api_key
+    const headers = theComplex?.api_key
       ? { "api-key": theComplex.api_key }
       : { authorization: `Bearer ${token}` };
     try {
@@ -38,7 +38,10 @@ export class ComplexService {
       await this.model.updateOne(
         { _id: toObjectId(theComplexId) },
         {
-          $set: { ...res.data, first_receipt: theComplex.first_receipt || 500 },
+          $set: {
+            ...res.data,
+            first_receipt: theComplex?.first_receipt || 500,
+          },
         },
         { upsert: true }
       );
@@ -67,6 +70,7 @@ export class ComplexService {
 
   async getLastUpdates() {
     const theRecord = await this.model.findOne({}).exec();
+    if (!theRecord) throw new NotFoundException(messages[404]);
     return {
       addresses: theRecord.last_addresses_update || "first time",
       users: theRecord.last_users_update || "first time",

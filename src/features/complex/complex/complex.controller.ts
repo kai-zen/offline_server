@@ -1,5 +1,6 @@
 import { ComplexService } from "./comlex.service";
-import { Controller, Get, Put } from "@nestjs/common";
+import { Controller, Get, Put, Body } from "@nestjs/common";
+import { UpdateComplexDataDto } from "./dto/update-complex-data.dto";
 
 @Controller("complex")
 export class ComplexController {
@@ -16,7 +17,7 @@ export class ComplexController {
   }
 
   @Put() // *
-  async updateData() {
-    return await this.service.updateData();
+  async updateData(@Body() updateComplexDataDto: UpdateComplexDataDto) {
+    return await this.service.updateData(updateComplexDataDto);
   }
 }
