@@ -238,35 +238,39 @@ export class ComplexUserAddressService {
         );
         if (res.data && res.data.length > 0) {
           for await (const record of res.data) {
-            const theUserId = record.user?._id || record.user;
-            const theRecordId = toObjectId(record._id);
-            const modifiedResponse = {
-              ...record,
-              user:
-                typeof record.user === "object"
-                  ? { ...record.user, _id: toObjectId(record.user?._id) }
-                  : typeof record.user === "string"
-                    ? toObjectId(record.user)
-                    : record.user,
-              _id: theRecordId,
-              needs_upload: false,
-            };
-            await this.model.deleteOne({
-              description: record.description,
-              user: toObjectId(theUserId),
-              name: record.name,
-              _id: { $ne: theRecordId },
-            });
+            try {
+              const theUserId = record.user?._id || record.user;
+              const theRecordId = toObjectId(record._id);
+              const modifiedResponse = {
+                ...record,
+                user:
+                  typeof record.user === "object"
+                    ? { ...record.user, _id: toObjectId(record.user?._id) }
+                    : typeof record.user === "string"
+                      ? toObjectId(record.user)
+                      : record.user,
+                _id: theRecordId,
+                needs_upload: false,
+              };
+              await this.model.deleteOne({
+                description: record.description,
+                user: toObjectId(theUserId),
+                name: record.name,
+                _id: { $ne: theRecordId },
+              });
 
-            await this.model.updateOne(
-              { _id: theRecordId },
-              { $set: modifiedResponse },
-              { upsert: true }
-            );
+              await this.model.updateOne(
+                { _id: theRecordId },
+                { $set: modifiedResponse },
+                { upsert: true }
+              );
+            } catch (err) {
+              console.log("Update address error:", err);
+            }
           }
-          await this.complexService.updatedAddress();
-          return "success";
         }
+        await this.complexService.updatedAddress();
+        return "success";
       } catch (err) {
         console.log("Update addresses error:", err);
         throw new BadRequestException(
@@ -291,16 +295,20 @@ export class ComplexUserAddressService {
         );
         if (res.data && res.data.length > 0) {
           for await (const record of res.data) {
-            const modifiedResponse = {
-              ...record,
-              _id: toObjectId(record._id),
-              needs_upload: false,
-            };
-            await this.model.updateOne(
-              { _id: modifiedResponse._id },
-              { $set: modifiedResponse },
-              { upsert: true }
-            );
+            try {
+              const modifiedResponse = {
+                ...record,
+                _id: toObjectId(record._id),
+                needs_upload: false,
+              };
+              await this.model.updateOne(
+                { _id: modifiedResponse._id },
+                { $set: modifiedResponse },
+                { upsert: true }
+              );
+            } catch (err) {
+              console.log("Update address error:", { cause: err });
+            }
           }
           ++page;
         } else hasMore = false;
@@ -308,8 +316,7 @@ export class ComplexUserAddressService {
       await this.complexService.updatedAddress();
       return "success";
     } catch (err) {
-      console.log("Update addresses for first time error:", err);
-      return "failed";
+      console.log("This is error", err);
       throw new BadRequestException(
         "ذخیره آفلاین آدرس‌های مشتریان با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
       );

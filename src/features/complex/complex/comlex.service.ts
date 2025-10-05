@@ -37,7 +37,9 @@ export class ComplexService {
       );
       await this.model.updateOne(
         { _id: toObjectId(theComplexId) },
-        { $set: res.data },
+        {
+          $set: { ...res.data, first_receipt: theComplex.first_receipt || 500 },
+        },
         { upsert: true }
       );
       return "success";
