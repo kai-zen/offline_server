@@ -100,7 +100,7 @@ export class AccessService {
   }
 
   async hasAccess(user_id: string | Types.ObjectId, types: number[] | "all") {
-    const count = await this.model.countDocuments();
+    const count = await this.model.countDocuments({});
     if (count === 0) return true;
 
     const userObjId = toObjectId(user_id);

@@ -1,12 +1,8 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { messages, sofreBaseUrl } from "src/helpers/constants";
+import { sofreBaseUrl } from "src/helpers/constants";
 import { Model } from "mongoose";
 import { toObjectId } from "src/helpers/functions";
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
 import { RegionDocument } from "./region.schema";
