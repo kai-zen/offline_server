@@ -2,15 +2,11 @@ import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { escapeRegex, toObjectId } from "src/helpers/functions";
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { ComplexUserAddress } from "./user-address.schema";
 import { UserService } from "src/features/user/users/user.service";
 import { lastValueFrom } from "rxjs";
-import { messages, sofreBaseUrl } from "src/helpers/constants";
+import { sofreBaseUrl } from "src/helpers/constants";
 import { ComplexService } from "../complex/comlex.service";
 
 @Injectable()
@@ -96,7 +92,7 @@ export class ComplexUserAddressService {
 
   async uploadNeededs() {
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
     const records = await this.model.find({ needs_upload: true }).lean().exec();
     const deleteds = await this.model
       .find({ needs_delete: true })
@@ -220,105 +216,87 @@ export class ComplexUserAddressService {
     return "success";
   }
 
+  async updateSingleRecord(record: any) {
+    if (!record?._id) return;
+    try {
+      const theUserId = record.user?._id || record.user;
+      const theRecordId = toObjectId(record._id);
+      const modifiedResponse = {
+        ...record,
+        user:
+          typeof record.user === "object"
+            ? { ...record.user, _id: toObjectId(record.user?._id) }
+            : typeof record.user === "string"
+              ? toObjectId(record.user)
+              : record.user,
+        _id: theRecordId,
+        needs_upload: false,
+      };
+      await this.model.deleteOne({
+        description: record.description,
+        user: toObjectId(theUserId),
+        name: record.name,
+        _id: { $ne: theRecordId },
+      });
+
+      await this.model.updateOne(
+        { _id: theRecordId },
+        { $set: modifiedResponse },
+        { upsert: true }
+      );
+      return;
+    } catch (err) {
+      console.log("Update address error:", err);
+      return;
+    }
+  }
+
   async updateData() {
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
 
-    const timeNumber = complex.last_addresses_update
+    const timeNumber = complex?.last_addresses_update
       ? new Date(complex.last_addresses_update).getTime()
       : null;
 
-    if (timeNumber) {
+    const apiRouteMaker = (pageNumber: string | number) => {
+      const staticPart = `${sofreBaseUrl}/complex-user-address/localdb/${complex._id.toString()}/${pageNumber}`;
+      return timeNumber
+        ? `${staticPart}?last_update=${timeNumber}`
+        : staticPart;
+    };
+
+    let hasMore = true;
+    let hasError = false;
+    let page = 1;
+
+    while (hasMore && !hasError) {
       try {
         const res = await lastValueFrom(
-          this.httpService.get(
-            `${sofreBaseUrl}/complex-user-address/localdb/${complex._id.toString()}?last_update=${timeNumber}`,
-            { headers: { "api-key": complex.api_key } }
-          )
+          this.httpService.get(apiRouteMaker(page), {
+            headers: { "api-key": complex.api_key },
+          })
         );
-        if (res.data && res.data.length > 0) {
-          for await (const record of res.data) {
-            try {
-              const theUserId = record.user?._id || record.user;
-              const theRecordId = toObjectId(record._id);
-              const modifiedResponse = {
-                ...record,
-                user:
-                  typeof record.user === "object"
-                    ? { ...record.user, _id: toObjectId(record.user?._id) }
-                    : typeof record.user === "string"
-                      ? toObjectId(record.user)
-                      : record.user,
-                _id: theRecordId,
-                needs_upload: false,
-              };
-              await this.model.deleteOne({
-                description: record.description,
-                user: toObjectId(theUserId),
-                name: record.name,
-                _id: { $ne: theRecordId },
-              });
-
-              await this.model.updateOne(
-                { _id: theRecordId },
-                { $set: modifiedResponse },
-                { upsert: true }
-              );
-            } catch (err) {
-              console.log("Update address error:", err);
-            }
-          }
-        }
-        await this.complexService.updatedAddress();
-        return "success";
-      } catch (err) {
-        console.log("Update addresses error:", err);
-        throw new BadRequestException(
-          "ذخیره آفلاین آخرین تغییرات آدرس‌های مشتریان با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
-        );
-      }
-    } else return await this.updateForFirstTime();
-  }
-
-  async updateForFirstTime() {
-    let hasMore = true;
-    let page = 1;
-    const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
-    try {
-      while (hasMore) {
-        const res = await lastValueFrom(
-          this.httpService.get(
-            `${sofreBaseUrl}/complex-user-address/localdb/${complex._id.toString()}/${page}`,
-            { headers: { "api-key": complex.api_key } }
-          )
-        );
-        if (res.data && res.data.length > 0) {
-          for await (const record of res.data) {
-            try {
-              const modifiedResponse = {
-                ...record,
-                _id: toObjectId(record._id),
-                needs_upload: false,
-              };
-              await this.model.updateOne(
-                { _id: modifiedResponse._id },
-                { $set: modifiedResponse },
-                { upsert: true }
-              );
-            } catch (err) {
-              console.log("Update address error:", { cause: err });
+        if (res?.data && res?.data?.length > 0) {
+          if (res.data && res.data.length > 0) {
+            for await (const record of res.data) {
+              await this.updateSingleRecord(record);
             }
           }
           ++page;
         } else hasMore = false;
+      } catch (err) {
+        hasMore = false;
+        hasError = true;
       }
+    }
+
+    if (!hasError) {
       await this.complexService.updatedAddress();
       return "success";
-    } catch (err) {
-      console.log("This is error", err);
+    } else {
       throw new BadRequestException(
-        "ذخیره آفلاین آدرس‌های مشتریان با خطا مواجه شد. اتصال اینترنت خود را بررسی کنید."
+        `خطایی در به‌روزرسانی صفحه ${page} از آدرس‌های مشتریان رخ داد.`
       );
     }
   }

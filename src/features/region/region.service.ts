@@ -44,7 +44,7 @@ export class RegionService {
   async updateDB() {
     try {
       const complex = await this.complexService.findTheComplex();
-      if (!complex) throw new NotFoundException(messages[404]);
+      if (!complex) return "Not configed yet.";
       const currentCount = await this.model.countDocuments();
       if (currentCount > 1) return;
       const res = await lastValueFrom(

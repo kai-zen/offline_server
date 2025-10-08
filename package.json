@@ -13,7 +13,8 @@
     "dev": "nest start --watch TZ='Asia/Tehran'",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
-    "binary": "ncc build dist/main.js -o binary-output --minify"
+    "binary": "ncc build dist/main.js -o binary-output --minify",
+    "postbuild": "npm run binary"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",

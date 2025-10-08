@@ -64,7 +64,7 @@ export class AccessService {
   async updateData() {
     try {
       const complex = await this.complexService.findTheComplex();
-      if (!complex) throw new NotFoundException(messages[404]);
+      if (!complex) return "Not configed yet.";
       const res = await lastValueFrom(
         this.httpService.get(
           `${sofreBaseUrl}/access/localdb/${complex._id.toString()}`,

@@ -40,7 +40,7 @@ export class AreaService {
 
   async updateData() {
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
     try {
       const res = await lastValueFrom(
         this.httpService.get(

@@ -86,7 +86,7 @@ export class UserService {
     const records = await this.model.find({ needs_upload: true }).lean().exec();
     if (records && records.length > 0) {
       const complex = await this.complexService.findTheComplex();
-      if (!complex) throw new NotFoundException(messages[404]);
+      if (!complex) return "Not configed yet.";
       try {
         const formattedRecords = records.map((rec) => {
           const userId = rec.complex_user_id.toString
@@ -171,7 +171,8 @@ export class UserService {
 
   async updateData() {
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
+
     const timeNumber = complex?.last_users_update
       ? new Date(complex.last_users_update).getTime()
       : null;
@@ -221,7 +222,7 @@ export class UserService {
       return "success";
     } else {
       throw new BadRequestException(
-        `خطایی در به‌روزرسانی صفحه ${page} از کاربران رخ داد.`
+        `خطایی در به‌روزرسانی صفحه ${page} از مشتریان رخ داد.`
       );
     }
   }

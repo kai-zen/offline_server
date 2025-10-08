@@ -48,7 +48,7 @@ export class OrderOtherCreateService {
       throw new BadRequestException("سفارش شما قبلا بارگذاری شده است.");
 
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
     else {
       try {
         const res = await lastValueFrom(
@@ -119,7 +119,7 @@ export class OrderOtherCreateService {
       uploaded_addresses: false,
     };
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
     try {
       const res = await lastValueFrom(
         this.httpService.post(

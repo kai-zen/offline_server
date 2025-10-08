@@ -45,7 +45,7 @@ export class RangeService {
 
   async updateData() {
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
     try {
       await this.regionService.updateDB();
       const res = await lastValueFrom(

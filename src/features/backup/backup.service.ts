@@ -19,7 +19,7 @@ export class BackupService {
 
   async backupDatabase() {
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
     if (complex && !complex.backup_route)
       throw new BadRequestException("مسیر ذخیره بک آپ تعیین نشده است.");
 

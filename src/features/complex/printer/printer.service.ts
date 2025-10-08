@@ -31,7 +31,7 @@ export class PrinterService {
 
   async updateData() {
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
     try {
       const res = await lastValueFrom(
         this.httpService.get(
@@ -67,7 +67,7 @@ export class PrinterService {
 
   async uploadNeededs() {
     const complex = await this.complexService.findTheComplex();
-    if (!complex) throw new NotFoundException(messages[404]);
+    if (!complex) return "Not configed yet.";
     const records = await this.model.find({ needs_upload: true }).lean().exec();
     const deleteds = await this.model
       .find({ needs_delete: true })
