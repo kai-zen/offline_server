@@ -142,7 +142,7 @@ export class OrderCreateService {
       order_type,
       description,
       user: theUser?._id || null,
-      user_address: user_address || null,
+      user_address: user_address?.description ? user_address || null : null,
       payments: [],
       user_phone,
       products: productsFullData,

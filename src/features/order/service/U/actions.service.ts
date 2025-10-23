@@ -13,6 +13,7 @@ import { AccessService } from "src/features/user/access/access.service";
 import { OrderDocument } from "../../order.schema";
 import { Complex } from "src/features/complex/complex/complex.schema";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
+import { AreaService } from "src/features/complex/area/area.service";
 
 @Injectable()
 export class OrderActionService {
@@ -22,7 +23,8 @@ export class OrderActionService {
     private readonly userService: UserService,
     private readonly eventsGateway: EventsGateway,
     private readonly complexService: ComplexService,
-    private readonly accessService: AccessService
+    private readonly accessService: AccessService,
+    private readonly areaService: AreaService
   ) {}
 
   async printReceipt(data: { printer: any; receipt: any[] }) {
@@ -117,10 +119,10 @@ export class OrderActionService {
         socketMessage = `فاکتور ${theRecord.factor_number} از ارسالی، تبدیل به سفارش برای میز ${table_number} شد.`;
       else if (!theRecord.table_number)
         socketMessage = `فاکتور ${theRecord.factor_number} از بیرون‌بر، تبدیل به سفارش برای میز ${table_number} شد.`;
+      else
+        socketMessage = `شماره میز فاکتور ${theRecord.factor_number} به ${table_number} تغییر کرد.`;
 
-      theRecord.table_number = table_number
-        ? Number(table_number.replace(/[^0-9]/g, ""))
-        : null;
+      theRecord.table_number = Number(table_number.replace(/[^0-9]/g, ""));
       theRecord.user_address = null;
 
       const serviceDiff = theComplex.service || 0 - theRecord.service;
