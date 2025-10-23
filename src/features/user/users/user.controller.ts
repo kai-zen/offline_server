@@ -12,7 +12,7 @@ import {
 import { SetNameDto } from "./dto/set-name.dto";
 import { HasAccessGuard } from "src/guards/access.guard";
 
-export const local_server_version = 4;
+export const local_server_version = "5.0.0";
 @Controller()
 export class UserController {
   constructor(private service: UserService) {}
