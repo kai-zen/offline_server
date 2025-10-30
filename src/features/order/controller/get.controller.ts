@@ -4,11 +4,8 @@ import {
   Get,
   Param,
   Query,
-  UseGuards,
 } from "@nestjs/common";
 import { OrderFetchService } from "../service/R/fetch.service";
-import { AccessLevel } from "src/helpers/decorators";
-import { HasAccessGuard } from "src/guards/access.guard";
 import { messages } from "src/helpers/constants";
 
 @Controller("orders")
@@ -21,8 +18,6 @@ export class OrderGetController {
   }
 
   @Get("/complex/cash-bank/:complexId/:cashbankId")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async findCashbankOrders(
     @Param("complexId") complexId: string,
     @Param("cashbankId") cashbankId: string
@@ -31,8 +26,6 @@ export class OrderGetController {
   }
 
   @Get("/complex/:complexId/stats/finance/with-count")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async financeStatsWithCount(
     @Param("complexId") complexId: string,
     @Query() queryParams: { [props: string]: string }

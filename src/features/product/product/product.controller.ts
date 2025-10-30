@@ -1,4 +1,3 @@
-import { AccessLevel } from "src/helpers/decorators";
 import { ProductService } from "./product.service";
 import {
   BadRequestException,
@@ -7,9 +6,7 @@ import {
   Param,
   Put,
   Query,
-  UseGuards,
 } from "@nestjs/common";
-import { HasAccessGuard } from "src/guards/access.guard";
 import { messages } from "src/helpers/constants";
 
 @Controller("product")
@@ -22,8 +19,6 @@ export class ProductController {
   }
 
   @Get("/complex/:complexId/stats")
-  @AccessLevel([1, 2, 3, 4, 10])
-  @UseGuards(HasAccessGuard)
   async getStats(
     @Param("complexId") complexId: string,
     @Query() queryParams: { [props: string]: string }

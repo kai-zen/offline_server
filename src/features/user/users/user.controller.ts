@@ -1,16 +1,6 @@
-import { AccessLevel } from "src/helpers/decorators";
 import { UserService } from "./user.service";
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Put,
-  Query,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Put, Query } from "@nestjs/common";
 import { SetNameDto } from "./dto/set-name.dto";
-import { HasAccessGuard } from "src/guards/access.guard";
 
 export const local_server_version = "5.0.0";
 @Controller()
@@ -56,8 +46,6 @@ export class UserController {
   }
 
   @Put("/complex-users/set-name") // *
-  @AccessLevel([1, 2, 3, 4, 5])
-  @UseGuards(HasAccessGuard)
   async setNameAndGender(@Body() body: SetNameDto) {
     return await this.service.setName({ ...body, user_id: body.id });
   }

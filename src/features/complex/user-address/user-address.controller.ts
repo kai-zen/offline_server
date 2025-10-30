@@ -33,9 +33,7 @@ export class ComplexUserAddressController {
     return await this.service.findById(recordId);
   }
 
-  @Post() // *
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
+  @Post()
   async create(@Body() body: CreateComplexUserAddressDto) {
     return await this.service.create(body);
   }

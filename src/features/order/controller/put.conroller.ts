@@ -1,6 +1,4 @@
-import { AccessLevel } from "src/helpers/decorators";
-import { HasAccessGuard } from "src/guards/access.guard";
-import { Body, Controller, Param, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Param, Put } from "@nestjs/common";
 import { OrderActionService } from "../service/U/actions.service";
 import { ModifyOrderItemsDto } from "../dto/modify.dto";
 import { OrderEditItemsService } from "../service/U/items.service";
@@ -20,22 +18,16 @@ export class OrderPutController {
   ) {}
 
   @Put("/employee/modify")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async modifyItems(@Body() body: ModifyOrderItemsDto) {
     return await this.editItemsService.modifyItems(body);
   }
 
   @Put("/employee/modify-user")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async modifyUserOrder(@Body() body: ChangeOrderUserDto) {
     return await this.actionService.modifyUser(body);
   }
 
   @Put("/edit-address/:id")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async editAddress(
     @Param("id") recordId: string,
     @Body() body: EditAddressDto
@@ -47,8 +39,6 @@ export class OrderPutController {
   }
 
   @Put("/modify-people-count/:id/:count")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async modifyPeopleCount(
     @Param("id") recordId: string,
     @Param("count") count: string
@@ -61,7 +51,6 @@ export class OrderPutController {
   }
 
   @Put("/edit-delivery/:id")
-  @AccessLevel([1, 2, 3, 4, 7])
   async editDelivery(
     @Param("id") recordId: string,
     @Body() body: EditDeliveryDto
@@ -73,8 +62,6 @@ export class OrderPutController {
   }
 
   @Put("/edit-prices/:id")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async editPrices(@Param("id") recordId: string, @Body() body: EditPriceDto) {
     return await this.actionService.editPrices({
       new_values: body,
@@ -83,15 +70,11 @@ export class OrderPutController {
   }
 
   @Put("/toggle-on-hold/:id")
-  @AccessLevel([1, 2, 3, 4])
-  @UseGuards(HasAccessGuard)
   async toggleOnHold(@Param("id") recordId: string) {
     return await this.actionService.toggleOnHold(recordId);
   }
 
   @Put("/:complexId/:id")
-  @AccessLevel([1, 2, 3, 4, 5, 6, 7, 8, 9])
-  @UseGuards(HasAccessGuard)
   async editOrder(@Param("id") recordId: string, @Body() body: EditOrderDto) {
     return await this.editPayAndStatusService.changeOrderStatus({
       id: recordId,
@@ -100,8 +83,6 @@ export class OrderPutController {
   }
 
   @Put("/payment/:complexId/:id")
-  @AccessLevel([1, 2, 3, 4, 5, 6, 7, 8, 9])
-  @UseGuards(HasAccessGuard)
   async editOrderPayments(
     @Param("id") recordId: string,
     @Body() body: EditOrderPaymentsDto
