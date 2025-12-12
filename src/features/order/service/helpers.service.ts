@@ -27,7 +27,7 @@ export class OrderThirdMethodsService {
     private readonly rangeService: RangeService,
     private readonly discountService: DiscountService,
     private readonly productService: ProductService
-  ) {}
+  ) { }
 
   async isValidCreateRequest() {
     const theComplex: Complex = await this.complexService.findTheComplex();
@@ -65,6 +65,7 @@ export class OrderThirdMethodsService {
     return productsFullData;
   }
 
+
   async shippingRangeHandler(data: {
     complex_id: string;
     user_address: {
@@ -73,27 +74,40 @@ export class OrderThirdMethodsService {
       latitude: number;
       longitude: number;
     };
+    soft?: boolean;
   }) {
-    const { user_address, complex_id } = data;
+    const { user_address, complex_id, soft } = data;
 
     if (!complex_id || !user_address)
       throw new BadRequestException("اطلاعات وارد شده ناقص است.");
 
     let theRange: RangeDocument | null;
     const { latitude, longitude } = user_address || {};
-    if (!latitude || !longitude)
+    if (!latitude || !longitude) {
+      if (soft) return null;
       throw new BadRequestException("مختصات جغرافیایی وارد نشده است.");
-    else
-      theRange = await this.rangeService.findCorrespondingRange({
-        latitude: user_address.latitude,
-        longitude: user_address.longitude,
-      });
+    } else {
+      try {
+        theRange = await this.rangeService.findCorrespondingRange({
+          latitude: user_address.latitude,
+          longitude: user_address.longitude,
+        });
+      } catch (error) {
+        console.log("Find range error", error);
+        if (soft) return null;
+        else throw new ForbiddenException(
+          "متاسفانه شما در محدوده ارسال مجموعه قرار ندارید."
+        );
+      }
+    }
 
-    if (!theRange)
-      throw new ForbiddenException(
+    if (!theRange) {
+      if (soft) return null;
+      else throw new ForbiddenException(
         "متاسفانه شما در محدوده ارسال مجموعه قرار ندارید."
       );
-    return theRange;
+    }
+    return theRange || null;
   }
 
   async priceHandler(data: {

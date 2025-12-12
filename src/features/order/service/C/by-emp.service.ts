@@ -8,6 +8,7 @@ import { p2e, toObjectId } from "src/helpers/functions";
 import { OrderDocument } from "../../order.schema";
 import { OrderThirdMethodsService } from "../helpers.service";
 import { AreaService } from "src/features/complex/area/area.service";
+import { RangeDocument } from "src/features/complex/range/range.schema";
 
 export interface OrderProductItemDataType {
   product_id: string;
@@ -25,7 +26,7 @@ export class OrderCreateService {
     private readonly eventsGateway: EventsGateway,
     private readonly orderThirdMethods: OrderThirdMethodsService,
     private readonly areaService: AreaService
-  ) {}
+  ) { }
 
   async createByEmployee(data: {
     order_type: 1 | 2 | 3;
@@ -84,21 +85,29 @@ export class OrderCreateService {
 
     const theArea = table_number
       ? await this.areaService.findRelatedArea({
-          complex_id,
-          table_number: Number(table_number),
-        })
+        complex_id,
+        table_number: Number(table_number),
+      })
       : null;
 
     const productsFullData =
       await this.orderThirdMethods.productDataHandler(products);
 
-    const theRange =
-      user_address?.latitude && user_address?.longitude
-        ? await this.orderThirdMethods.shippingRangeHandler({
-            complex_id,
-            user_address,
-          })
-        : null;
+    const hasCoords = user_address?.latitude && user_address?.longitude;
+
+    let theRange: RangeDocument | null = null;
+    if (hasCoords) {
+      try {
+        theRange = await this.orderThirdMethods.shippingRangeHandler({
+          complex_id,
+          user_address,
+          soft: true,
+        });
+      } catch (error) {
+        console.log("Find range error", error);
+        theRange = null;
+      }
+    }
 
     // calculate different prices
     if (typeof shipping_price !== "number")
