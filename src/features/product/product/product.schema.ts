@@ -67,7 +67,7 @@ export class Product {
   is_deleted: boolean;
 
   @Prop({ default: false })
-  has_shipping: boolean; // equals to unable to pack
+  has_shipping: boolean;
 
   @Prop({ default: true })
   is_packable: boolean;
