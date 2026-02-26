@@ -2,7 +2,7 @@ import { UserService } from "./user.service";
 import { Body, Controller, Get, Param, Put, Query } from "@nestjs/common";
 import { SetNameDto } from "./dto/set-name.dto";
 
-export const local_server_version = "5.0.0";
+export const local_server_version = "7.1.0";
 @Controller()
 export class UserController {
   constructor(private service: UserService) {}
