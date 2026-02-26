@@ -11,13 +11,14 @@ import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { escapeRegex, isValidDate, toObjectId } from "src/helpers/functions";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel("user") private readonly model: Model<UserDocument>,
     private readonly httpService: HttpService,
-    private readonly complexService: ComplexService
+    private readonly complexService: ComplexService,
   ) {}
 
   async findAll(queryParams: { [props: string]: string }) {
@@ -107,8 +108,8 @@ export class UserService {
               complex_id: complex._id.toString(),
               users: formattedRecords,
             },
-            { headers: { "api-key": complex.api_key } }
-          )
+            { headers: { "api-key": complex.api_key } },
+          ),
         );
         await this.model.updateMany({}, { $set: { needs_upload: false } });
       } catch (err) {
@@ -169,6 +170,16 @@ export class UserService {
     return modifiedResponse;
   }
 
+  async validatePassword(user_id: Types.ObjectId, password: string) {
+    const theUser = await this.model.findById(toObjectId(user_id));
+
+    if (!theUser) throw new NotFoundException(messages[404]);
+    else if (typeof theUser.password !== "string")
+      throw new BadRequestException(messages[400]);
+
+    return await bcrypt.compare(password, theUser.password);
+  }
+
   async updateData() {
     const complex = await this.complexService.findTheComplex();
     if (!complex) return "Not configed yet.";
@@ -192,7 +203,7 @@ export class UserService {
         const res = await lastValueFrom(
           this.httpService.get(apiRouteMaker(page), {
             headers: { "api-key": complex.api_key },
-          })
+          }),
         );
         if (res.data && res.data.length > 0) {
           for await (const record of res.data) {
@@ -202,7 +213,7 @@ export class UserService {
                 await this.model.updateOne(
                   { mobile: modifiedResponse.mobile },
                   { $set: modifiedResponse },
-                  { upsert: true }
+                  { upsert: true },
                 );
               }
             } catch (err) {
@@ -222,7 +233,7 @@ export class UserService {
       return "success";
     } else {
       throw new BadRequestException(
-        `خطایی در به‌روزرسانی صفحه ${page} از مشتریان رخ داد.`
+        `خطایی در به‌روزرسانی صفحه ${page} از مشتریان رخ داد.`,
       );
     }
   }

@@ -1,6 +1,18 @@
 import { UserService } from "./user.service";
-import { Body, Controller, Get, Param, Put, Query } from "@nestjs/common";
-import { SetNameDto } from "./dto/set-name.dto";
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+} from "@nestjs/common";
+import { SetNameDto, SetPasswordDTO } from "./dto/set-name.dto";
+import { Request } from "express";
+import { messages } from "src/helpers/constants";
 
 export const local_server_version = "5.0.0";
 @Controller()
@@ -38,6 +50,13 @@ export class UserController {
   @Get("/complex-users/:id")
   async findById2(@Param("id") complexId: string) {
     return await this.service.findById(complexId);
+  }
+
+  @Post("/check-password")
+  async checkPassword(@Req() req: Request, @Body() body: SetPasswordDTO) {
+    const userId = req?.currentUser?._id;
+    if (!userId) throw new ForbiddenException(messages[403]);
+    return await this.service.validatePassword(userId, body.password);
   }
 
   @Put("/user")
