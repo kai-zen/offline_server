@@ -170,8 +170,9 @@ export class UserService {
     return modifiedResponse;
   }
 
-  async validatePassword(user_id: Types.ObjectId, password: string) {
-    const theUser = await this.model.findById(toObjectId(user_id));
+  async validatePassword(data: { mobile: string; password: string }) {
+    const { mobile, password } = data;
+    const theUser = await this.model.findOne({ mobile });
 
     if (!theUser) throw new NotFoundException(messages[404]);
     else if (typeof theUser.password !== "string")

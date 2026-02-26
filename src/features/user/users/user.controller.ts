@@ -10,7 +10,7 @@ import {
   Query,
   Req,
 } from "@nestjs/common";
-import { SetNameDto, SetPasswordDTO } from "./dto/set-name.dto";
+import { SetNameDto, CheckPasswordDTO } from "./dto/set-name.dto";
 import { Request } from "express";
 import { messages } from "src/helpers/constants";
 
@@ -53,10 +53,10 @@ export class UserController {
   }
 
   @Post("/check-password")
-  async checkPassword(@Req() req: Request, @Body() body: SetPasswordDTO) {
+  async checkPassword(@Req() req: Request, @Body() body: CheckPasswordDTO) {
     const userId = req?.currentUser?._id;
     if (!userId) throw new ForbiddenException(messages[403]);
-    return await this.service.validatePassword(userId, body.password);
+    return await this.service.validatePassword(body);
   }
 
   @Put("/user")

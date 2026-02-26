@@ -36,10 +36,16 @@ export class SetNameDto {
   needs_upload: boolean;
 }
 
-export class SetPasswordDTO {
+export class CheckPasswordDTO {
   @IsString()
   @IsNotEmpty({
     message: "لطفا رمز خود را وارد کنید.",
   })
   password: string;
+
+  @IsString()
+  @IsNotEmpty({
+    message: "شماره مورد نظر وارد نشده است.",
+  })
+  mobile: string;
 }
