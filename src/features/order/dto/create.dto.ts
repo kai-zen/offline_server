@@ -49,7 +49,7 @@ export class CreateOrderDto {
 
   @IsNumber()
   @IsOptional()
-  shpipping_price?: number;
+  shipping_price?: number;
 
   @IsNumber()
   @IsOptional()
