@@ -11,7 +11,7 @@ import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { escapeRegex, isValidDate, toObjectId } from "src/helpers/functions";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class UserService {
