@@ -35,17 +35,3 @@ export class SetNameDto {
   @IsNotEmpty({ message: "وضعیت بارگزاری مشخص نشده است" })
   needs_upload: boolean;
 }
-
-export class CheckPasswordDTO {
-  @IsString()
-  @IsNotEmpty({
-    message: "لطفا رمز خود را وارد کنید.",
-  })
-  password: string;
-
-  @IsString()
-  @IsNotEmpty({
-    message: "شماره مورد نظر وارد نشده است.",
-  })
-  mobile: string;
-}

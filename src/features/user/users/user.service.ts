@@ -11,7 +11,6 @@ import { messages, sofreBaseUrl } from "src/helpers/constants";
 import { HttpService } from "@nestjs/axios";
 import { escapeRegex, isValidDate, toObjectId } from "src/helpers/functions";
 import { ComplexService } from "src/features/complex/complex/comlex.service";
-import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class UserService {
@@ -168,17 +167,6 @@ export class UserService {
       last_visit: record.last_visit ? new Date(record.last_visit) : null,
     };
     return modifiedResponse;
-  }
-
-  async validatePassword(data: { mobile: string; password: string }) {
-    const { mobile, password } = data;
-    const theUser = await this.model.findOne({ mobile });
-
-    if (!theUser) throw new NotFoundException(messages[404]);
-    else if (typeof theUser.password !== "string")
-      throw new BadRequestException(messages[400]);
-
-    return await bcrypt.compare(password, theUser.password);
   }
 
   async updateData() {
